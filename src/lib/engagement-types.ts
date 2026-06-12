@@ -115,6 +115,7 @@ export interface EngagementConfig {
   timeLimitCustomMode?: boolean; // UI-only: true when "Custom" button is selected
   variancePercent: number;     // 10-50, default 25
   peakHoursEnabled: boolean;   // default true
+  customRunCount?: number;     // Optional: force exact number of runs (1..floor(quantity/minQuantity))
 }
 
 // Default organic settings for each type

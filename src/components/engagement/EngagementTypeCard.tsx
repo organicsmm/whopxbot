@@ -111,6 +111,11 @@ export function EngagementTypeCard({
   const isCustomMode = config.timeLimitCustomMode ?? false;
   const variancePercent = config.variancePercent ?? DEFAULT_ORGANIC_SETTINGS.variancePercent;
   const peakHoursEnabled = config.peakHoursEnabled ?? DEFAULT_ORGANIC_SETTINGS.peakHoursEnabled;
+  const customRunCount = config.customRunCount;
+
+  // Max allowed runs = quantity / providerMin (e.g. 1000 views ÷ 100 min = 10 runs)
+  const maxAllowedRuns = Math.max(1, Math.floor((config.quantity || 0) / providerMin));
+  const runsExceedMax = !!customRunCount && customRunCount > maxAllowedRuns;
 
   // Calculate full schedule with runs
   const scheduleData = useMemo(() => {
@@ -178,7 +183,8 @@ export function EngagementTypeCard({
       peakHoursEnabled,
       startTime,
       providerMin,
-      timeLimitArg
+      timeLimitArg,
+      customRunCount && customRunCount > 0 ? Math.min(customRunCount, Math.max(1, Math.floor(config.quantity / providerMin))) : undefined
     );
 
     const avgInterval =
@@ -206,6 +212,7 @@ export function EngagementTypeCard({
     type,
     providerMin,
     customCurvePoints,
+    customRunCount,
   ]);
 
   const handleToggle = (enabled: boolean) => {
@@ -273,6 +280,21 @@ export function EngagementTypeCard({
 
   const handlePeakHoursChange = (enabled: boolean) => {
     onChange({ ...config, peakHoursEnabled: enabled });
+  };
+
+  const handleRunCountChange = (raw: string) => {
+    const trimmed = raw.trim();
+    if (trimmed === '') {
+      onChange({ ...config, customRunCount: undefined });
+      return;
+    }
+    const n = parseInt(trimmed, 10);
+    if (!Number.isFinite(n) || n <= 0) {
+      onChange({ ...config, customRunCount: undefined });
+      return;
+    }
+    const clamped = Math.min(maxAllowedRuns, Math.max(1, n));
+    onChange({ ...config, customRunCount: clamped });
   };
 
   // Validation
@@ -454,6 +476,50 @@ export function EngagementTypeCard({
                     </div>
                   )}
                 </div>
+
+                {/* Number of Runs (optional override) */}
+                <div className="space-y-1.5">
+                  <Label className="text-[10px] font-bold flex items-center justify-between text-foreground uppercase tracking-widest">
+                    <span className="flex items-center gap-1.5">
+                      <List className="h-3 w-3 text-foreground" />
+                      Number of Runs
+                    </span>
+                    <span className="text-[9px] font-mono text-muted-foreground normal-case tracking-normal">
+                      max {maxAllowedRuns} ({config.quantity || 0} ÷ {providerMin})
+                    </span>
+                  </Label>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      placeholder="Auto"
+                      value={customRunCount ?? ''}
+                      onChange={(e) => handleRunCountChange(e.target.value)}
+                      onBlur={(e) => handleRunCountChange(e.target.value)}
+                      className={cn(
+                        "w-20 sm:w-24 h-9 sm:h-10 text-sm sm:text-base bg-secondary border-2 border-border text-foreground font-bold",
+                        runsExceedMax && "border-red-500"
+                      )}
+                    />
+                    <span className="text-xs sm:text-sm text-muted-foreground font-medium">
+                      {customRunCount ? `runs` : 'runs (auto)'}
+                    </span>
+                  </div>
+                  {runsExceedMax && (
+                    <p className="text-[10px] sm:text-xs text-red-500 font-bold flex items-center gap-1">
+                      <AlertTriangle className="h-3 w-3" />
+                      Max {maxAllowedRuns} runs allowed (quantity {config.quantity} ÷ min {providerMin})
+                    </p>
+                  )}
+                  {!runsExceedMax && customRunCount && (
+                    <p className="text-[10px] text-muted-foreground">
+                      Exact {customRunCount} runs in {timeLimitHours > 0 ? `${timeLimitHours}h` : '~auto window'}
+                    </p>
+                  )}
+                </div>
+
+
 
                 {/* Variance Slider */}
                 <div className="space-y-2">
