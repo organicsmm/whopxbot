@@ -19,6 +19,7 @@ import { EngagementTypeCard } from "@/components/engagement/EngagementTypeCard";
 import { DeliveryPreview } from "@/components/engagement/DeliveryPreview";
 import { LiveGrowthChart } from "@/components/engagement/LiveGrowthChart";
 import { DrawableGrowthChart } from "@/components/engagement/DrawableGrowthChart";
+import { AISpeedRecommender } from "@/components/engagement/AISpeedRecommender";
 import {
   EngagementType,
   EngagementConfig,
@@ -831,11 +832,19 @@ export default function EngagementOrder() {
         {/* Link Input */}
         <Card className="glass-card border-2 border-border">
           <CardContent className="p-4 sm:p-6">
-            <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-5">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-foreground/10 flex items-center justify-center">
-                <LinkIcon className="h-4 w-4 sm:h-5 sm:w-5 text-foreground" />
+            <div className="flex items-center justify-between gap-2 sm:gap-3 mb-4 sm:mb-5">
+              <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-foreground/10 flex items-center justify-center shrink-0">
+                  <LinkIcon className="h-4 w-4 sm:h-5 sm:w-5 text-foreground" />
+                </div>
+                <Label className="text-base sm:text-lg font-bold tracking-tight text-foreground truncate">Video/Post Link</Label>
               </div>
-              <Label className="text-base sm:text-lg font-bold tracking-tight text-foreground">Video/Post Link</Label>
+              <AISpeedRecommender
+                link={link}
+                platform={platform}
+                types={Object.entries(engagements).filter(([, c]) => c.enabled).map(([t]) => t)}
+                totalQuantity={baseQuantity}
+              />
             </div>
             <Input
               placeholder={`https://${platform}.com/...`}
