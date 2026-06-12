@@ -62,8 +62,8 @@ const Index = () => {
             </div>
           </Link>
           <div className="hidden md:flex items-center gap-7">
-            {['Features', 'How it works', 'Why us'].map((t, i) => (
-              <a key={t} href={['#features', '#how-it-works', '#comparison'][i]}
+            {['Features', 'How it works', 'Pricing', 'Why us'].map((t, i) => (
+              <a key={t} href={['#features', '#how-it-works', '#pricing', '#comparison'][i]}
                 className="text-[13px] font-medium transition-colors hover:opacity-100" style={{ color: C.ink2 }}>
                 {t}
               </a>
