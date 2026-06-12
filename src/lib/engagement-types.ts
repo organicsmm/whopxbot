@@ -25,6 +25,7 @@ export interface BundleItem {
   default_drip_interval: number;
   default_drip_interval_unit: 'minutes' | 'hours';
   sort_order: number;
+  price_per_k?: number | null;
   created_at: string;
   service?: {
     id: string;

@@ -24,6 +24,7 @@ export type Database = {
           engagement_type: string
           id: string
           is_base: boolean | null
+          price_per_k: number | null
           ratio_percent: number | null
           service_id: string | null
           sort_order: number | null
@@ -37,6 +38,7 @@ export type Database = {
           engagement_type: string
           id?: string
           is_base?: boolean | null
+          price_per_k?: number | null
           ratio_percent?: number | null
           service_id?: string | null
           sort_order?: number | null
@@ -50,6 +52,7 @@ export type Database = {
           engagement_type?: string
           id?: string
           is_base?: boolean | null
+          price_per_k?: number | null
           ratio_percent?: number | null
           service_id?: string | null
           sort_order?: number | null

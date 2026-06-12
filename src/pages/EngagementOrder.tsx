@@ -248,10 +248,17 @@ export default function EngagementOrder() {
       const positiveMins = matchingServices.map(s => s.min_quantity ?? 0).filter(n => n > 0);
       const lowestMatchedMin = positiveMins.length > 0 ? Math.min(...positiveMins) : undefined;
 
+      // Admin-set bundle-level per-1000 price overrides everything.
+      // Provider rotate ho ya nahi, ye fixed price hi user ko charge hota hai.
+      const adminPricePerK =
+        item.price_per_k != null && Number(item.price_per_k) > 0
+          ? Number(item.price_per_k)
+          : null;
+
       // 1) Try the linked service first, but show the lowest provider minimum across the rotation pool
-      if (item.service && item.service.price > 0) {
+      if (item.service && (adminPricePerK !== null || item.service.price > 0)) {
         prices[item.engagement_type] = {
-          pricePerK: applyMarkup(item.service.price),
+          pricePerK: adminPricePerK ?? item.service.price,
           serviceId: item.service.id,
           minQuantity: lowestMatchedMin ?? item.service.min_quantity,
         };
@@ -263,12 +270,12 @@ export default function EngagementOrder() {
         const matches = matchingServices.filter(s => s.price > 0);
 
         if (matches.length > 0) {
-          // Cheapest service for pricing
+          // Cheapest service for routing target
           const match = matches.reduce((a, b) => (a.price <= b.price ? a : b));
           // Lowest min across all matching providers (router can rotate)
           const lowestMin = Math.min(...matches.map(s => s.min_quantity ?? 0).filter(n => n > 0));
           prices[item.engagement_type] = {
-            pricePerK: applyMarkup(match.price),
+            pricePerK: adminPricePerK ?? match.price,
             serviceId: match.id,
             minQuantity: Number.isFinite(lowestMin) ? lowestMin : match.min_quantity,
           };
@@ -279,15 +286,14 @@ export default function EngagementOrder() {
       // 3) Even if linked but price=0, still register the service for order routing
       if (item.service) {
         prices[item.engagement_type] = {
-          pricePerK: applyMarkup(item.service.price),
+          pricePerK: adminPricePerK ?? item.service.price,
           serviceId: item.service.id,
           minQuantity: lowestMatchedMin ?? item.service.min_quantity,
         };
       }
     });
-    // Admin controls every per-1000 price directly in /admin/services — no overrides applied here.
     return prices;
-  }, [bundles, applyMarkup, allServices, platform, rates]);
+  }, [bundles, allServices, platform, rates]);
 
   // Update engagement configs when bundle or base quantity changes
   // Use debounced value to prevent excessive recalculations
