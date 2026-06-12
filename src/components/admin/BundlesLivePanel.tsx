@@ -12,6 +12,7 @@ interface BundleItem {
   engagement_type: string;
   ratio_percent: number | null;
   is_base: boolean | null;
+  price_per_k: number | null;
   service: { id: string; name: string; price: number } | null;
 }
 
@@ -39,7 +40,7 @@ export function BundlesLivePanel() {
         .select(`
           id, name, platform, is_active, created_at,
           items:bundle_items(
-            id, engagement_type, ratio_percent, is_base,
+            id, engagement_type, ratio_percent, is_base, price_per_k,
             service:services(id, name, price)
           )
         `)
