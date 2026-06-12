@@ -184,6 +184,10 @@ export function DeliveryPreview({ engagements, refreshKey = 0, platform = 'insta
       }
       
       // Default: use organic schedule generator
+      const maxRunsByMin = Math.max(1, Math.floor(config.quantity / serviceMinimum));
+      const requestedRuns = config.customRunCount && config.customRunCount > 0
+        ? Math.min(config.customRunCount, maxRunsByMin)
+        : undefined;
       const schedule = generateOrganicSchedule(
         type,
         config.quantity,
@@ -191,7 +195,8 @@ export function DeliveryPreview({ engagements, refreshKey = 0, platform = 'insta
         peakHoursEnabled,
         typeStartTime,
         serviceMinimum,
-        timeLimitHours > 0 ? timeLimitHours : undefined
+        timeLimitHours > 0 ? timeLimitHours : undefined,
+        requestedRuns
       );
       
       // Capture views first run time for anchoring other types
