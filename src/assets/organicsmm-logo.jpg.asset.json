@@ -1,11 +1,11 @@
 {
-  "version": 1,
   "asset_id": "629907e8-d337-4ae6-907a-d50fec419bdb",
-  "project_id": "9519d9d7-8d88-416b-b95e-15e5a6e36041",
-  "url": "/__l5e/assets-v1/629907e8-d337-4ae6-907a-d50fec419bdb/organicsmm-logo.jpg",
-  "r2_key": "a/v1/9519d9d7-8d88-416b-b95e-15e5a6e36041/629907e8-d337-4ae6-907a-d50fec419bdb/organicsmm-logo.jpg",
-  "original_filename": "organicsmm-logo.jpg",
-  "size": 43784,
   "content_type": "image/jpeg",
-  "created_at": "2026-06-12T04:44:56Z"
+  "created_at": "2026-06-12T04:44:56Z",
+  "original_filename": "organicsmm-logo.jpg",
+  "project_id": "fdcaa58e-a0c1-4281-aa14-0419ecd1663a",
+  "r2_key": "a/v1/fdcaa58e-a0c1-4281-aa14-0419ecd1663a/629907e8-d337-4ae6-907a-d50fec419bdb/organicsmm-logo.jpg",
+  "size": 43784,
+  "url": "/__l5e/assets-v1/629907e8-d337-4ae6-907a-d50fec419bdb/organicsmm-logo.jpg",
+  "version": 1
 }
