@@ -342,7 +342,7 @@ export default function AdminServices() {
                   <tr>
                     <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Service</th>
                     <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Category</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Price/1K</th>
+                    {/* Price/1K column removed — pricing ab bundle-level pe set hota hai (/admin/bundles) */}
                     <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Min/Max</th>
                     <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Status</th>
                     <th className="px-4 py-3 text-right text-sm font-medium text-muted-foreground">Actions</th>
@@ -358,9 +358,7 @@ export default function AdminServices() {
                         </div>
                       </td>
                       <td className="px-4 py-4 text-sm text-muted-foreground">{service.category}</td>
-                      <td className="px-4 py-4">
-                        <span className="font-semibold text-success">${service.price}</span>
-                      </td>
+                      {/* Price/1K cell removed */}
                       <td className="px-4 py-4 text-sm text-muted-foreground">
                         {service.min_quantity.toLocaleString()} / {service.max_quantity.toLocaleString()}
                       </td>
