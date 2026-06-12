@@ -72,13 +72,8 @@ serve(async (req) => {
 
         console.log(`[public-api] action="${action}" auth="key"`)
 
-        // ── Fetch global markup for pricing ──────────────────────────────────
-        const { data: settings } = await supabase
-            .from('platform_settings')
-            .select('global_markup_percent')
-            .eq('id', 'global')
-            .maybeSingle()
-        const markupMultiplier = 1 + ((settings?.global_markup_percent ?? 0) / 100)
+        // Global markup removed — services.price is the final per-1000 USD price set by admin.
+        const markupMultiplier = 1
 
         // ── Auth ────────────────────────────────────────────────────────────────
         if (!key) return err('Authentication required (key)', 401)

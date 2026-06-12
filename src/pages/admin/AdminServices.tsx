@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/hooks/useAuth';
@@ -36,6 +36,7 @@ import { Link, Navigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import type { Service } from '@/lib/supabase';
 import { ImportServicesDialog } from '@/components/admin/ImportServicesDialog';
+import { BundlesLivePanel } from '@/components/admin/BundlesLivePanel';
 
 export default function AdminServices() {
   const { isAdmin, isLoading: authLoading } = useAuth();
@@ -313,6 +314,9 @@ export default function AdminServices() {
             </Dialog>
           </div>
         </div>
+
+        {/* Live bundles (realtime sync with /admin/bundles) */}
+        <BundlesLivePanel />
 
         {/* Search */}
         <div className="relative max-w-md">
