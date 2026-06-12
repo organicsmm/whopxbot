@@ -119,10 +119,8 @@ export function DeliveryPreview({ engagements, refreshKey = 0, platform = 'insta
       const variancePercent = config.variancePercent ?? DEFAULT_ORGANIC_SETTINGS.variancePercent;
       const peakHoursEnabled = config.peakHoursEnabled ?? DEFAULT_ORGANIC_SETTINGS.peakHoursEnabled;
       const serviceMinimum = config.minQuantity || PROVIDER_MINIMUMS[type] || 10;
-      const isViewType = type === 'views';
-      const timeLimitHours = !isViewType && viewsDurationHours > 0
-        ? Math.max(viewsDurationHours, 0.25)
-        : rawTimeLimitHours;
+      // Each type uses its OWN time limit (user's per-type setting wins)
+      const timeLimitHours = rawTimeLimitHours;
       
       // Calculate start time based on type priority and views anchor
       let typeStartTime: Date;
