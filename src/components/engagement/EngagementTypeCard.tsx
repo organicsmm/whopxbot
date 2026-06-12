@@ -111,6 +111,11 @@ export function EngagementTypeCard({
   const isCustomMode = config.timeLimitCustomMode ?? false;
   const variancePercent = config.variancePercent ?? DEFAULT_ORGANIC_SETTINGS.variancePercent;
   const peakHoursEnabled = config.peakHoursEnabled ?? DEFAULT_ORGANIC_SETTINGS.peakHoursEnabled;
+  const customRunCount = config.customRunCount;
+
+  // Max allowed runs = quantity / providerMin (e.g. 1000 views ÷ 100 min = 10 runs)
+  const maxAllowedRuns = Math.max(1, Math.floor((config.quantity || 0) / providerMin));
+  const runsExceedMax = !!customRunCount && customRunCount > maxAllowedRuns;
 
   // Calculate full schedule with runs
   const scheduleData = useMemo(() => {
