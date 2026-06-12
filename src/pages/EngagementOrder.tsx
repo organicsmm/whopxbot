@@ -20,6 +20,7 @@ import { DeliveryPreview } from "@/components/engagement/DeliveryPreview";
 import { LiveGrowthChart } from "@/components/engagement/LiveGrowthChart";
 import { DrawableGrowthChart } from "@/components/engagement/DrawableGrowthChart";
 import { AISpeedRecommender } from "@/components/engagement/AISpeedRecommender";
+import { PreOrderRatioWarning } from "@/components/engagement/PreOrderRatioWarning";
 import {
   EngagementType,
   EngagementConfig,
@@ -932,6 +933,9 @@ export default function EngagementOrder() {
             onScheduleChange={handleScheduleChange}
           />
         )}
+
+        {/* Organic engagement ratio / botting % warning */}
+        <PreOrderRatioWarning engagements={engagements as any} />
 
         {/* Order Summary - Compact on mobile */}
         <Card className="glass-card border-2 border-primary/40 bg-gradient-to-br from-primary/5 via-transparent to-primary/10 overflow-hidden">
