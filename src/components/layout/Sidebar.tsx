@@ -13,7 +13,7 @@ const userNavItems = [
   { icon: Rocket, label: 'Full Engagement', path: '/engagement-order', highlight: true },
   { icon: Sparkles, label: 'Engagement Orders', path: '/engagement-orders' },
   { icon: ShoppingCart, label: 'New Order', path: '/order' },
-  { icon: Droplets, label: 'Drip-Feed', path: '/drip-feed' },
+  
   { icon: ListOrdered, label: 'Orders', path: '/orders' },
   { icon: Package, label: 'Services', path: '/services' },
   { icon: Wallet, label: 'Wallet', path: '/wallet' },
