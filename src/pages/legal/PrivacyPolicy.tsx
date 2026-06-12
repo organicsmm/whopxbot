@@ -6,7 +6,7 @@ import { PageMeta } from "@/components/seo/PageMeta";
 export default function PrivacyPolicy() {
   return (
     <>
-      <PageMeta title="Privacy Policy | OrganicSMM" description="Learn how OrganicSMM collects, uses, and protects your personal data." canonicalPath="/privacy" breadcrumbs={[{ name: "Home", path: "/" }, { name: "Privacy Policy", path: "/privacy" }]} />
+      <PageMeta title="Privacy Policy | OrganicSMM Pro" description="Learn how OrganicSMM Pro collects, uses, and protects your personal data." canonicalPath="/privacy" breadcrumbs={[{ name: "Home", path: "/" }, { name: "Privacy Policy", path: "/privacy" }]} />
       <div className="min-h-screen bg-background text-foreground">
         <div className="max-w-4xl mx-auto px-4 py-12">
           <Link to="/">
@@ -21,7 +21,7 @@ export default function PrivacyPolicy() {
           <div className="prose prose-invert max-w-none space-y-6 text-muted-foreground">
             <section className="space-y-3">
               <h2 className="text-xl font-semibold text-foreground">1. Introduction</h2>
-              <p>OrganicSMM ("we," "us," or "our") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our platform and services. Please read this policy carefully to understand our practices regarding your personal data.</p>
+              <p>OrganicSMM Pro ("we," "us," or "our") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our platform and services. Please read this policy carefully to understand our practices regarding your personal data.</p>
             </section>
 
             <section className="space-y-3">

@@ -188,8 +188,8 @@ export default function Support() {
   return (
     <DashboardLayout>
       <PageMeta
-        title="Support & FAQ — OrganicSMM"
-        description="OrganicSMM support: open tickets, browse FAQs about delivery times, payments, refunds and Organic Mode. We respond within 24 hours."
+        title="Support & FAQ — OrganicSMM Pro"
+        description="OrganicSMM Pro support: open tickets, browse FAQs about delivery times, payments, refunds and Organic Mode. We respond within 24 hours."
         canonicalPath="/support"
         breadcrumbs={[
           { name: 'Home', path: '/' },

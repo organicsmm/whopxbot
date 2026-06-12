@@ -14,8 +14,8 @@ export function MobileBottomNav() {
             <Menu className="w-4 h-4" style={{ color: '#555' }} />
           </button>
           <div className="flex items-center gap-2">
-            <img src={logo} alt="OrganicSMM" className="w-7 h-7 rounded-md object-cover" />
-            <span className="text-[14px] font-bold tracking-tight" style={{ color: '#1a1a2e' }}>OrganicSMM</span>
+            <img src={logo} alt="OrganicSMM Pro" className="w-7 h-7 rounded-md object-cover" />
+            <span className="text-[14px] font-bold tracking-tight" style={{ color: '#1a1a2e' }}>OrganicSMM Pro</span>
           </div>
           <div className="w-9" />
         </div>

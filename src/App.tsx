@@ -43,6 +43,7 @@ import AdminChat from "./pages/admin/AdminChat";
 import AdminDeposits from "./pages/admin/AdminDeposits";
 import AdminProviderAccounts from "./pages/admin/AdminProviderAccounts";
 import AdminServiceProviderMapping from "./pages/admin/AdminServiceProviderMapping";
+import AdminSubscriptions from "./pages/admin/AdminSubscriptions";
 
 // Legal pages
 import TermsOfService from "./pages/legal/TermsOfService";
@@ -131,6 +132,7 @@ const App = () => {
                     <Route path="/admin/deposits" element={<AdminGuard><AdminDeposits /></AdminGuard>} />
                     <Route path="/admin/provider-accounts" element={<AdminGuard><AdminProviderAccounts /></AdminGuard>} />
                     <Route path="/admin/service-provider-mapping" element={<AdminGuard><AdminServiceProviderMapping /></AdminGuard>} />
+                    <Route path="/admin/subscriptions" element={<AdminGuard><AdminSubscriptions /></AdminGuard>} />
 
                     {/* Legal */}
                     <Route path="/terms" element={<TermsOfService />} />
