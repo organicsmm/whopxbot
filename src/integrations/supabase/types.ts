@@ -187,6 +187,71 @@ export type Database = {
         }
         Relationships: []
       }
+      drip_feed_campaigns: {
+        Row: {
+          created_at: string
+          id: string
+          interval_minutes: number
+          is_active: boolean
+          last_error: string | null
+          last_order_id: string | null
+          link: string
+          name: string | null
+          next_run_at: string
+          qty_per_run: number
+          runs_done: number
+          runs_failed: number
+          service_id: string | null
+          total_runs: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          interval_minutes?: number
+          is_active?: boolean
+          last_error?: string | null
+          last_order_id?: string | null
+          link: string
+          name?: string | null
+          next_run_at?: string
+          qty_per_run: number
+          runs_done?: number
+          runs_failed?: number
+          service_id?: string | null
+          total_runs: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          interval_minutes?: number
+          is_active?: boolean
+          last_error?: string | null
+          last_order_id?: string | null
+          link?: string
+          name?: string | null
+          next_run_at?: string
+          qty_per_run?: number
+          runs_done?: number
+          runs_failed?: number
+          service_id?: string | null
+          total_runs?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "drip_feed_campaigns_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       engagement_bundles: {
         Row: {
           ai_organic_enabled: boolean | null
@@ -249,6 +314,10 @@ export type Database = {
       }
       engagement_order_items: {
         Row: {
+          auto_refill_count: number
+          auto_refill_enabled: boolean
+          auto_refill_max: number
+          auto_refill_threshold_pct: number
           created_at: string | null
           drip_interval: number | null
           drip_interval_unit: string | null
@@ -258,6 +327,7 @@ export type Database = {
           error_message: string | null
           id: string
           is_enabled: boolean | null
+          last_refill_at: string | null
           price: number
           provider_order_id: string | null
           quantity: number
@@ -267,6 +337,10 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          auto_refill_count?: number
+          auto_refill_enabled?: boolean
+          auto_refill_max?: number
+          auto_refill_threshold_pct?: number
           created_at?: string | null
           drip_interval?: number | null
           drip_interval_unit?: string | null
@@ -276,6 +350,7 @@ export type Database = {
           error_message?: string | null
           id?: string
           is_enabled?: boolean | null
+          last_refill_at?: string | null
           price: number
           provider_order_id?: string | null
           quantity: number
@@ -285,6 +360,10 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          auto_refill_count?: number
+          auto_refill_enabled?: boolean
+          auto_refill_max?: number
+          auto_refill_threshold_pct?: number
           created_at?: string | null
           drip_interval?: number | null
           drip_interval_unit?: string | null
@@ -294,6 +373,7 @@ export type Database = {
           error_message?: string | null
           id?: string
           is_enabled?: boolean | null
+          last_refill_at?: string | null
           price?: number
           provider_order_id?: string | null
           quantity?: number
@@ -383,6 +463,10 @@ export type Database = {
       }
       orders: {
         Row: {
+          auto_refill_count: number
+          auto_refill_enabled: boolean
+          auto_refill_max: number
+          auto_refill_threshold_pct: number
           created_at: string | null
           drip_interval: number | null
           drip_interval_unit: string | null
@@ -392,6 +476,7 @@ export type Database = {
           id: string
           is_drip_feed: boolean | null
           is_organic_mode: boolean | null
+          last_refill_at: string | null
           link: string
           order_number: number
           peak_hours_enabled: boolean | null
@@ -407,6 +492,10 @@ export type Database = {
           variance_percent: number | null
         }
         Insert: {
+          auto_refill_count?: number
+          auto_refill_enabled?: boolean
+          auto_refill_max?: number
+          auto_refill_threshold_pct?: number
           created_at?: string | null
           drip_interval?: number | null
           drip_interval_unit?: string | null
@@ -416,6 +505,7 @@ export type Database = {
           id?: string
           is_drip_feed?: boolean | null
           is_organic_mode?: boolean | null
+          last_refill_at?: string | null
           link: string
           order_number?: number
           peak_hours_enabled?: boolean | null
@@ -431,6 +521,10 @@ export type Database = {
           variance_percent?: number | null
         }
         Update: {
+          auto_refill_count?: number
+          auto_refill_enabled?: boolean
+          auto_refill_max?: number
+          auto_refill_threshold_pct?: number
           created_at?: string | null
           drip_interval?: number | null
           drip_interval_unit?: string | null
@@ -440,6 +534,7 @@ export type Database = {
           id?: string
           is_drip_feed?: boolean | null
           is_organic_mode?: boolean | null
+          last_refill_at?: string | null
           link?: string
           order_number?: number
           peak_hours_enabled?: boolean | null
