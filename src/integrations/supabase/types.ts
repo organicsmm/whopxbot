@@ -187,6 +187,71 @@ export type Database = {
         }
         Relationships: []
       }
+      drip_feed_campaigns: {
+        Row: {
+          created_at: string
+          id: string
+          interval_minutes: number
+          is_active: boolean
+          last_error: string | null
+          last_order_id: string | null
+          link: string
+          name: string | null
+          next_run_at: string
+          qty_per_run: number
+          runs_done: number
+          runs_failed: number
+          service_id: string | null
+          total_runs: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          interval_minutes?: number
+          is_active?: boolean
+          last_error?: string | null
+          last_order_id?: string | null
+          link: string
+          name?: string | null
+          next_run_at?: string
+          qty_per_run: number
+          runs_done?: number
+          runs_failed?: number
+          service_id?: string | null
+          total_runs: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          interval_minutes?: number
+          is_active?: boolean
+          last_error?: string | null
+          last_order_id?: string | null
+          link?: string
+          name?: string | null
+          next_run_at?: string
+          qty_per_run?: number
+          runs_done?: number
+          runs_failed?: number
+          service_id?: string | null
+          total_runs?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "drip_feed_campaigns_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       engagement_bundles: {
         Row: {
           ai_organic_enabled: boolean | null
@@ -249,6 +314,10 @@ export type Database = {
       }
       engagement_order_items: {
         Row: {
+          auto_refill_count: number
+          auto_refill_enabled: boolean
+          auto_refill_max: number
+          auto_refill_threshold_pct: number
           created_at: string | null
           drip_interval: number | null
           drip_interval_unit: string | null
@@ -258,6 +327,7 @@ export type Database = {
           error_message: string | null
           id: string
           is_enabled: boolean | null
+          last_refill_at: string | null
           price: number
           provider_order_id: string | null
           quantity: number
@@ -267,6 +337,10 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          auto_refill_count?: number
+          auto_refill_enabled?: boolean
+          auto_refill_max?: number
+          auto_refill_threshold_pct?: number
           created_at?: string | null
           drip_interval?: number | null
           drip_interval_unit?: string | null
@@ -276,6 +350,7 @@ export type Database = {
           error_message?: string | null
           id?: string
           is_enabled?: boolean | null
+          last_refill_at?: string | null
           price: number
           provider_order_id?: string | null
           quantity: number
@@ -285,6 +360,10 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          auto_refill_count?: number
+          auto_refill_enabled?: boolean
+          auto_refill_max?: number
+          auto_refill_threshold_pct?: number
           created_at?: string | null
           drip_interval?: number | null
           drip_interval_unit?: string | null
@@ -294,6 +373,7 @@ export type Database = {
           error_message?: string | null
           id?: string
           is_enabled?: boolean | null
+          last_refill_at?: string | null
           price?: number
           provider_order_id?: string | null
           quantity?: number
@@ -383,6 +463,10 @@ export type Database = {
       }
       orders: {
         Row: {
+          auto_refill_count: number
+          auto_refill_enabled: boolean
+          auto_refill_max: number
+          auto_refill_threshold_pct: number
           created_at: string | null
           drip_interval: number | null
           drip_interval_unit: string | null
@@ -392,6 +476,7 @@ export type Database = {
           id: string
           is_drip_feed: boolean | null
           is_organic_mode: boolean | null
+          last_refill_at: string | null
           link: string
           order_number: number
           peak_hours_enabled: boolean | null
@@ -407,6 +492,10 @@ export type Database = {
           variance_percent: number | null
         }
         Insert: {
+          auto_refill_count?: number
+          auto_refill_enabled?: boolean
+          auto_refill_max?: number
+          auto_refill_threshold_pct?: number
           created_at?: string | null
           drip_interval?: number | null
           drip_interval_unit?: string | null
@@ -416,6 +505,7 @@ export type Database = {
           id?: string
           is_drip_feed?: boolean | null
           is_organic_mode?: boolean | null
+          last_refill_at?: string | null
           link: string
           order_number?: number
           peak_hours_enabled?: boolean | null
@@ -431,6 +521,10 @@ export type Database = {
           variance_percent?: number | null
         }
         Update: {
+          auto_refill_count?: number
+          auto_refill_enabled?: boolean
+          auto_refill_max?: number
+          auto_refill_threshold_pct?: number
           created_at?: string | null
           drip_interval?: number | null
           drip_interval_unit?: string | null
@@ -440,6 +534,7 @@ export type Database = {
           id?: string
           is_drip_feed?: boolean | null
           is_organic_mode?: boolean | null
+          last_refill_at?: string | null
           link?: string
           order_number?: number
           peak_hours_enabled?: boolean | null
@@ -604,6 +699,9 @@ export type Database = {
           organic_peak_hours_enabled: boolean | null
           organic_ratios: Json | null
           organic_variance_percent: number | null
+          referral_code: string | null
+          referral_earnings: number
+          referred_by: string | null
           telegram_chat_id: string | null
           telegram_id: string | null
           telegram_notifications_enabled: boolean | null
@@ -623,6 +721,9 @@ export type Database = {
           organic_peak_hours_enabled?: boolean | null
           organic_ratios?: Json | null
           organic_variance_percent?: number | null
+          referral_code?: string | null
+          referral_earnings?: number
+          referred_by?: string | null
           telegram_chat_id?: string | null
           telegram_id?: string | null
           telegram_notifications_enabled?: boolean | null
@@ -642,6 +743,9 @@ export type Database = {
           organic_peak_hours_enabled?: boolean | null
           organic_ratios?: Json | null
           organic_variance_percent?: number | null
+          referral_code?: string | null
+          referral_earnings?: number
+          referred_by?: string | null
           telegram_chat_id?: string | null
           telegram_id?: string | null
           telegram_notifications_enabled?: boolean | null
@@ -650,6 +754,86 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      promo_codes: {
+        Row: {
+          bonus_type: string
+          bonus_value: number
+          code: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          max_uses: number | null
+          min_deposit_usd: number
+          used_count: number
+        }
+        Insert: {
+          bonus_type?: string
+          bonus_value: number
+          code: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          max_uses?: number | null
+          min_deposit_usd?: number
+          used_count?: number
+        }
+        Update: {
+          bonus_type?: string
+          bonus_value?: number
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          max_uses?: number | null
+          min_deposit_usd?: number
+          used_count?: number
+        }
+        Relationships: []
+      }
+      promo_redemptions: {
+        Row: {
+          bonus_amount_usd: number
+          deposit_amount_usd: number
+          id: string
+          promo_code_id: string
+          redeemed_at: string
+          user_id: string
+        }
+        Insert: {
+          bonus_amount_usd: number
+          deposit_amount_usd: number
+          id?: string
+          promo_code_id: string
+          redeemed_at?: string
+          user_id: string
+        }
+        Update: {
+          bonus_amount_usd?: number
+          deposit_amount_usd?: number
+          id?: string
+          promo_code_id?: string
+          redeemed_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "promo_redemptions_promo_code_id_fkey"
+            columns: ["promo_code_id"]
+            isOneToOne: false
+            referencedRelation: "promo_codes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       provider_accounts: {
         Row: {
@@ -1157,6 +1341,10 @@ export type Database = {
       }
     }
     Functions: {
+      apply_referral_bonus: {
+        Args: { p_deposit_usd: number; p_referee: string }
+        Returns: Json
+      }
       cleanup_old_completed_engagement_orders: { Args: never; Returns: Json }
       credit_wallet_razorpay: {
         Args: {
@@ -1174,6 +1362,7 @@ export type Database = {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
       }
+      get_user_tier: { Args: { _user_id: string }; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1183,10 +1372,15 @@ export type Database = {
       }
       is_maintenance_mode: { Args: never; Returns: boolean }
       pg_advisory_xact_lock: { Args: { key: number }; Returns: undefined }
+      redeem_promo_code: {
+        Args: { p_code: string; p_deposit_usd: number }
+        Returns: Json
+      }
       reschedule_organic_run: {
         Args: { p_quantity: number; p_run_id: string; p_scheduled_at: string }
         Returns: Json
       }
+      set_referrer_by_code: { Args: { p_code: string }; Returns: Json }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"

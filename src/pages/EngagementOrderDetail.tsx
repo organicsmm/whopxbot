@@ -47,6 +47,8 @@ import { MergedTimeline } from "@/components/engagement/MergedTimeline";
 import { TypeHistoryCard } from "@/components/engagement/TypeHistoryCard";
 import { PerTypeBreakdown } from "@/components/engagement/PerTypeBreakdown";
 import { EditRunDialog } from "@/components/engagement/EditRunDialog";
+import { HealthScoreBadge } from "@/components/engagement/HealthScoreBadge";
+import { AutoRefillToggle } from "@/components/engagement/AutoRefillToggle";
 import { OrderProgressChart } from "@/components/engagement/OrderProgressChart";
 
 const ENGAGEMENT_ICONS = {
@@ -858,7 +860,21 @@ export default function EngagementOrderDetail() {
             }, 0);
 
             return (
-              <div key={item.id} id={`type-history-${item.engagement_type}`}>
+              <div key={item.id} id={`type-history-${item.engagement_type}`} className="space-y-2">
+                <div className="flex flex-wrap items-center justify-between gap-2 px-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-semibold capitalize">{item.engagement_type}</span>
+                    <HealthScoreBadge runs={item.runs || []} />
+                  </div>
+                </div>
+                <AutoRefillToggle
+                  itemId={item.id}
+                  enabled={!!item.auto_refill_enabled}
+                  threshold={item.auto_refill_threshold_pct || 10}
+                  maxRefills={item.auto_refill_max || 3}
+                  count={item.auto_refill_count || 0}
+                  onUpdated={() => refetch()}
+                />
                 <TypeHistoryCard
                   engagementType={item.engagement_type}
                   targetQuantity={item.quantity}
