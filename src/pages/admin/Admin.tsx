@@ -181,68 +181,8 @@ export default function Admin() {
           </CardContent>
         </Card>
 
-        {/* Stats Grid */}
-        {/* Global Markup Control */}
-        <Card className="glass-card border-2 border-primary/30 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-primary/5" />
-          <CardContent className="p-5 sm:p-6 relative">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-              <div className="flex items-center gap-4 flex-1">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-xl shadow-primary/20 shrink-0">
-                  <Percent className="h-7 w-7 text-primary-foreground" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-foreground">Global Price Markup</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Provider rate ke upar ya niche % set karo — sabhi services pe apply hoga
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="relative">
-                  <Input
-                    type="number"
-                    value={markupInput}
-                    onChange={(e) => setMarkupInput(e.target.value)}
-                    className="w-28 h-12 text-center text-lg font-bold input-glass pr-8"
-                    placeholder="0"
-                  />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground font-semibold">%</span>
-                </div>
-                <Button
-                  onClick={() => saveMarkupMutation.mutate(parseFloat(markupInput) || 0)}
-                  disabled={saveMarkupMutation.isPending}
-                  className="h-12 px-5"
-                  variant="gradient"
-                >
-                  {saveMarkupMutation.isPending ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <>
-                      <Save className="h-4 w-4 mr-2" />
-                      Save
-                    </>
-                  )}
-                </Button>
-              </div>
-            </div>
-            {markupInput && parseFloat(markupInput) !== 0 && (
-              <div className="mt-3 flex items-center gap-2 text-sm">
-                {parseFloat(markupInput) > 0 ? (
-                  <>
-                    <TrendingUp className="h-4 w-4 text-success" />
-                    <span className="text-success font-medium">+{markupInput}% — Prices provider rate se zyada dikhenge</span>
-                  </>
-                ) : (
-                  <>
-                    <TrendingDown className="h-4 w-4 text-destructive" />
-                    <span className="text-destructive font-medium">{markupInput}% — Prices provider rate se kam dikhenge</span>
-                  </>
-                )}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        {/* Global markup hata diya gaya hai — admin har service ka per-1000 price direct /admin/services se set karta hai */}
+
 
         {/* Maintenance Mode Toggle */}
         <Card className={`glass-card border-2 relative overflow-hidden transition-all ${maintenanceMode ? 'border-destructive/50 bg-destructive/5' : 'border-border'}`}>
