@@ -312,6 +312,65 @@ export type Database = {
           },
         ]
       }
+      engagement_health_history: {
+        Row: {
+          botting_percent: number
+          comments_count: number
+          created_at: string
+          engagement_order_id: string
+          followers_count: number
+          health_score: number
+          id: string
+          likes_count: number
+          ratios: Json | null
+          recorded_at: string
+          saves_count: number
+          shares_count: number
+          views_count: number
+          warnings: Json | null
+        }
+        Insert: {
+          botting_percent?: number
+          comments_count?: number
+          created_at?: string
+          engagement_order_id: string
+          followers_count?: number
+          health_score?: number
+          id?: string
+          likes_count?: number
+          ratios?: Json | null
+          recorded_at?: string
+          saves_count?: number
+          shares_count?: number
+          views_count?: number
+          warnings?: Json | null
+        }
+        Update: {
+          botting_percent?: number
+          comments_count?: number
+          created_at?: string
+          engagement_order_id?: string
+          followers_count?: number
+          health_score?: number
+          id?: string
+          likes_count?: number
+          ratios?: Json | null
+          recorded_at?: string
+          saves_count?: number
+          shares_count?: number
+          views_count?: number
+          warnings?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "engagement_health_history_engagement_order_id_fkey"
+            columns: ["engagement_order_id"]
+            isOneToOne: false
+            referencedRelation: "engagement_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       engagement_order_items: {
         Row: {
           auto_refill_count: number
@@ -405,9 +464,12 @@ export type Database = {
           bundle_id: string | null
           completed_at: string | null
           created_at: string | null
+          current_botting_percent: number | null
+          current_health_score: number | null
           error_message: string | null
           id: string
           is_organic_mode: boolean | null
+          last_health_check_at: string | null
           link: string
           order_number: number
           peak_hours_enabled: boolean | null
@@ -422,9 +484,12 @@ export type Database = {
           bundle_id?: string | null
           completed_at?: string | null
           created_at?: string | null
+          current_botting_percent?: number | null
+          current_health_score?: number | null
           error_message?: string | null
           id?: string
           is_organic_mode?: boolean | null
+          last_health_check_at?: string | null
           link: string
           order_number?: number
           peak_hours_enabled?: boolean | null
@@ -439,9 +504,12 @@ export type Database = {
           bundle_id?: string | null
           completed_at?: string | null
           created_at?: string | null
+          current_botting_percent?: number | null
+          current_health_score?: number | null
           error_message?: string | null
           id?: string
           is_organic_mode?: boolean | null
+          last_health_check_at?: string | null
           link?: string
           order_number?: number
           peak_hours_enabled?: boolean | null
