@@ -29,7 +29,7 @@ import ApiAccess from "./pages/ApiAccess";
 import EngagementOrder from "./pages/EngagementOrder";
 import EngagementOrders from "./pages/EngagementOrders";
 import EngagementOrderDetail from "./pages/EngagementOrderDetail";
-import DripFeed from "./pages/DripFeed";
+
 
 // Admin pages
 import Admin from "./pages/admin/Admin";
@@ -118,7 +118,7 @@ const App = () => {
                     <Route path="/engagement-order" element={<EngagementOrder />} />
                     <Route path="/engagement-orders" element={<EngagementOrders />} />
                     <Route path="/engagement-orders/:orderNumber" element={<EngagementOrderDetail />} />
-                    <Route path="/drip-feed" element={<DripFeed />} />
+                    
 
                     {/* Admin — server-verified guard */}
                     <Route path="/admin" element={<AdminGuard><Admin /></AdminGuard>} />
