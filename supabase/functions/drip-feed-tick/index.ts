@@ -38,10 +38,8 @@ Deno.serve(async (req) => {
           continue;
         }
 
-        const markupRes = await sb.rpc("get_public_markup");
-        const markup = Number(markupRes.data || 0);
-        const basePrice = (c.qty_per_run / 1000) * Number(svc.price);
-        const finalPrice = Number((basePrice * (1 + markup / 100)).toFixed(4));
+        // Global markup removed — services.price is the final per-1000 USD price set by admin.
+        const finalPrice = Number(((c.qty_per_run / 1000) * Number(svc.price)).toFixed(4));
 
         // Check wallet
         const { data: wal } = await sb.from("wallets").select("balance").eq("user_id", c.user_id).single();
