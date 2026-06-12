@@ -393,8 +393,74 @@ export function generateOrganicSchedule(
   peakEnabled: boolean,
   startTime: Date,
   serviceMinimum?: number,
-  timeLimitHours?: number // NEW: Optional time limit in hours
+  timeLimitHours?: number, // NEW: Optional time limit in hours
+  customRunCount?: number  // NEW: Optional explicit number of runs (overrides auto)
 ): FullOrganicConfig {
+  // ------------------------------------------------------------------
+  // CUSTOM RUN COUNT MODE
+  // When user explicitly chooses N runs, bypass the complex auto logic
+  // and build N evenly-spaced runs with light variance & peak boost.
+  // ------------------------------------------------------------------
+  if (customRunCount && customRunCount > 0) {
+    const providerMinCR = serviceMinimum || PROVIDER_MINIMUMS[engagementType] || 10;
+    const maxRunsCR = Math.max(1, Math.floor(totalQuantity / providerMinCR));
+    const nRuns = Math.max(1, Math.min(customRunCount, maxRunsCR));
+    const baseQty = Math.floor(totalQuantity / nRuns);
+    const remainder = totalQuantity - baseQty * nRuns;
+    const totalMinutes = (timeLimitHours && timeLimitHours > 0)
+      ? timeLimitHours * 60
+      : Math.max(30, nRuns * 30); // sensible default if no time limit
+    const interval = nRuns > 1 ? totalMinutes / (nRuns - 1) : 0;
+    const variance = Math.max(0, Math.min(50, variancePercent)) / 100;
+    const runsCR: OrganicRunConfig[] = [];
+    const istOffsetMs = 5.5 * 60 * 60 * 1000;
+    for (let i = 0; i < nRuns; i++) {
+      let qty = baseQty + (i < remainder ? 1 : 0);
+      // Apply small randomized variance, ensure >= provider min
+      if (variance > 0 && nRuns > 1 && i < nRuns - 1) {
+        const delta = Math.round(qty * variance * (Math.random() * 2 - 1) * 0.5);
+        qty = Math.max(providerMinCR, qty + delta);
+      }
+      // jitter the schedule a bit (±10% of interval) so it doesn't look perfectly even
+      const jitterMin = nRuns > 1 ? (Math.random() * 2 - 1) * interval * 0.1 : 0;
+      const scheduledAt = new Date(startTime.getTime() + (i * interval + jitterMin) * 60 * 1000);
+      const ist = new Date(scheduledAt.getTime() + istOffsetMs);
+      const hour = ist.getUTCHours();
+      const peakMultiplier = peakEnabled && hour >= 18 && hour <= 23 ? 1.15 : 1;
+      runsCR.push({
+        runNumber: i + 1,
+        scheduledAt,
+        quantity: qty,
+        baseQuantity: baseQty,
+        varianceApplied: qty - baseQty,
+        peakMultiplier,
+        dayOfWeek: ist.getUTCDay(),
+        hourOfDay: hour,
+        sessionType: 'normal',
+        humanBehaviorScore: 80,
+        patternBreaker: false,
+      });
+    }
+    // Quantity reconciliation: ensure exact totalQuantity, dump diff on last run
+    const sentSoFar = runsCR.slice(0, -1).reduce((s, r) => s + r.quantity, 0);
+    const last = runsCR[runsCR.length - 1];
+    last.quantity = Math.max(providerMinCR, totalQuantity - sentSoFar);
+    const warningsCR: string[] = [];
+    if (customRunCount > maxRunsCR) {
+      warningsCR.push(`Requested ${customRunCount} runs exceeded the maximum (${maxRunsCR}). Capped at ${maxRunsCR}.`);
+    }
+    return {
+      engagementType,
+      totalQuantity,
+      runs: runsCR,
+      totalDuration: nRuns > 1 ? (runsCR[nRuns - 1].scheduledAt.getTime() - runsCR[0].scheduledAt.getTime()) : 0,
+      warnings: warningsCR,
+      patternBreakCount: 0,
+      avgHumanScore: 80,
+      varietyIndex: 0.6,
+    };
+  }
+
   const runs: OrganicRunConfig[] = [];
   const warnings: string[] = [];
   let patternBreakCount = 0;
