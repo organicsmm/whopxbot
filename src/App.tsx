@@ -43,6 +43,7 @@ import AdminChat from "./pages/admin/AdminChat";
 import AdminDeposits from "./pages/admin/AdminDeposits";
 import AdminProviderAccounts from "./pages/admin/AdminProviderAccounts";
 import AdminServiceProviderMapping from "./pages/admin/AdminServiceProviderMapping";
+import AdminSubscriptions from "./pages/admin/AdminSubscriptions";
 
 // Legal pages
 import TermsOfService from "./pages/legal/TermsOfService";
