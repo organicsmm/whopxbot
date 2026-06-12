@@ -155,7 +155,7 @@ export function BundlesLivePanel() {
                             className={`font-mono font-semibold shrink-0 ml-2 ${isAdminFixed ? 'text-primary' : 'text-muted-foreground'}`}
                             title={isAdminFixed ? 'Admin-set bundle price' : 'Falls back to linked service price'}
                           >
-                            {effective != null ? `$${effective.toFixed(4)}/1k` : '—'}
+                            {effective != null ? `₹${(effective * 83.5).toFixed(2)}/1k` : '—'}
                             {isAdminFixed && <span className="text-[9px] ml-1">FIXED</span>}
                           </span>
                         );
