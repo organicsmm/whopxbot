@@ -695,6 +695,7 @@ function BundleCard({
   onDeleteItem,
   onUpdateItem,
   onUpdateRatio,
+  onUpdatePricePerK,
 }: {
   bundle: any;
   services: any[];
