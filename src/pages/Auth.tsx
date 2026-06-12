@@ -96,16 +96,16 @@ export default function Auth() {
   return (
     <div className="min-h-screen flex items-center justify-center px-6 py-12" style={{ background: 'linear-gradient(180deg, #fff 0%, #f0fdf4 50%, #dcfce7 100%)' }}>
       <PageMeta
-        title={isLogin ? 'Sign in — OrganicSMM' : 'Create your account — OrganicSMM'}
-        description="Sign in or create your free OrganicSMM account to launch organic Instagram, YouTube and TikTok growth campaigns. No credit card required."
+        title={isLogin ? 'Sign in — OrganicSMM Pro' : 'Create your account — OrganicSMM Pro'}
+        description="Sign in or create your free OrganicSMM Pro account to launch organic Instagram, YouTube and TikTok growth campaigns. No credit card required."
         canonicalPath="/auth"
       />
       <div className="w-full max-w-[400px]">
           {/* Logo */}
           <div className="flex items-center justify-center gap-2.5 mb-10">
-            <img src={logo} alt="OrganicSMM" className="w-10 h-10 rounded-xl object-cover shadow-sm" />
+            <img src={logo} alt="OrganicSMM Pro" className="w-10 h-10 rounded-xl object-cover shadow-sm" />
             <div className="flex flex-col">
-              <span className="text-[16px] font-bold tracking-tight" style={{ color: '#1a1a2e' }}>OrganicSMM</span>
+              <span className="text-[16px] font-bold tracking-tight" style={{ color: '#1a1a2e' }}>OrganicSMM Pro</span>
               <span className="text-[9px] font-semibold uppercase tracking-[0.15em]" style={{ background: 'linear-gradient(90deg, #16a34a, #f97316)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>✦ Updated Version</span>
             </div>
           </div>
