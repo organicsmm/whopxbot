@@ -100,6 +100,27 @@ export default function EngagementOrder() {
     } catch { /* ignore */ }
   }, []);
 
+  // Realtime: invalidate bundles when admin updates price_per_k or bundle items
+  useEffect(() => {
+    const channel = supabase
+      .channel('user-bundles-live')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'bundle_items' }, () => {
+        queryClient.invalidateQueries({ queryKey: ['bundles'] });
+        queryClient.invalidateQueries({ queryKey: ['all-bundles-with-items'] });
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'engagement_bundles' }, () => {
+        queryClient.invalidateQueries({ queryKey: ['bundles'] });
+        queryClient.invalidateQueries({ queryKey: ['all-bundles-with-items'] });
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'services' }, () => {
+        queryClient.invalidateQueries({ queryKey: ['bundles'] });
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [queryClient]);
+
+
+
 
   // Fetch ALL active bundles WITH items to know which platforms are available
   const { data: allBundles } = useQuery({
