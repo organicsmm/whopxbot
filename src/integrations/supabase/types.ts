@@ -604,6 +604,9 @@ export type Database = {
           organic_peak_hours_enabled: boolean | null
           organic_ratios: Json | null
           organic_variance_percent: number | null
+          referral_code: string | null
+          referral_earnings: number
+          referred_by: string | null
           telegram_chat_id: string | null
           telegram_id: string | null
           telegram_notifications_enabled: boolean | null
@@ -623,6 +626,9 @@ export type Database = {
           organic_peak_hours_enabled?: boolean | null
           organic_ratios?: Json | null
           organic_variance_percent?: number | null
+          referral_code?: string | null
+          referral_earnings?: number
+          referred_by?: string | null
           telegram_chat_id?: string | null
           telegram_id?: string | null
           telegram_notifications_enabled?: boolean | null
@@ -642,6 +648,9 @@ export type Database = {
           organic_peak_hours_enabled?: boolean | null
           organic_ratios?: Json | null
           organic_variance_percent?: number | null
+          referral_code?: string | null
+          referral_earnings?: number
+          referred_by?: string | null
           telegram_chat_id?: string | null
           telegram_id?: string | null
           telegram_notifications_enabled?: boolean | null
@@ -650,6 +659,86 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      promo_codes: {
+        Row: {
+          bonus_type: string
+          bonus_value: number
+          code: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          max_uses: number | null
+          min_deposit_usd: number
+          used_count: number
+        }
+        Insert: {
+          bonus_type?: string
+          bonus_value: number
+          code: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          max_uses?: number | null
+          min_deposit_usd?: number
+          used_count?: number
+        }
+        Update: {
+          bonus_type?: string
+          bonus_value?: number
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          max_uses?: number | null
+          min_deposit_usd?: number
+          used_count?: number
+        }
+        Relationships: []
+      }
+      promo_redemptions: {
+        Row: {
+          bonus_amount_usd: number
+          deposit_amount_usd: number
+          id: string
+          promo_code_id: string
+          redeemed_at: string
+          user_id: string
+        }
+        Insert: {
+          bonus_amount_usd: number
+          deposit_amount_usd: number
+          id?: string
+          promo_code_id: string
+          redeemed_at?: string
+          user_id: string
+        }
+        Update: {
+          bonus_amount_usd?: number
+          deposit_amount_usd?: number
+          id?: string
+          promo_code_id?: string
+          redeemed_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "promo_redemptions_promo_code_id_fkey"
+            columns: ["promo_code_id"]
+            isOneToOne: false
+            referencedRelation: "promo_codes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       provider_accounts: {
         Row: {
@@ -1157,6 +1246,10 @@ export type Database = {
       }
     }
     Functions: {
+      apply_referral_bonus: {
+        Args: { p_deposit_usd: number; p_referee: string }
+        Returns: Json
+      }
       cleanup_old_completed_engagement_orders: { Args: never; Returns: Json }
       credit_wallet_razorpay: {
         Args: {
@@ -1174,6 +1267,7 @@ export type Database = {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
       }
+      get_user_tier: { Args: { _user_id: string }; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1183,10 +1277,15 @@ export type Database = {
       }
       is_maintenance_mode: { Args: never; Returns: boolean }
       pg_advisory_xact_lock: { Args: { key: number }; Returns: undefined }
+      redeem_promo_code: {
+        Args: { p_code: string; p_deposit_usd: number }
+        Returns: Json
+      }
       reschedule_organic_run: {
         Args: { p_quantity: number; p_run_id: string; p_scheduled_at: string }
         Returns: Json
       }
+      set_referrer_by_code: { Args: { p_code: string }; Returns: Json }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
