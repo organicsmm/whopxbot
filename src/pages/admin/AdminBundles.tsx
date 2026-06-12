@@ -1019,46 +1019,60 @@ function BundleCard({
                   />
                 </div>
 
-                {/* Bundle-level fixed per-1000 price (admin override, applies to ALL provider rotations) */}
-                <div className="flex items-center gap-2 pl-12">
-                  <span className="text-xs text-muted-foreground shrink-0">
-                    Per 1000 {item.engagement_type}:
-                  </span>
-                  <div className="flex items-center gap-1">
-                    <span className="text-primary font-bold text-sm">$</span>
-                    <Input
-                      type="number"
-                      placeholder="auto"
-                      value={
-                        editingPrices[item.id] ??
-                        (item.price_per_k != null ? String(item.price_per_k) : '')
-                      }
-                      onChange={(e) =>
-                        setEditingPrices((prev) => ({ ...prev, [item.id]: e.target.value }))
-                      }
-                      onBlur={(e) => {
-                        const raw = e.target.value.trim();
-                        const next = raw === '' ? null : parseFloat(raw);
-                        const current = item.price_per_k != null ? Number(item.price_per_k) : null;
-                        if (next === null || (!isNaN(next) && next >= 0)) {
-                          if (next !== current) onUpdatePricePerK(item.id, next);
-                        }
-                        setEditingPrices((prev) => {
-                          const n = { ...prev };
-                          delete n[item.id];
-                          return n;
-                        });
-                      }}
-                      className="w-28 h-8 text-sm text-center px-2 rounded-lg font-bold text-primary border-primary/30"
-                      min={0}
-                      step={0.0001}
-                    />
-                    <span className="text-[10px] text-muted-foreground ml-1">USD / 1K</span>
-                  </div>
-                  {item.price_per_k != null && (
-                    <Badge className="bg-primary/20 text-primary text-[10px]">Fixed</Badge>
-                  )}
-                </div>
+                {/* Bundle-level fixed per-1000 price in INR (admin override, USD me convert ho ke DB me jata hai) */}
+                {(() => {
+                  const INR_RATE = 83.5;
+                  const currentInr =
+                    item.price_per_k != null ? Number(item.price_per_k) * INR_RATE : null;
+                  return (
+                    <div className="flex items-center gap-2 pl-12">
+                      <span className="text-xs text-muted-foreground shrink-0">
+                        Per 1000 {item.engagement_type}:
+                      </span>
+                      <div className="flex items-center gap-1">
+                        <span className="text-primary font-bold text-sm">₹</span>
+                        <Input
+                          type="number"
+                          placeholder="auto"
+                          value={
+                            editingPrices[item.id] ??
+                            (currentInr != null ? currentInr.toFixed(2) : '')
+                          }
+                          onChange={(e) =>
+                            setEditingPrices((prev) => ({ ...prev, [item.id]: e.target.value }))
+                          }
+                          onBlur={(e) => {
+                            const raw = e.target.value.trim();
+                            const inrVal = raw === '' ? null : parseFloat(raw);
+                            const usdNext =
+                              inrVal === null
+                                ? null
+                                : isNaN(inrVal) || inrVal < 0
+                                ? undefined
+                                : Number((inrVal / INR_RATE).toFixed(6));
+                            const current =
+                              item.price_per_k != null ? Number(item.price_per_k) : null;
+                            if (usdNext !== undefined && usdNext !== current) {
+                              onUpdatePricePerK(item.id, usdNext);
+                            }
+                            setEditingPrices((prev) => {
+                              const n = { ...prev };
+                              delete n[item.id];
+                              return n;
+                            });
+                          }}
+                          className="w-28 h-8 text-sm text-center px-2 rounded-lg font-bold text-primary border-primary/30"
+                          min={0}
+                          step={0.01}
+                        />
+                        <span className="text-[10px] text-muted-foreground ml-1">INR / 1K</span>
+                      </div>
+                      {item.price_per_k != null && (
+                        <Badge className="bg-primary/20 text-primary text-[10px]">Fixed</Badge>
+                      )}
+                    </div>
+                  );
+                })()}
               </div>
             );
           })}
