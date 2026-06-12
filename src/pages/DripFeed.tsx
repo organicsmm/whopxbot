@@ -33,7 +33,7 @@ import {
 interface Service {
   id: string;
   name: string;
-  service_id: string;
+  provider_service_id: string;
   price: number;
   category: string;
   min_quantity: number;
@@ -90,7 +90,7 @@ export default function DripFeed() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("services")
-        .select("id,name,service_id,price,category,min_quantity,max_quantity")
+        .select("id,name,provider_service_id,price,category,min_quantity,max_quantity")
         .eq("is_active", true)
         .order("category");
       if (error) throw error;
@@ -128,7 +128,7 @@ export default function DripFeed() {
 
   const toggleMut = useMutation({
     mutationFn: async ({ id, active }: { id: string; active: boolean }) => {
-      const patch: Record<string, unknown> = { is_active: active };
+      const patch: { is_active: boolean; next_run_at?: string } = { is_active: active };
       if (active) patch.next_run_at = new Date().toISOString();
       const { error } = await supabase.from("drip_feed_campaigns").update(patch).eq("id", id);
       if (error) throw error;

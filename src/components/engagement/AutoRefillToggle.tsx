@@ -23,7 +23,6 @@ export function AutoRefillToggle({ itemId, orderId, enabled, threshold, maxRefil
   const [localThreshold, setLocalThreshold] = useState(threshold);
   const [localMax, setLocalMax] = useState(maxRefills);
 
-  const table = itemId ? "engagement_order_items" : "orders";
   const id = itemId || orderId;
 
   type RefillPatch = {
