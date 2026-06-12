@@ -191,6 +191,7 @@ export default function AdminSubscriptions() {
       toast.success(`Subscription activated for ${profile.email}!`);
       setAddEmail('');
       queryClient.invalidateQueries({ queryKey: ['admin-active-subscribers'] });
+      queryClient.invalidateQueries({ queryKey: ['user-subscription', profile.user_id] });
     },
     onError: (error: Error) => {
       toast.error(error.message);
@@ -222,10 +223,11 @@ export default function AdminSubscriptions() {
         },
       }).catch(err => console.error('Email failed:', err));
     },
-    onSuccess: () => {
+    onSuccess: (_, { userId }) => {
       toast.success('Subscription removed!');
       setRemoveDialog(null);
       queryClient.invalidateQueries({ queryKey: ['admin-active-subscribers'] });
+      queryClient.invalidateQueries({ queryKey: ['user-subscription', userId] });
     },
     onError: (error: Error) => {
       toast.error(error.message);
@@ -282,12 +284,16 @@ export default function AdminSubscriptions() {
         },
       }).catch(err => console.error('Email failed:', err));
     },
-    onSuccess: (_, { action }) => {
+    onSuccess: (_, { action, requestId }) => {
       toast.success(action === 'approve' ? 'Subscription activated!' : 'Request rejected.');
       setSelectedRequest(null);
       setAdminNotes('');
       queryClient.invalidateQueries({ queryKey: ['admin-subscription-requests'] });
       queryClient.invalidateQueries({ queryKey: ['admin-active-subscribers'] });
+      const request = requests?.find(r => r.id === requestId);
+      if (request) {
+        queryClient.invalidateQueries({ queryKey: ['user-subscription', request.user_id] });
+      }
     },
     onError: (error: Error) => {
       toast.error(error.message);
