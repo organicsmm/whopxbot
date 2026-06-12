@@ -19,7 +19,7 @@ import { EngagementTypeCard } from "@/components/engagement/EngagementTypeCard";
 import { DeliveryPreview } from "@/components/engagement/DeliveryPreview";
 import { LiveGrowthChart } from "@/components/engagement/LiveGrowthChart";
 import { DrawableGrowthChart } from "@/components/engagement/DrawableGrowthChart";
-import { AISpeedRecommender } from "@/components/engagement/AISpeedRecommender";
+import { AIEngagementChat } from "@/components/engagement/AIEngagementChat";
 import { PreOrderRatioWarning } from "@/components/engagement/PreOrderRatioWarning";
 import {
   EngagementType,
@@ -840,10 +840,10 @@ export default function EngagementOrder() {
                 </div>
                 <Label className="text-base sm:text-lg font-bold tracking-tight text-foreground truncate">Video/Post Link</Label>
               </div>
-              <AISpeedRecommender
+              <AIEngagementChat
                 link={link}
                 platform={platform}
-                types={Object.entries(engagements).filter(([, c]) => c.enabled).map(([t]) => t)}
+                engagements={engagements}
                 totalQuantity={baseQuantity}
               />
             </div>
