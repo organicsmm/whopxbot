@@ -48,6 +48,8 @@ import { TypeHistoryCard } from "@/components/engagement/TypeHistoryCard";
 import { PerTypeBreakdown } from "@/components/engagement/PerTypeBreakdown";
 import { EditRunDialog } from "@/components/engagement/EditRunDialog";
 import { HealthScoreBadge } from "@/components/engagement/HealthScoreBadge";
+import { BottingScoreCard } from "@/components/engagement/BottingScoreCard";
+import type { Counts } from "@/lib/engagement-ratio";
 import { AutoRefillToggle } from "@/components/engagement/AutoRefillToggle";
 import { OrderProgressChart } from "@/components/engagement/OrderProgressChart";
 
@@ -789,6 +791,25 @@ export default function EngagementOrderDetail() {
 
         {/* Real-Time Progress Chart */}
         <OrderProgressChart runs={stats.allRuns} perType={stats.perType} />
+
+        {/* Live Botting % / Organic Ratio Health */}
+        {(() => {
+          const toCounts = (key: "delivered" | "target"): Counts => {
+            const c: Counts = { views: 0, likes: 0, comments: 0, shares: 0, saves: 0 };
+            for (const p of stats.perType as any[]) {
+              const t = String(p.type || "").toLowerCase();
+              const q = Number(p[key] || 0);
+              if (q <= 0) continue;
+              if (t.includes("view") || t.includes("impression") || t.includes("reach") || t.includes("plays")) c.views! += q;
+              else if (t.includes("like") || t.includes("reaction")) c.likes! += q;
+              else if (t.includes("comment")) c.comments! += q;
+              else if (t.includes("share") || t.includes("repost")) c.shares! += q;
+              else if (t.includes("save") || t.includes("bookmark")) c.saves! += q;
+            }
+            return c;
+          };
+          return <BottingScoreCard delivered={toCounts("delivered")} targets={toCounts("target")} />;
+        })()}
 
         {/* Per-Type Breakdown with Real-Time History - Clickable cards */}
         <PerTypeBreakdown 
