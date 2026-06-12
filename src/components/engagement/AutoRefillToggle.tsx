@@ -26,10 +26,18 @@ export function AutoRefillToggle({ itemId, orderId, enabled, threshold, maxRefil
   const table = itemId ? "engagement_order_items" : "orders";
   const id = itemId || orderId;
 
-  const save = async (patch: Record<string, unknown>) => {
+  type RefillPatch = {
+    auto_refill_enabled?: boolean;
+    auto_refill_threshold_pct?: number;
+    auto_refill_max?: number;
+  };
+  const save = async (patch: RefillPatch) => {
     if (!id) return;
     setBusy(true);
-    const { error } = await supabase.from(table).update(patch).eq("id", id);
+    const q = itemId
+      ? supabase.from("engagement_order_items").update(patch).eq("id", id)
+      : supabase.from("orders").update(patch).eq("id", id);
+    const { error } = await q;
     setBusy(false);
     if (error) {
       toast({ title: "Save failed", description: error.message, variant: "destructive" });
