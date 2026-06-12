@@ -976,7 +976,7 @@ function BundleCard({
                               {linkedService.name?.slice(0, 40)}
                             </span>
                             <Badge variant="outline" className="text-[10px] shrink-0 font-bold border-primary/30 text-primary">
-                              ${displayPrice ?? '?'}/1K
+                              ₹{displayPrice != null ? (Number(displayPrice) * 83.5).toFixed(2) : '?'}/1K
                             </Badge>
                           </>
                         ) : (
