@@ -282,6 +282,21 @@ export function EngagementTypeCard({
     onChange({ ...config, peakHoursEnabled: enabled });
   };
 
+  const handleRunCountChange = (raw: string) => {
+    const trimmed = raw.trim();
+    if (trimmed === '') {
+      onChange({ ...config, customRunCount: undefined });
+      return;
+    }
+    const n = parseInt(trimmed, 10);
+    if (!Number.isFinite(n) || n <= 0) {
+      onChange({ ...config, customRunCount: undefined });
+      return;
+    }
+    const clamped = Math.min(maxAllowedRuns, Math.max(1, n));
+    onChange({ ...config, customRunCount: clamped });
+  };
+
   // Validation
   const isBelowMin = config.enabled && config.quantity < providerMin;
   const isAboveMax = config.enabled && config.quantity > providerMax;
