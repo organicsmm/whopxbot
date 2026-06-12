@@ -1018,6 +1018,47 @@ function BundleCard({
                     onServiceLinked={(id, sid) => onUpdateItem(id, sid)}
                   />
                 </div>
+
+                {/* Bundle-level fixed per-1000 price (admin override, applies to ALL provider rotations) */}
+                <div className="flex items-center gap-2 pl-12">
+                  <span className="text-xs text-muted-foreground shrink-0">
+                    Per 1000 {item.engagement_type}:
+                  </span>
+                  <div className="flex items-center gap-1">
+                    <span className="text-primary font-bold text-sm">$</span>
+                    <Input
+                      type="number"
+                      placeholder="auto"
+                      value={
+                        editingPrices[item.id] ??
+                        (item.price_per_k != null ? String(item.price_per_k) : '')
+                      }
+                      onChange={(e) =>
+                        setEditingPrices((prev) => ({ ...prev, [item.id]: e.target.value }))
+                      }
+                      onBlur={(e) => {
+                        const raw = e.target.value.trim();
+                        const next = raw === '' ? null : parseFloat(raw);
+                        const current = item.price_per_k != null ? Number(item.price_per_k) : null;
+                        if (next === null || (!isNaN(next) && next >= 0)) {
+                          if (next !== current) onUpdatePricePerK(item.id, next);
+                        }
+                        setEditingPrices((prev) => {
+                          const n = { ...prev };
+                          delete n[item.id];
+                          return n;
+                        });
+                      }}
+                      className="w-28 h-8 text-sm text-center px-2 rounded-lg font-bold text-primary border-primary/30"
+                      min={0}
+                      step={0.0001}
+                    />
+                    <span className="text-[10px] text-muted-foreground ml-1">USD / 1K</span>
+                  </div>
+                  {item.price_per_k != null && (
+                    <Badge className="bg-primary/20 text-primary text-[10px]">Fixed</Badge>
+                  )}
+                </div>
               </div>
             );
           })}
