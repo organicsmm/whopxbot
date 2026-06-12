@@ -144,11 +144,22 @@ export function BundlesLivePanel() {
                           {it.service ? it.service.name : 'No service linked'}
                         </span>
                       </div>
-                      <span className="font-mono font-semibold text-primary shrink-0 ml-2">
-                        {it.service
-                          ? `$${Number(it.service.price).toFixed(4)}/1k`
-                          : '—'}
-                      </span>
+                      {(() => {
+                        const effective =
+                          it.price_per_k != null && Number(it.price_per_k) > 0
+                            ? Number(it.price_per_k)
+                            : it.service?.price ?? null;
+                        const isAdminFixed = it.price_per_k != null && Number(it.price_per_k) > 0;
+                        return (
+                          <span
+                            className={`font-mono font-semibold shrink-0 ml-2 ${isAdminFixed ? 'text-primary' : 'text-muted-foreground'}`}
+                            title={isAdminFixed ? 'Admin-set bundle price' : 'Falls back to linked service price'}
+                          >
+                            {effective != null ? `$${effective.toFixed(4)}/1k` : '—'}
+                            {isAdminFixed && <span className="text-[9px] ml-1">FIXED</span>}
+                          </span>
+                        );
+                      })()}
                     </div>
                   ))}
                 </div>
