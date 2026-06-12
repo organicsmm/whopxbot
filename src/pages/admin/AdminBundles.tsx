@@ -330,6 +330,22 @@ export default function AdminBundles() {
     },
   });
 
+  // Update bundle item per-1000 price (admin's final price for this engagement type)
+  const updatePricePerKMutation = useMutation({
+    mutationFn: async ({ id, price_per_k }: { id: string; price_per_k: number | null }) => {
+      const { error } = await supabase
+        .from('bundle_items')
+        .update({ price_per_k })
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-bundles'] });
+      toast({ title: 'Price updated' });
+    },
+    onError: (e: any) => toast({ title: 'Failed', description: e?.message, variant: 'destructive' }),
+  });
+
   // Toggle custom ratios mode
   const toggleCustomRatiosMutation = useMutation({
     mutationFn: async ({
@@ -561,6 +577,9 @@ export default function AdminBundles() {
                   onUpdateRatio={(id, ratio_percent) =>
                     updateItemRatioMutation.mutate({ id, ratio_percent })
                   }
+                  onUpdatePricePerK={(id, price_per_k) =>
+                    updatePricePerKMutation.mutate({ id, price_per_k })
+                  }
                 />
               ))
             )}
@@ -693,7 +712,9 @@ function BundleCard({
   onDeleteItem: (id: string) => void;
   onUpdateItem: (id: string, service_id: string | null) => void;
   onUpdateRatio: (id: string, ratio_percent: number) => void;
+  onUpdatePricePerK: (id: string, price_per_k: number | null) => void;
 }) {
+  const [editingPrices, setEditingPrices] = useState<Record<string, string>>({});
   const [editingRatios, setEditingRatios] = useState<Record<string, string>>({});
   const existingTypes = new Set(
     bundle.items?.map((i: any) => i.engagement_type) || []
