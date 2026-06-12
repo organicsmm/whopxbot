@@ -222,7 +222,7 @@ Request ID: ${requestData.id}`;
       features: ['Global Markup Control', 'Full platform access', 'All organic features', 'Cancel anytime']
     }
     : {
-      price: '$99',
+      price: '$50',
       period: ' lifetime',
       icon: Crown,
       color: 'warning',
