@@ -477,6 +477,50 @@ export function EngagementTypeCard({
                   )}
                 </div>
 
+                {/* Number of Runs (optional override) */}
+                <div className="space-y-1.5">
+                  <Label className="text-[10px] font-bold flex items-center justify-between text-foreground uppercase tracking-widest">
+                    <span className="flex items-center gap-1.5">
+                      <List className="h-3 w-3 text-foreground" />
+                      Number of Runs
+                    </span>
+                    <span className="text-[9px] font-mono text-muted-foreground normal-case tracking-normal">
+                      max {maxAllowedRuns} ({config.quantity || 0} ÷ {providerMin})
+                    </span>
+                  </Label>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      placeholder="Auto"
+                      value={customRunCount ?? ''}
+                      onChange={(e) => handleRunCountChange(e.target.value)}
+                      onBlur={(e) => handleRunCountChange(e.target.value)}
+                      className={cn(
+                        "w-20 sm:w-24 h-9 sm:h-10 text-sm sm:text-base bg-secondary border-2 border-border text-foreground font-bold",
+                        runsExceedMax && "border-red-500"
+                      )}
+                    />
+                    <span className="text-xs sm:text-sm text-muted-foreground font-medium">
+                      {customRunCount ? `runs` : 'runs (auto)'}
+                    </span>
+                  </div>
+                  {runsExceedMax && (
+                    <p className="text-[10px] sm:text-xs text-red-500 font-bold flex items-center gap-1">
+                      <AlertTriangle className="h-3 w-3" />
+                      Max {maxAllowedRuns} runs allowed (quantity {config.quantity} ÷ min {providerMin})
+                    </p>
+                  )}
+                  {!runsExceedMax && customRunCount && (
+                    <p className="text-[10px] text-muted-foreground">
+                      Exact {customRunCount} runs in {timeLimitHours > 0 ? `${timeLimitHours}h` : '~auto window'}
+                    </p>
+                  )}
+                </div>
+
+
+
                 {/* Variance Slider */}
                 <div className="space-y-2">
                   <Label className="text-[10px] font-bold flex items-center justify-between text-foreground uppercase tracking-widest">
