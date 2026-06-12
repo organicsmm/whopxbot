@@ -62,8 +62,8 @@ const Index = () => {
             </div>
           </Link>
           <div className="hidden md:flex items-center gap-7">
-            {['Features', 'How it works', 'Why us'].map((t, i) => (
-              <a key={t} href={['#features', '#how-it-works', '#comparison'][i]}
+            {['Features', 'How it works', 'Pricing', 'Why us'].map((t, i) => (
+              <a key={t} href={['#features', '#how-it-works', '#pricing', '#comparison'][i]}
                 className="text-[13px] font-medium transition-colors hover:opacity-100" style={{ color: C.ink2 }}>
                 {t}
               </a>
@@ -277,6 +277,102 @@ const Index = () => {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ═══ PRICING / SUBSCRIPTION ═══ */}
+      <section id="pricing" className="py-14 sm:py-24 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-10 sm:mb-14">
+            <Pill><Sparkles className="w-3 h-3" /> Simple, transparent pricing</Pill>
+            <h2 className="mt-4 text-[1.75rem] sm:text-4xl lg:text-[2.75rem] font-extrabold tracking-tight"
+              style={{ color: C.ink, fontFamily: "'Outfit', system-ui" }}>
+              Choose your <span style={{ color: C.orange }}>growth plan</span>
+            </h2>
+            <p className="mt-3 text-[14px] sm:text-[15.5px] max-w-xl mx-auto" style={{ color: C.ink2 }}>
+              Unlock the full power of organic delivery. Cancel anytime.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6 max-w-3xl mx-auto">
+            {/* Monthly */}
+            <div className="rounded-3xl p-7 sm:p-8 flex flex-col"
+              style={{ background: C.card, border: `1px solid ${C.line}`, boxShadow: C.soft }}>
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-[13px] font-bold uppercase tracking-wider" style={{ color: C.ink2 }}>Monthly</span>
+                <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-md"
+                  style={{ background: C.peach, color: C.orangeDeep }}>Flexible</span>
+              </div>
+              <div className="flex items-baseline gap-1.5 mb-1">
+                <span className="text-[44px] font-black tracking-tight" style={{ color: C.ink, fontFamily: "'Outfit', system-ui" }}>$10</span>
+                <span className="text-[14px] font-medium" style={{ color: C.muted }}>/month</span>
+              </div>
+              <p className="text-[13px] mb-6" style={{ color: C.ink2 }}>Billed monthly. Full access to all features.</p>
+              <ul className="space-y-2.5 mb-7 flex-1">
+                {[
+                  'Unlimited organic orders',
+                  'All platforms & engagement types',
+                  'Live delivery preview',
+                  'Peak hour optimization',
+                  'Priority support',
+                ].map((t) => (
+                  <li key={t} className="flex items-start gap-2.5 text-[13px]" style={{ color: C.ink2 }}>
+                    <CheckCircle2 className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: C.orange }} />
+                    {t}
+                  </li>
+                ))}
+              </ul>
+              <Link to="/auth" className="h-11 px-5 rounded-xl text-[13.5px] font-semibold flex items-center justify-center gap-1.5 transition-colors"
+                style={{ color: C.ink, background: '#FAFAF7', border: `1px solid ${C.line}` }}>
+                Get started <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+
+            {/* Lifetime — Featured */}
+            <div className="rounded-3xl p-7 sm:p-8 flex flex-col relative"
+              style={{
+                background: `linear-gradient(180deg, #F1FCF4 0%, #FFFFFF 100%)`,
+                border: `2px solid ${C.orange}`,
+                boxShadow: C.softLg,
+              }}>
+              <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full text-white whitespace-nowrap"
+                style={{ background: C.orange, boxShadow: '0 4px 12px rgba(22,163,74,.35)' }}>
+                Best value · Save 90%
+              </span>
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-[13px] font-bold uppercase tracking-wider" style={{ color: C.orangeDeep }}>Lifetime</span>
+                <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-md"
+                  style={{ background: C.orange, color: 'white' }}>One-time</span>
+              </div>
+              <div className="flex items-baseline gap-2 mb-1">
+                <span className="text-[44px] font-black tracking-tight" style={{ color: C.ink, fontFamily: "'Outfit', system-ui" }}>$99</span>
+                <span className="text-[14px] font-medium line-through" style={{ color: C.muted }}>$240/yr</span>
+              </div>
+              <p className="text-[13px] mb-6" style={{ color: C.ink2 }}>Pay once. Use forever. No renewals.</p>
+              <ul className="space-y-2.5 mb-7 flex-1">
+                {[
+                  'Everything in Monthly',
+                  'Lifetime access — no recurring fees',
+                  'All future updates included',
+                  'Early access to new features',
+                  'VIP priority support',
+                ].map((t) => (
+                  <li key={t} className="flex items-start gap-2.5 text-[13px]" style={{ color: C.ink2 }}>
+                    <CheckCircle2 className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: C.orange }} />
+                    {t}
+                  </li>
+                ))}
+              </ul>
+              <Link to="/auth" className="h-11 px-5 rounded-xl text-[13.5px] font-semibold text-white flex items-center justify-center gap-1.5 transition-transform hover:-translate-y-0.5"
+                style={{ background: `linear-gradient(135deg, ${C.orange}, ${C.orangeDeep})`, boxShadow: '0 10px 24px rgba(22,163,74,.35)' }}>
+                <Sparkles className="w-4 h-4" /> Get lifetime access
+              </Link>
+            </div>
+          </div>
+
+          <p className="text-center text-[12px] mt-8" style={{ color: C.muted }}>
+            🔒 Secure payment · Instant activation · 100% money-back guarantee
+          </p>
         </div>
       </section>
 
