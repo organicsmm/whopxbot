@@ -67,6 +67,8 @@ const formatPriceRaw = (price: number): string => {
 export default function EngagementOrder() {
   const navigate = useNavigate();
   const { user, profile, isLoading: authLoading, isAdmin, wallet, refreshWallet } = useAuth();
+  const { hasActiveSubscription } = useSubscription();
+  const [showSubDialog, setShowSubDialog] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { formatPrice, rates } = useCurrency();
