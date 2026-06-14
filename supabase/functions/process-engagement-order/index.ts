@@ -275,7 +275,10 @@ serve(async (req) => {
     const user_id = user.id
 
     const body = await req.json()
-    const { bundle_id, link, total_price, engagements, base_quantity } = body
+    const { bundle_id, link, total_price, engagements, base_quantity, campaign_name } = body
+    const sanitizedCampaignName = typeof campaign_name === 'string'
+      ? campaign_name.trim().slice(0, 120) || null
+      : null
 
     if (!bundle_id || !Array.isArray(engagements) || engagements.length === 0 || !total_price || total_price <= 0) {
       return new Response(JSON.stringify({ error: 'Invalid request' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
