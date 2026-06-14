@@ -274,6 +274,18 @@ serve(async (req) => {
     }
     const user_id = user.id
 
+    // Subscription gate (admin bypass)
+    const { data: isAdminRow } = await supabase
+      .from('user_roles').select('role').eq('user_id', user_id).eq('role', 'admin').maybeSingle()
+    if (!isAdminRow) {
+      const { data: sub } = await supabase
+        .from('subscriptions').select('status, plan_type').eq('user_id', user_id).maybeSingle()
+      const active = sub && sub.status === 'active' && sub.plan_type !== 'trial' && sub.plan_type !== 'none'
+      if (!active) {
+        return new Response(JSON.stringify({ error: 'Subscription required to place orders' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+      }
+    }
+
     const body = await req.json()
     const { bundle_id, link, total_price, engagements, base_quantity, campaign_name } = body
     const sanitizedCampaignName = typeof campaign_name === 'string'
