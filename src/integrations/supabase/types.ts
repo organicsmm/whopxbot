@@ -535,6 +535,101 @@ export type Database = {
           },
         ]
       }
+      mass_order_batch_items: {
+        Row: {
+          batch_id: string
+          created_at: string
+          engagement_order_id: string | null
+          engagement_order_number: number | null
+          error_message: string | null
+          id: string
+          link: string
+          payload: Json | null
+          price: number
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          batch_id: string
+          created_at?: string
+          engagement_order_id?: string | null
+          engagement_order_number?: number | null
+          error_message?: string | null
+          id?: string
+          link: string
+          payload?: Json | null
+          price?: number
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          batch_id?: string
+          created_at?: string
+          engagement_order_id?: string | null
+          engagement_order_number?: number | null
+          error_message?: string | null
+          id?: string
+          link?: string
+          payload?: Json | null
+          price?: number
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mass_order_batch_items_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "mass_order_batches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mass_order_batches: {
+        Row: {
+          created_at: string
+          failed_count: number
+          id: string
+          name: string | null
+          platform: string | null
+          status: string
+          success_count: number
+          total_count: number
+          total_price: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          failed_count?: number
+          id?: string
+          name?: string | null
+          platform?: string | null
+          status?: string
+          success_count?: number
+          total_count?: number
+          total_price?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          failed_count?: number
+          id?: string
+          name?: string | null
+          platform?: string | null
+          status?: string
+          success_count?: number
+          total_count?: number
+          total_price?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       orders: {
         Row: {
           auto_refill_count: number
