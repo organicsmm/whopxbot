@@ -28,6 +28,7 @@ const Settings = lazy(() => import("./pages/Settings"));
 const Support = lazy(() => import("./pages/Support"));
 const ApiAccess = lazy(() => import("./pages/ApiAccess"));
 const EngagementOrderDetail = lazy(() => import("./pages/EngagementOrderDetail"));
+const MassOrder = lazy(() => import("./pages/MassOrder"));
 
 const Admin = lazy(() => import("./pages/admin/Admin"));
 const AdminServices = lazy(() => import("./pages/admin/AdminServices"));
@@ -114,6 +115,7 @@ const App = () => {
                     <Route path="/engagement-order" element={<EngagementOrder />} />
                     <Route path="/engagement-orders" element={<EngagementOrders />} />
                     <Route path="/engagement-orders/:orderNumber" element={<EngagementOrderDetail />} />
+                    <Route path="/mass-order" element={<MassOrder />} />
 
                     {/* Admin — server-verified guard */}
                     <Route path="/admin" element={<AdminGuard><Admin /></AdminGuard>} />
