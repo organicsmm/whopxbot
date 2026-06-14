@@ -266,11 +266,23 @@ serve(async (req) => {
 
                 if (!order) return err('Organic Order not found', 404)
 
+                // Get item IDs for this order
+                const { data: items } = await supabase
+                    .from('engagement_order_items')
+                    .select('id')
+                    .eq('engagement_order_id', order.id)
+
+                const itemIds = (items || []).map(i => i.id)
+                if (itemIds.length === 0) {
+                    return json({ order_number: body.order, upcoming_runs: [] })
+                }
+
                 const { data: runs } = await supabase
                     .from('organic_run_schedule')
                     .select('run_number, scheduled_at, quantity_to_send, status')
+                    .in('engagement_order_item_id', itemIds)
                     .order('scheduled_at', { ascending: true })
-                    .limit(20) // Only show next 20 for bot readability
+                    .limit(20)
 
                 return json({
                     order_number: body.order,
