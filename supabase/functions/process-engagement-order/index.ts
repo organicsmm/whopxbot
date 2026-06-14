@@ -277,6 +277,37 @@ serve(async (req) => {
     const body = await req.json()
     const { bundle_id, link, total_price, engagements, base_quantity } = body
 
+    if (!bundle_id || !Array.isArray(engagements) || engagements.length === 0 || !total_price || total_price <= 0) {
+      return new Response(JSON.stringify({ error: 'Invalid request' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    }
+
+    // Server-side price verification against bundle_items.price_per_k (fallback to services.price)
+    const { data: bItems, error: biErr } = await supabase
+      .from('bundle_items')
+      .select('id, service_id, engagement_type, price_per_k, services:service_id(price)')
+      .eq('bundle_id', bundle_id)
+    if (biErr || !bItems || bItems.length === 0) {
+      return new Response(JSON.stringify({ error: 'Bundle not found' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    }
+
+    let expectedTotal = 0
+    for (const eng of engagements) {
+      const qty = Math.max(0, Math.floor(Number(eng?.quantity) || 0))
+      if (qty <= 0) {
+        return new Response(JSON.stringify({ error: 'Invalid engagement quantity' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+      }
+      const match = bItems.find((b: any) => b.engagement_type === eng.type && (!eng.service_id || b.service_id === eng.service_id))
+      if (!match) {
+        return new Response(JSON.stringify({ error: `Engagement ${eng.type} not in bundle` }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+      }
+      const pricePerK = Number(match.price_per_k ?? (match as any).services?.price ?? 0)
+      expectedTotal += (qty / 1000) * pricePerK
+    }
+
+    if (expectedTotal <= 0 || Math.abs(Number(total_price) - expectedTotal) / expectedTotal > 0.01) {
+      return new Response(JSON.stringify({ error: 'Price mismatch' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    }
+
     // Lock wallet and fetch balance
     const { data: wallet } = await supabase.from('wallets').select('*').eq('user_id', user_id).single()
     if (!wallet || wallet.balance < total_price) return new Response(JSON.stringify({ error: 'Insufficient balance' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })

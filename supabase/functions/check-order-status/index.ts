@@ -21,31 +21,32 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Auth check - this is a cron/internal function
-    // Allow: anon key (cron), service key (internal), or valid user JWT
-    // For cron calls, the system sends the anon key automatically
+    // Auth: cron uses service-role (or CRON_SECRET); users must be admin
     const authHeader = req.headers.get('Authorization')
-    const token = authHeader?.replace('Bearer ', '') || ''
-    const anonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? ''
-    const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    
-    // System calls: anon key or service key
-    const isSystemCall = !!(token && (token === anonKey || token === serviceKey))
-    
-    if (!isSystemCall && token) {
-      // User JWT - verify it
-      const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(token)
-      if (claimsError || !claimsData?.claims?.sub) {
-        console.log('JWT verification failed, checking if valid system token...')
-        // Still allow if it looks like a valid JWT (cron might send different format)
-      }
-    }
-    
-    // If no token at all, reject
-    if (!authHeader) {
+    if (!authHeader?.startsWith('Bearer ')) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       })
+    }
+    const token = authHeader.replace('Bearer ', '')
+    const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    const cronSecret = Deno.env.get('CRON_SECRET') ?? ''
+    const isSystemCall = (serviceKey && token === serviceKey) || (cronSecret && token === cronSecret)
+
+    if (!isSystemCall) {
+      const { data: { user }, error: authError } = await supabase.auth.getUser(token)
+      if (authError || !user) {
+        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+          status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        })
+      }
+      const { data: roleRow } = await supabase
+        .from('user_roles').select('role').eq('user_id', user.id).eq('role', 'admin').maybeSingle()
+      if (!roleRow) {
+        return new Response(JSON.stringify({ error: 'Forbidden' }), {
+          status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        })
+      }
     }
 
     // Check if specific run ID was passed (for on-demand check)
