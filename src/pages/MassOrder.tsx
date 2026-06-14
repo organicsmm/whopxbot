@@ -93,7 +93,9 @@ const STATUS_BADGE: Record<string, { color: string; icon: any }> = {
 // ---------- Page ----------
 export default function MassOrder() {
   const navigate = useNavigate();
-  const { user, wallet, refreshWallet } = useAuth();
+  const { user, wallet, refreshWallet, isAdmin } = useAuth();
+  const { hasActiveSubscription } = useSubscription();
+  const [showSubDialog, setShowSubDialog] = useState(false);
   const { formatPrice } = useCurrency();
   const { applyMarkup } = useGlobalMarkup();
   const { toast } = useToast();
