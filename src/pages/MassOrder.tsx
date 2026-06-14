@@ -279,8 +279,13 @@ export default function MassOrder() {
   // ---------- Submit ----------
   const handleSubmitAll = async () => {
     if (!user || !canSubmit || !bundle) return;
+    if (!isAdmin && !hasActiveSubscription) {
+      setShowSubDialog(true);
+      return;
+    }
     setSubmitting(true);
     setProgress({ done: 0, total: cards.length });
+
 
     const { data: batchRow, error: batchErr } = await supabase
       .from("mass_order_batches")
