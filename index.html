@@ -224,16 +224,8 @@
     #root { min-height: 100vh; display: flex; flex-direction: column; }
   </style>
 
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
-          .then(reg => console.log('OrganicSMM Pro: Service Worker Registered'))
-          .catch(err => console.log('SW Registration failed:', err));
-      });
-    }
-  </script>
-  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <!-- Service worker registration removed (stale-cache issues). main.tsx unregisters any existing SW. -->
+  <!-- Razorpay script removed (deposits temporarily suspended). Load on demand if/when re-enabled. -->
   <meta property="og:title" content="OrganicSMM Pro — Organic Social Media Growth Panel">
   <meta name="twitter:title" content="OrganicSMM Pro — Organic Social Media Growth Panel">
   <meta property="og:description" content="AI-organic SMM panel for Instagram, YouTube &amp; TikTok. Real engagement, natural delivery, 100% safe accounts. Start free — no credit card.">
