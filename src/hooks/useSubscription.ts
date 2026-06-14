@@ -48,6 +48,8 @@ export function useSubscription() {
     enabled: !!user,
   });
 
+  const hasActiveSub = subscription?.status === 'active' && subscription?.plan_type !== 'trial';
+
   const { data: pendingRequest, isLoading: isLoadingRequest } = useQuery({
     queryKey: ['subscription-requests', user?.id],
     queryFn: async () => {
@@ -69,7 +71,9 @@ export function useSubscription() {
 
       return data as SubscriptionRequest | null;
     },
-    enabled: !!user,
+    // Skip pending-request lookup entirely when user already has an active sub
+    enabled: !!user && !hasActiveSub,
+    staleTime: 10 * 60 * 1000,
   });
 
   const hasActiveSubscription = subscription?.status === 'active' && subscription?.plan_type !== 'trial';
