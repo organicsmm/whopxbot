@@ -46,6 +46,8 @@ import {
   type ServiceCategory,
   type OrganicServiceConfig
 } from '@/lib/organic-service-config';
+import { useSubscription } from '@/hooks/useSubscription';
+import { SubscriptionCheckDialog } from '@/components/subscription/SubscriptionCheckDialog';
 
 type DeliveryMode = 'direct' | 'uniform' | 'organic';
 
