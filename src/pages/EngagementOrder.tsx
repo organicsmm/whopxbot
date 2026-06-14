@@ -522,6 +522,7 @@ export default function EngagementOrder() {
           user_id: user.id,
           bundle_id: bundle?.id,
           link: link.trim(),
+          campaign_name: campaignName.trim() || null,
           base_quantity: baseQuantity,
           total_price: totalPrice,
           is_organic_mode: isOrganicMode,
