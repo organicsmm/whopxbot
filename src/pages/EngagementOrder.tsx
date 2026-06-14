@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useCallback, memo } from "react";
+import { useState, useMemo, useEffect, useCallback, memo, lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,11 +16,18 @@ import { cn } from "@/lib/utils";
 import { PlatformSelector } from "@/components/engagement/PlatformSelector";
 import { QuantitySelector } from "@/components/engagement/QuantitySelector";
 import { EngagementTypeCard } from "@/components/engagement/EngagementTypeCard";
-import { DeliveryPreview } from "@/components/engagement/DeliveryPreview";
-import { LiveGrowthChart } from "@/components/engagement/LiveGrowthChart";
 import { DrawableGrowthChart } from "@/components/engagement/DrawableGrowthChart";
 import { AIEngagementChat } from "@/components/engagement/AIEngagementChat";
 import { PreOrderRatioWarning } from "@/components/engagement/PreOrderRatioWarning";
+
+// Heavy preview components — lazy-loaded behind the "Show delivery preview" toggle
+const LiveGrowthChart = lazy(() =>
+  import("@/components/engagement/LiveGrowthChart").then((m) => ({ default: m.LiveGrowthChart }))
+);
+const DeliveryPreview = lazy(() =>
+  import("@/components/engagement/DeliveryPreview").then((m) => ({ default: m.DeliveryPreview }))
+);
+
 import {
   EngagementType,
   EngagementConfig,
@@ -36,7 +43,7 @@ import {
   curveToSchedule,
   calculateQuantitiesFromCurve,
 } from "@/lib/curve-to-schedule";
-import { Loader2, Rocket, Link as LinkIcon, Wallet, RefreshCw, Brain, Percent } from "lucide-react";
+import { Loader2, Rocket, Link as LinkIcon, Wallet, RefreshCw, Brain, Percent, Eye, EyeOff, Megaphone } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { useDebounce } from "@/hooks/useDebounce";
 import { FullOrganicConfig } from "@/lib/organic-algorithm";
