@@ -72,6 +72,8 @@ export default function Order() {
   const navigate = useNavigate();
   const { user, profile, wallet, refreshWallet, isAdmin } = useAuth();
   const { formatPrice } = useCurrency();
+  const { hasActiveSubscription } = useSubscription();
+  const [showSubDialog, setShowSubDialog] = useState(false);
 
   const preselectedService = searchParams.get('service');
 
