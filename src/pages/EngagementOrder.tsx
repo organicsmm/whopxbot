@@ -952,25 +952,43 @@ export default function EngagementOrder() {
           />
         )}
 
-        {/* Live Growth Chart - Real-time visualization (shown when not drawing) */}
-        {!drawModeState.isEnabled && activeEngagementTypes.length > 0 && (
-          <LiveGrowthChart
-            engagements={engagements as Record<EngagementType, EngagementConfig>}
-            refreshKey={previewRefreshKey}
-            onRefresh={() => setPreviewRefreshKey(k => k + 1)}
-            platform={platform as 'instagram' | 'tiktok' | 'youtube' | 'twitter' | 'facebook'}
-          />
+        {/* Heavy delivery previews — opt-in to keep initial render snappy */}
+        {activeEngagementTypes.length > 0 && (
+          <div className="flex justify-center">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setShowPreview((v) => !v)}
+              className="rounded-full"
+            >
+              {showPreview ? <EyeOff className="h-4 w-4 mr-2" /> : <Eye className="h-4 w-4 mr-2" />}
+              {showPreview ? 'Hide delivery preview' : 'Show delivery preview'}
+            </Button>
+          </div>
         )}
 
-        {/* Delivery Timeline Preview - Detailed schedule */}
-        {activeEngagementTypes.length > 0 && (
-          <DeliveryPreview
-            engagements={engagements as Record<EngagementType, EngagementConfig>}
-            refreshKey={previewRefreshKey}
-            platform={platform as 'instagram' | 'tiktok' | 'youtube' | 'twitter' | 'facebook'}
-            customCurvePoints={drawModeState.isEnabled ? drawModeState.points : undefined}
-            onScheduleChange={handleScheduleChange}
-          />
+        {showPreview && !drawModeState.isEnabled && activeEngagementTypes.length > 0 && (
+          <Suspense fallback={<div className="text-center text-xs text-muted-foreground py-4">Loading chart…</div>}>
+            <LiveGrowthChart
+              engagements={engagements as Record<EngagementType, EngagementConfig>}
+              refreshKey={previewRefreshKey}
+              onRefresh={() => setPreviewRefreshKey(k => k + 1)}
+              platform={platform as 'instagram' | 'tiktok' | 'youtube' | 'twitter' | 'facebook'}
+            />
+          </Suspense>
+        )}
+
+        {showPreview && activeEngagementTypes.length > 0 && (
+          <Suspense fallback={<div className="text-center text-xs text-muted-foreground py-4">Loading timeline…</div>}>
+            <DeliveryPreview
+              engagements={engagements as Record<EngagementType, EngagementConfig>}
+              refreshKey={previewRefreshKey}
+              platform={platform as 'instagram' | 'tiktok' | 'youtube' | 'twitter' | 'facebook'}
+              customCurvePoints={drawModeState.isEnabled ? drawModeState.points : undefined}
+              onScheduleChange={handleScheduleChange}
+            />
+          </Suspense>
         )}
 
         {/* Organic engagement ratio / botting % warning */}
