@@ -6,6 +6,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useCurrency } from "@/hooks/useCurrency";
 import { useGlobalMarkup } from "@/hooks/useGlobalMarkup";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { useSubscription } from "@/hooks/useSubscription";
+import { SubscriptionCheckDialog } from "@/components/subscription/SubscriptionCheckDialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -65,6 +67,8 @@ const formatPriceRaw = (price: number): string => {
 export default function EngagementOrder() {
   const navigate = useNavigate();
   const { user, profile, isLoading: authLoading, isAdmin, wallet, refreshWallet } = useAuth();
+  const { hasActiveSubscription } = useSubscription();
+  const [showSubDialog, setShowSubDialog] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { formatPrice, rates } = useCurrency();
@@ -700,6 +704,14 @@ export default function EngagementOrder() {
       return;
     }
 
+    // Subscription required for non-admin users
+    if (!hasActiveSubscription) {
+      setShowSubDialog(true);
+      return;
+    }
+
+
+
 
     // STEP 2: After subscription is confirmed, check balance
     if (!wallet || wallet.balance <= 0) {
@@ -1035,6 +1047,7 @@ export default function EngagementOrder() {
         </Card>
       </div>
 
+      <SubscriptionCheckDialog open={showSubDialog} onOpenChange={setShowSubDialog} />
     </DashboardLayout>
   );
 }

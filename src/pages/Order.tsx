@@ -46,6 +46,8 @@ import {
   type ServiceCategory,
   type OrganicServiceConfig
 } from '@/lib/organic-service-config';
+import { useSubscription } from '@/hooks/useSubscription';
+import { SubscriptionCheckDialog } from '@/components/subscription/SubscriptionCheckDialog';
 
 type DeliveryMode = 'direct' | 'uniform' | 'organic';
 
@@ -70,6 +72,8 @@ export default function Order() {
   const navigate = useNavigate();
   const { user, profile, wallet, refreshWallet, isAdmin } = useAuth();
   const { formatPrice } = useCurrency();
+  const { hasActiveSubscription } = useSubscription();
+  const [showSubDialog, setShowSubDialog] = useState(false);
 
   const preselectedService = searchParams.get('service');
 
@@ -502,6 +506,14 @@ export default function Order() {
       placeOrderMutation.mutate();
       return;
     }
+
+    // Subscription required for non-admin users
+    if (!hasActiveSubscription) {
+      setShowSubDialog(true);
+      return;
+    }
+
+
 
 
     // STEP 2: After subscription confirmed, check balance
@@ -1305,6 +1317,7 @@ export default function Order() {
         </div>
       </div>
 
+      <SubscriptionCheckDialog open={showSubDialog} onOpenChange={setShowSubDialog} />
     </DashboardLayout>
   );
 }
