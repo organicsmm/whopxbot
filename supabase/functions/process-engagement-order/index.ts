@@ -329,7 +329,8 @@ serve(async (req) => {
 
     // Create order
     const { data: order, error: orderError } = await supabase.from('engagement_orders').insert({
-      user_id, bundle_id, link, total_price, base_quantity, is_organic_mode: true, status: 'processing'
+      user_id, bundle_id, link, total_price, base_quantity, is_organic_mode: true, status: 'processing',
+      campaign_name: sanitizedCampaignName,
     }).select().single()
 
     if (orderError || !order) return new Response(JSON.stringify({ error: `Failed to create order: ${orderError?.message || 'Unknown error'}` }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
