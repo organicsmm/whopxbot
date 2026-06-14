@@ -507,6 +507,14 @@ export default function Order() {
       return;
     }
 
+    // Subscription required for non-admin users
+    if (!hasActiveSubscription) {
+      setShowSubDialog(true);
+      return;
+    }
+
+
+
 
     // STEP 2: After subscription confirmed, check balance
     if (!wallet || wallet.balance <= 0) {
