@@ -20,7 +20,7 @@ serve(async (req) => {
   }
 
   try {
-    // Auth check - allow cron (anon key) or authenticated users
+    // Auth check - cron uses service-role; admin users may also invoke
     const authHeader = req.headers.get('Authorization')
     if (!authHeader?.startsWith('Bearer ')) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
@@ -28,15 +28,22 @@ serve(async (req) => {
       })
     }
 
-    // Verify token is valid
     const token = authHeader.replace('Bearer ', '')
-    const anonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? ''
     const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    if (token !== anonKey && token !== serviceKey) {
+    const cronSecret = Deno.env.get('CRON_SECRET') ?? ''
+    const isSystem = (serviceKey && token === serviceKey) || (cronSecret && token === cronSecret)
+    if (!isSystem) {
       const { data: { user }, error: authError } = await supabase.auth.getUser(token)
       if (authError || !user) {
         return new Response(JSON.stringify({ error: 'Unauthorized' }), {
           status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        })
+      }
+      const { data: roleRow } = await supabase
+        .from('user_roles').select('role').eq('user_id', user.id).eq('role', 'admin').maybeSingle()
+      if (!roleRow) {
+        return new Response(JSON.stringify({ error: 'Forbidden' }), {
+          status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         })
       }
     }
