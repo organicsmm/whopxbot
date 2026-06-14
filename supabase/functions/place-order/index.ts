@@ -34,6 +34,20 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Subscription gate (admin bypass)
+    const { data: isAdminRow } = await supabaseAdmin
+      .from("user_roles").select("role").eq("user_id", user.id).eq("role", "admin").maybeSingle();
+    if (!isAdminRow) {
+      const { data: sub } = await supabaseAdmin
+        .from("subscriptions").select("status, plan_type").eq("user_id", user.id).maybeSingle();
+      const active = sub && sub.status === "active" && sub.plan_type !== "trial" && sub.plan_type !== "none";
+      if (!active) {
+        return new Response(JSON.stringify({ error: "Subscription required to place orders" }), {
+          status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+
     const body = await req.json();
     const { orderData, totalPrice, runs } = body;
 
