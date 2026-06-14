@@ -54,6 +54,7 @@ serve(async (req) => {
 
   try {
     let isServiceRole = false;
+    let authenticatedUserId: string | null = null;
     const authHeader = req.headers.get('Authorization')
     if (!authHeader?.startsWith('Bearer ')) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
@@ -67,12 +68,22 @@ serve(async (req) => {
       if (verifyError || !user) {
         return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
       }
+      authenticatedUserId = user.id;
     }
 
     const { order_id } = await req.json()
 
     const { data: order, error: orderError } = await supabase.from('orders').select('*, service:services(*)').eq('id', order_id).single()
     if (orderError || !order) return new Response(JSON.stringify({ error: 'Order not found' }), { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+
+    // Ownership check for non-service-role callers (admin allowed)
+    if (!isServiceRole && authenticatedUserId && order.user_id !== authenticatedUserId) {
+      const { data: roleRow } = await supabase
+        .from('user_roles').select('role').eq('user_id', authenticatedUserId).eq('role', 'admin').maybeSingle()
+      if (!roleRow) {
+        return new Response(JSON.stringify({ error: 'Forbidden' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+      }
+    }
 
     const currentOrderError = (order.error_message || '').toLowerCase()
     const hasUncertainDispatch = currentOrderError.includes('[dispatch uncertain]') || currentOrderError.includes('[awaiting provider confirmation]')
