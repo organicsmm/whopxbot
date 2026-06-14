@@ -879,6 +879,19 @@ export default function EngagementOrder() {
               onChange={(e) => setLink(e.target.value)}
               className="h-12 sm:h-14 text-base sm:text-lg rounded-xl border-2 border-border focus:border-foreground bg-secondary text-foreground font-medium placeholder:text-muted-foreground transition-all"
             />
+            <div className="mt-3 sm:mt-4">
+              <Label className="text-xs sm:text-sm font-semibold text-muted-foreground flex items-center gap-1.5 mb-2">
+                <Megaphone className="h-3.5 w-3.5" />
+                Campaign Name <span className="font-normal opacity-60">(optional)</span>
+              </Label>
+              <Input
+                placeholder="e.g. Diwali Reel Campaign"
+                value={campaignName}
+                onChange={(e) => setCampaignName(e.target.value.slice(0, 120))}
+                maxLength={120}
+                className="h-10 sm:h-11 rounded-xl border-2 border-border focus:border-foreground bg-secondary text-foreground placeholder:text-muted-foreground"
+              />
+            </div>
           </CardContent>
         </Card>
 
