@@ -704,6 +704,14 @@ export default function EngagementOrder() {
       return;
     }
 
+    // Subscription required for non-admin users
+    if (!hasActiveSubscription) {
+      setShowSubDialog(true);
+      return;
+    }
+
+
+
 
     // STEP 2: After subscription is confirmed, check balance
     if (!wallet || wallet.balance <= 0) {
