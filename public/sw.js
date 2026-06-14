@@ -1,47 +1,14 @@
-// 💎 Whopautopailot Pro Service Worker (Lite)
-const CACHE_NAME = 'whopautopailot-app-v1';
-const ASSETS_TO_CACHE = [
-    '/',
-    '/index.html',
-    '/manifest.webmanifest',
-    '/favicon.png',
-    '/logo.png'
-];
-
-// Install Event
-self.addEventListener('install', (event) => {
-    event.waitUntil(
-        caches.open(CACHE_NAME).then((cache) => {
-            console.log('✅ App Shell cached successfully');
-            return cache.addAll(ASSETS_TO_CACHE);
-        })
-    );
-    self.skipWaiting();
-});
-
-// Activate Event
+// Service worker disabled — was causing stale-cache issues.
+// main.tsx unregisters any existing SW on load. This file is a no-op kept
+// only so existing client registrations resolve cleanly until unregistered.
+self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', (event) => {
-    event.waitUntil(
-        caches.keys().then((keys) => {
-            return Promise.all(
-                keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
-            );
-        })
-    );
+    event.waitUntil((async () => {
+        const keys = await caches.keys();
+        await Promise.all(keys.map((k) => caches.delete(k).catch(() => false)));
+        await self.clients.claim();
+        const regs = await self.registration ? [self.registration] : [];
+        for (const reg of regs) { try { await reg.unregister(); } catch {} }
+    })());
 });
-
-// Fetch Event (Network-first with Cache recovery)
-self.addEventListener('fetch', (event) => {
-    if (event.request.method !== 'GET') return;
-
-    event.respondWith(
-        fetch(event.request)
-            .then((response) => {
-                // Update cache with new content
-                const copy = response.clone();
-                caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
-                return response;
-            })
-            .catch(() => caches.match(event.request))
-    );
-});
+// No fetch handler — let the browser fetch everything directly.

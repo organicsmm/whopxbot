@@ -275,7 +275,10 @@ serve(async (req) => {
     const user_id = user.id
 
     const body = await req.json()
-    const { bundle_id, link, total_price, engagements, base_quantity } = body
+    const { bundle_id, link, total_price, engagements, base_quantity, campaign_name } = body
+    const sanitizedCampaignName = typeof campaign_name === 'string'
+      ? campaign_name.trim().slice(0, 120) || null
+      : null
 
     if (!bundle_id || !Array.isArray(engagements) || engagements.length === 0 || !total_price || total_price <= 0) {
       return new Response(JSON.stringify({ error: 'Invalid request' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
@@ -326,7 +329,8 @@ serve(async (req) => {
 
     // Create order
     const { data: order, error: orderError } = await supabase.from('engagement_orders').insert({
-      user_id, bundle_id, link, total_price, base_quantity, is_organic_mode: true, status: 'processing'
+      user_id, bundle_id, link, total_price, base_quantity, is_organic_mode: true, status: 'processing',
+      campaign_name: sanitizedCampaignName,
     }).select().single()
 
     if (orderError || !order) return new Response(JSON.stringify({ error: `Failed to create order: ${orderError?.message || 'Unknown error'}` }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })

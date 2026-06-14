@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { AdminGuard } from "@/components/admin/AdminGuard";
@@ -11,57 +11,52 @@ import { ScrollToTop } from "@/components/ScrollToTop";
 import { toast } from "sonner";
 import { AppErrorBoundary } from "@/components/app/AppErrorBoundary";
 
-
-// ALL pages eager-loaded for instantaneous navigation
-import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
-import Auth from "./pages/Auth";
+// Eager — frequently-used dashboard pages stay fast on navigation
 import Dashboard from "./pages/Dashboard";
-import Services from "./pages/Services";
-import Order from "./pages/Order";
-import Orders from "./pages/Orders";
-import Wallet from "./pages/Wallet";
-import Settings from "./pages/Settings";
-import Support from "./pages/Support";
-import ApiAccess from "./pages/ApiAccess";
-
-// Engagement pages
 import EngagementOrder from "./pages/EngagementOrder";
 import EngagementOrders from "./pages/EngagementOrders";
-import EngagementOrderDetail from "./pages/EngagementOrderDetail";
+import Orders from "./pages/Orders";
+import Wallet from "./pages/Wallet";
 
+// Lazy — landing, auth, secondary, legal, all admin pages
+const Index = lazy(() => import("./pages/Index"));
+const Auth = lazy(() => import("./pages/Auth"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const Services = lazy(() => import("./pages/Services"));
+const Order = lazy(() => import("./pages/Order"));
+const Settings = lazy(() => import("./pages/Settings"));
+const Support = lazy(() => import("./pages/Support"));
+const ApiAccess = lazy(() => import("./pages/ApiAccess"));
+const EngagementOrderDetail = lazy(() => import("./pages/EngagementOrderDetail"));
 
-// Admin pages
-import Admin from "./pages/admin/Admin";
-import AdminServices from "./pages/admin/AdminServices";
-import AdminUsers from "./pages/admin/AdminUsers";
-import AdminOrders from "./pages/admin/AdminOrders";
-import AdminBundles from "./pages/admin/AdminBundles";
-import AdminCronMonitor from "./pages/admin/AdminCronMonitor";
+const Admin = lazy(() => import("./pages/admin/Admin"));
+const AdminServices = lazy(() => import("./pages/admin/AdminServices"));
+const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
+const AdminOrders = lazy(() => import("./pages/admin/AdminOrders"));
+const AdminBundles = lazy(() => import("./pages/admin/AdminBundles"));
+const AdminCronMonitor = lazy(() => import("./pages/admin/AdminCronMonitor"));
+const AdminChat = lazy(() => import("./pages/admin/AdminChat"));
+const AdminDeposits = lazy(() => import("./pages/admin/AdminDeposits"));
+const AdminProviderAccounts = lazy(() => import("./pages/admin/AdminProviderAccounts"));
+const AdminServiceProviderMapping = lazy(() => import("./pages/admin/AdminServiceProviderMapping"));
+const AdminSubscriptions = lazy(() => import("./pages/admin/AdminSubscriptions"));
 
-import AdminChat from "./pages/admin/AdminChat";
-import AdminDeposits from "./pages/admin/AdminDeposits";
-import AdminProviderAccounts from "./pages/admin/AdminProviderAccounts";
-import AdminServiceProviderMapping from "./pages/admin/AdminServiceProviderMapping";
-import AdminSubscriptions from "./pages/admin/AdminSubscriptions";
-
-// Legal pages
-import TermsOfService from "./pages/legal/TermsOfService";
-import PrivacyPolicy from "./pages/legal/PrivacyPolicy";
-import RefundPolicy from "./pages/legal/RefundPolicy";
-import CookiePolicy from "./pages/legal/CookiePolicy";
-import ContactUs from "./pages/legal/ContactUs";
-import AboutUs from "./pages/legal/AboutUs";
-import ShippingPolicy from "./pages/legal/ShippingPolicy";
+const TermsOfService = lazy(() => import("./pages/legal/TermsOfService"));
+const PrivacyPolicy = lazy(() => import("./pages/legal/PrivacyPolicy"));
+const RefundPolicy = lazy(() => import("./pages/legal/RefundPolicy"));
+const CookiePolicy = lazy(() => import("./pages/legal/CookiePolicy"));
+const ContactUs = lazy(() => import("./pages/legal/ContactUs"));
+const AboutUs = lazy(() => import("./pages/legal/AboutUs"));
+const ShippingPolicy = lazy(() => import("./pages/legal/ShippingPolicy"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000,       // 5 min — use cache, don't refetch
-      gcTime: 15 * 60 * 1000,          // 15 min cache retention
-      refetchOnWindowFocus: false,      // Don't refetch on tab switch
-      refetchOnReconnect: false,        // Don't refetch on reconnect
-      refetchOnMount: false,            // Use cached data on navigation
+      staleTime: 10 * 60 * 1000,      // 10 min — use cache, don't refetch
+      gcTime: 30 * 60 * 1000,          // 30 min cache retention
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+      refetchOnMount: false,
       retry: 2,
       retryDelay: (i) => Math.min(1000 * 2 ** i, 10000),
     },
@@ -100,7 +95,7 @@ const App = () => {
             <AppErrorBoundary>
               <BrowserRouter>
                 <ScrollToTop />
-                
+                <Suspense fallback={null}>
                   <Routes>
                     {/* User pages */}
                     <Route path="/" element={<Index />} />
@@ -119,7 +114,6 @@ const App = () => {
                     <Route path="/engagement-order" element={<EngagementOrder />} />
                     <Route path="/engagement-orders" element={<EngagementOrders />} />
                     <Route path="/engagement-orders/:orderNumber" element={<EngagementOrderDetail />} />
-                    
 
                     {/* Admin — server-verified guard */}
                     <Route path="/admin" element={<AdminGuard><Admin /></AdminGuard>} />
@@ -143,7 +137,7 @@ const App = () => {
                     <Route path="/about" element={<AboutUs />} />
                     <Route path="/shipping" element={<ShippingPolicy />} />
                   </Routes>
-                
+                </Suspense>
               </BrowserRouter>
             </AppErrorBoundary>
           </TooltipProvider>

@@ -465,6 +465,7 @@ export type Database = {
         Row: {
           base_quantity: number
           bundle_id: string | null
+          campaign_name: string | null
           completed_at: string | null
           created_at: string | null
           current_botting_percent: number | null
@@ -485,6 +486,7 @@ export type Database = {
         Insert: {
           base_quantity: number
           bundle_id?: string | null
+          campaign_name?: string | null
           completed_at?: string | null
           created_at?: string | null
           current_botting_percent?: number | null
@@ -505,6 +507,7 @@ export type Database = {
         Update: {
           base_quantity?: number
           bundle_id?: string | null
+          campaign_name?: string | null
           completed_at?: string | null
           created_at?: string | null
           current_botting_percent?: number | null

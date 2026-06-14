@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useCallback, memo } from "react";
+import { useState, useMemo, useEffect, useCallback, memo, lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,11 +16,18 @@ import { cn } from "@/lib/utils";
 import { PlatformSelector } from "@/components/engagement/PlatformSelector";
 import { QuantitySelector } from "@/components/engagement/QuantitySelector";
 import { EngagementTypeCard } from "@/components/engagement/EngagementTypeCard";
-import { DeliveryPreview } from "@/components/engagement/DeliveryPreview";
-import { LiveGrowthChart } from "@/components/engagement/LiveGrowthChart";
 import { DrawableGrowthChart } from "@/components/engagement/DrawableGrowthChart";
 import { AIEngagementChat } from "@/components/engagement/AIEngagementChat";
 import { PreOrderRatioWarning } from "@/components/engagement/PreOrderRatioWarning";
+
+// Heavy preview components — lazy-loaded behind the "Show delivery preview" toggle
+const LiveGrowthChart = lazy(() =>
+  import("@/components/engagement/LiveGrowthChart").then((m) => ({ default: m.LiveGrowthChart }))
+);
+const DeliveryPreview = lazy(() =>
+  import("@/components/engagement/DeliveryPreview").then((m) => ({ default: m.DeliveryPreview }))
+);
+
 import {
   EngagementType,
   EngagementConfig,
@@ -36,7 +43,7 @@ import {
   curveToSchedule,
   calculateQuantitiesFromCurve,
 } from "@/lib/curve-to-schedule";
-import { Loader2, Rocket, Link as LinkIcon, Wallet, RefreshCw, Brain, Percent } from "lucide-react";
+import { Loader2, Rocket, Link as LinkIcon, Wallet, RefreshCw, Brain, Percent, Eye, EyeOff, Megaphone } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { useDebounce } from "@/hooks/useDebounce";
 import { FullOrganicConfig } from "@/lib/organic-algorithm";
@@ -66,6 +73,8 @@ export default function EngagementOrder() {
   // Form State
   const [platform, setPlatform] = useState('instagram');
   const [link, setLink] = useState('');
+  const [campaignName, setCampaignName] = useState('');
+  const [showPreview, setShowPreview] = useState(false);
   const [baseQuantity, setBaseQuantity] = useState(10000);
   // Debounce base quantity for expensive recalculations
   const debouncedBaseQuantity = useDebounce(baseQuantity, 200);
@@ -513,6 +522,7 @@ export default function EngagementOrder() {
           user_id: user.id,
           bundle_id: bundle?.id,
           link: link.trim(),
+          campaign_name: campaignName.trim() || null,
           base_quantity: baseQuantity,
           total_price: totalPrice,
           is_organic_mode: isOrganicMode,
@@ -869,6 +879,19 @@ export default function EngagementOrder() {
               onChange={(e) => setLink(e.target.value)}
               className="h-12 sm:h-14 text-base sm:text-lg rounded-xl border-2 border-border focus:border-foreground bg-secondary text-foreground font-medium placeholder:text-muted-foreground transition-all"
             />
+            <div className="mt-3 sm:mt-4">
+              <Label className="text-xs sm:text-sm font-semibold text-muted-foreground flex items-center gap-1.5 mb-2">
+                <Megaphone className="h-3.5 w-3.5" />
+                Campaign Name <span className="font-normal opacity-60">(optional)</span>
+              </Label>
+              <Input
+                placeholder="e.g. Diwali Reel Campaign"
+                value={campaignName}
+                onChange={(e) => setCampaignName(e.target.value.slice(0, 120))}
+                maxLength={120}
+                className="h-10 sm:h-11 rounded-xl border-2 border-border focus:border-foreground bg-secondary text-foreground placeholder:text-muted-foreground"
+              />
+            </div>
           </CardContent>
         </Card>
 
@@ -929,25 +952,43 @@ export default function EngagementOrder() {
           />
         )}
 
-        {/* Live Growth Chart - Real-time visualization (shown when not drawing) */}
-        {!drawModeState.isEnabled && activeEngagementTypes.length > 0 && (
-          <LiveGrowthChart
-            engagements={engagements as Record<EngagementType, EngagementConfig>}
-            refreshKey={previewRefreshKey}
-            onRefresh={() => setPreviewRefreshKey(k => k + 1)}
-            platform={platform as 'instagram' | 'tiktok' | 'youtube' | 'twitter' | 'facebook'}
-          />
+        {/* Heavy delivery previews — opt-in to keep initial render snappy */}
+        {activeEngagementTypes.length > 0 && (
+          <div className="flex justify-center">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setShowPreview((v) => !v)}
+              className="rounded-full"
+            >
+              {showPreview ? <EyeOff className="h-4 w-4 mr-2" /> : <Eye className="h-4 w-4 mr-2" />}
+              {showPreview ? 'Hide delivery preview' : 'Show delivery preview'}
+            </Button>
+          </div>
         )}
 
-        {/* Delivery Timeline Preview - Detailed schedule */}
-        {activeEngagementTypes.length > 0 && (
-          <DeliveryPreview
-            engagements={engagements as Record<EngagementType, EngagementConfig>}
-            refreshKey={previewRefreshKey}
-            platform={platform as 'instagram' | 'tiktok' | 'youtube' | 'twitter' | 'facebook'}
-            customCurvePoints={drawModeState.isEnabled ? drawModeState.points : undefined}
-            onScheduleChange={handleScheduleChange}
-          />
+        {showPreview && !drawModeState.isEnabled && activeEngagementTypes.length > 0 && (
+          <Suspense fallback={<div className="text-center text-xs text-muted-foreground py-4">Loading chart…</div>}>
+            <LiveGrowthChart
+              engagements={engagements as Record<EngagementType, EngagementConfig>}
+              refreshKey={previewRefreshKey}
+              onRefresh={() => setPreviewRefreshKey(k => k + 1)}
+              platform={platform as 'instagram' | 'tiktok' | 'youtube' | 'twitter' | 'facebook'}
+            />
+          </Suspense>
+        )}
+
+        {showPreview && activeEngagementTypes.length > 0 && (
+          <Suspense fallback={<div className="text-center text-xs text-muted-foreground py-4">Loading timeline…</div>}>
+            <DeliveryPreview
+              engagements={engagements as Record<EngagementType, EngagementConfig>}
+              refreshKey={previewRefreshKey}
+              platform={platform as 'instagram' | 'tiktok' | 'youtube' | 'twitter' | 'facebook'}
+              customCurvePoints={drawModeState.isEnabled ? drawModeState.points : undefined}
+              onScheduleChange={handleScheduleChange}
+            />
+          </Suspense>
         )}
 
         {/* Organic engagement ratio / botting % warning */}
