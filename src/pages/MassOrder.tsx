@@ -6,6 +6,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useCurrency } from "@/hooks/useCurrency";
 import { useGlobalMarkup } from "@/hooks/useGlobalMarkup";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { useSubscription } from "@/hooks/useSubscription";
+import { SubscriptionCheckDialog } from "@/components/subscription/SubscriptionCheckDialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
