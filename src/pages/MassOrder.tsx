@@ -1012,6 +1012,7 @@ export default function MassOrder() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <SubscriptionCheckDialog open={showSubDialog} onOpenChange={setShowSubDialog} />
     </DashboardLayout>
   );
 }
