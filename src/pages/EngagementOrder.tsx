@@ -1047,6 +1047,7 @@ export default function EngagementOrder() {
         </Card>
       </div>
 
+      <SubscriptionCheckDialog open={showSubDialog} onOpenChange={setShowSubDialog} />
     </DashboardLayout>
   );
 }
