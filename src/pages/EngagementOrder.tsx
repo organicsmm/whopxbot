@@ -73,7 +73,6 @@ export default function EngagementOrder() {
   // Form State
   const [platform, setPlatform] = useState('instagram');
   const [link, setLink] = useState('');
-  const [campaignName, setCampaignName] = useState('');
   const [showPreview, setShowPreview] = useState(false);
   const [baseQuantity, setBaseQuantity] = useState(10000);
   // Debounce base quantity for expensive recalculations
