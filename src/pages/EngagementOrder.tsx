@@ -43,7 +43,7 @@ import {
   curveToSchedule,
   calculateQuantitiesFromCurve,
 } from "@/lib/curve-to-schedule";
-import { Loader2, Rocket, Link as LinkIcon, Wallet, RefreshCw, Brain, Percent, Eye, EyeOff, Megaphone } from "lucide-react";
+import { Loader2, Rocket, Link as LinkIcon, Wallet, RefreshCw, Brain, Percent, Eye, EyeOff } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { useDebounce } from "@/hooks/useDebounce";
 import { FullOrganicConfig } from "@/lib/organic-algorithm";
@@ -73,7 +73,6 @@ export default function EngagementOrder() {
   // Form State
   const [platform, setPlatform] = useState('instagram');
   const [link, setLink] = useState('');
-  const [campaignName, setCampaignName] = useState('');
   const [showPreview, setShowPreview] = useState(false);
   const [baseQuantity, setBaseQuantity] = useState(10000);
   // Debounce base quantity for expensive recalculations
@@ -522,7 +521,6 @@ export default function EngagementOrder() {
           user_id: user.id,
           bundle_id: bundle?.id,
           link: link.trim(),
-          campaign_name: campaignName.trim() || null,
           base_quantity: baseQuantity,
           total_price: totalPrice,
           is_organic_mode: isOrganicMode,
@@ -879,19 +877,6 @@ export default function EngagementOrder() {
               onChange={(e) => setLink(e.target.value)}
               className="h-12 sm:h-14 text-base sm:text-lg rounded-xl border-2 border-border focus:border-foreground bg-secondary text-foreground font-medium placeholder:text-muted-foreground transition-all"
             />
-            <div className="mt-3 sm:mt-4">
-              <Label className="text-xs sm:text-sm font-semibold text-muted-foreground flex items-center gap-1.5 mb-2">
-                <Megaphone className="h-3.5 w-3.5" />
-                Campaign Name <span className="font-normal opacity-60">(optional)</span>
-              </Label>
-              <Input
-                placeholder="e.g. Diwali Reel Campaign"
-                value={campaignName}
-                onChange={(e) => setCampaignName(e.target.value.slice(0, 120))}
-                maxLength={120}
-                className="h-10 sm:h-11 rounded-xl border-2 border-border focus:border-foreground bg-secondary text-foreground placeholder:text-muted-foreground"
-              />
-            </div>
           </CardContent>
         </Card>
 
