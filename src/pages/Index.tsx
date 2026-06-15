@@ -30,7 +30,7 @@ const Index = () => {
   return (
     <div className="min-h-screen w-full overflow-x-hidden" style={{ background: C.bg, color: C.ink, fontFamily: "'Inter', system-ui, sans-serif" }}>
       <PageMeta
-        title="OrganicSMM Pro — Organic Social Media Growth Platform"
+        title="Grinzo — Organic Social Media Growth Platform"
         description="Revolutionary organic social media growth with natural delivery patterns. 100% safe for your accounts."
         canonicalPath="/"
         breadcrumbs={[{ name: 'Home', path: '/' }]}
@@ -52,11 +52,11 @@ const Index = () => {
             <div className="relative">
               <div className="absolute -inset-1 rounded-2xl opacity-60 blur-md transition-opacity group-hover:opacity-90"
                 style={{ background: `linear-gradient(135deg, ${C.orange}, #86EFAC)` }} />
-              <img src={logo} alt="OrganicSMM Pro" className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-xl object-cover bg-white"
+              <img src={logo} alt="Grinzo" className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-xl object-cover bg-white"
                 style={{ border: '1.5px solid white', boxShadow: C.soft }} />
             </div>
             <div className="flex items-center gap-2 leading-none">
-              <span className="text-[15px] sm:text-[16px] font-extrabold tracking-tight" style={{ color: C.ink }}>OrganicSMM Pro</span>
+              <span className="text-[15px] sm:text-[16px] font-extrabold tracking-tight" style={{ color: C.ink }}>Grinzo</span>
               <span className="hidden sm:inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-[0.14em] px-1.5 py-[3px] rounded-md"
                 style={{ background: C.peach, color: C.orangeDeep }}>v2.0</span>
             </div>
@@ -214,7 +214,7 @@ const Index = () => {
                 <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: '#DCFCE7' }}>
                   <CheckCircle2 className="w-4.5 h-4.5" style={{ color: '#16A34A', width: 18, height: 18 }} />
                 </div>
-                <span className="text-[15px] font-bold" style={{ color: C.ink }}>OrganicSMM Pro</span>
+                <span className="text-[15px] font-bold" style={{ color: C.ink }}>Grinzo</span>
               </div>
               <div className="space-y-3">
                 {[
@@ -413,7 +413,7 @@ const Index = () => {
             <div className="col-span-2 sm:col-span-1">
               <div className="flex items-center gap-2.5 mb-4">
                 <img src={logo} alt="" className="w-9 h-9 rounded-xl object-cover" style={{ border: `1px solid ${C.line}` }} />
-                <span className="text-[15px] font-bold" style={{ color: C.ink }}>OrganicSMM Pro</span>
+                <span className="text-[15px] font-bold" style={{ color: C.ink }}>Grinzo</span>
               </div>
               <p className="text-[13px] leading-relaxed" style={{ color: C.muted }}>
                 Revolutionary organic social media growth platform with natural delivery patterns.
@@ -455,10 +455,10 @@ const Index = () => {
                     <l.icon className="w-3 h-3 flex-shrink-0" /> {l.label}
                   </Link>
                 ))}
-                <a href="mailto:support@organicsmm.online" className="block text-[12px] mt-2" style={{ color: C.muted }}>support@organicsmm.online</a>
+                <a href="mailto:support@grinzo.app" className="block text-[12px] mt-2" style={{ color: C.muted }}>support@grinzo.app</a>
                 <a href="tel:+13678288027" className="block text-[12px]" style={{ color: C.muted }}>+1 (367) 828-8027</a>
                 <p className="text-[12px] leading-relaxed mt-2" style={{ color: C.muted }}>
-                  OrganicSMM Pro LLC<br />
+                  Grinzo LLC<br />
                   8 The Green, Suite #14490<br />
                   Dover, DE 19901<br />
                   United States
@@ -468,7 +468,7 @@ const Index = () => {
           </div>
 
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6" style={{ borderTop: `1px solid ${C.line}` }}>
-            <p className="text-[12px]" style={{ color: C.muted }}>© {new Date().getFullYear()} OrganicSMM Pro LLC — Dover, Delaware, USA. All rights reserved.</p>
+            <p className="text-[12px]" style={{ color: C.muted }}>© {new Date().getFullYear()} Grinzo LLC — Dover, Delaware, USA. All rights reserved.</p>
             <div className="flex items-center gap-5 text-[12px] font-medium" style={{ color: C.muted }}>
               <span className="flex items-center gap-1"><Shield className="w-3 h-3" style={{ color: '#10b981' }} /> SSL Secured</span>
               <span className="flex items-center gap-1"><Zap className="w-3 h-3" style={{ color: C.orange }} /> 99.9% Uptime</span>

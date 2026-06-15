@@ -1,5 +1,5 @@
 import { Send, MessageCircle, Wallet as WalletIcon, Clock, ShieldCheck } from 'lucide-react';
-import supportAvatar from '@/assets/organicsmm-logo.jpg.asset.json';
+import supportAvatar from '@/assets/logo.png';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -12,7 +12,7 @@ const WHATSAPP_NUMBER = '255637520201'; // +255 637 520 201
 function buildSupportMessage(email?: string) {
   return (
     `Hi! 👋\n\n` +
-    `Mujhe apne Organic SMM wallet me funds add karne hain.\n` +
+    `Mujhe apne Grinzo wallet me funds add karne hain.\n` +
     (email ? `My account email: ${email}\n` : '') +
     `\nPlease help me with the payment process. 🙏`
   );
@@ -119,7 +119,7 @@ export default function RazorpayDepositCard() {
                 }}
               >
                 <img
-                  src={supportAvatar.url}
+                  src={supportAvatar}
                   alt="Support"
                   className="w-full h-full object-cover"
                   loading="lazy"

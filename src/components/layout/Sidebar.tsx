@@ -36,9 +36,9 @@ export function Sidebar({ onClose }: SidebarProps) {
       {/* Logo */}
       <div className="flex items-center justify-between px-5 pt-4 pb-3">
         <Link to="/" className="flex items-center gap-2.5">
-          <img src={logo} alt="OrganicSMM Pro" className="w-9 h-9 rounded-xl object-cover shadow-sm" />
+          <img src={logo} alt="Grinzo" className="w-9 h-9 rounded-xl object-cover shadow-sm" />
           <div className="flex flex-col">
-            <span className="text-[15px] font-bold tracking-tight leading-tight" style={{ color: '#1a1a2e' }}>OrganicSMM Pro</span>
+            <span className="text-[15px] font-bold tracking-tight leading-tight" style={{ color: '#1a1a2e' }}>Grinzo</span>
             <span className="text-[9px] font-semibold uppercase tracking-[0.15em] leading-tight" style={{ background: 'linear-gradient(90deg, #16a34a, #f97316)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>✦ Updated Version</span>
           </div>
         </Link>

@@ -1,11 +1,11 @@
 {
-    "name": "OrganicSMM",
-    "short_name": "Whopautopilot",
-    "description": "Premium High-Growth Social Media Terminal",
+    "name": "Grinzo",
+    "short_name": "Grinzo",
+    "description": "Grinzo — Organic social media growth platform with AI-powered natural delivery.",
     "start_url": "/",
     "display": "fullscreen",
-    "background_color": "#0a0a0c",
-    "theme_color": "#0a0a0c",
+    "background_color": "#ffffff",
+    "theme_color": "#16A34A",
     "orientation": "portrait",
     "icons": [
         {
