@@ -1,5 +1,5 @@
 import { Send, MessageCircle, Wallet as WalletIcon, Clock, ShieldCheck } from 'lucide-react';
-import supportAvatar from '@/assets/grinzo-logo.jpg.asset.json';
+import supportAvatar from '@/assets/logo.png';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 
