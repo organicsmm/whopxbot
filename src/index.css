@@ -19,45 +19,45 @@ input[type="number"] {
 
 @layer base {
   :root {
-    /* ════ CLEAN LIGHT PINK THEME ════ */
-    --background: 30 20% 98%;
-    --foreground: 240 20% 12%;
+    /* ════ TERRACOTTA & SAGE — Warm, Human, Natural ════ */
+    --background: 36 38% 97%;
+    --foreground: 140 20% 14%;
 
     --card: 0 0% 100%;
-    --card-foreground: 240 20% 12%;
+    --card-foreground: 140 20% 14%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 240 20% 12%;
+    --popover-foreground: 140 20% 14%;
 
-    --primary: 142 71% 45%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 100 18% 35%;
+    --primary-foreground: 36 38% 97%;
 
-    --secondary: 30 15% 95%;
-    --secondary-foreground: 240 20% 12%;
+    --secondary: 36 30% 94%;
+    --secondary-foreground: 140 20% 14%;
 
-    --muted: 30 15% 95%;
-    --muted-foreground: 240 5% 50%;
+    --muted: 36 25% 93%;
+    --muted-foreground: 140 8% 42%;
 
-    --accent: 142 71% 45%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 22 70% 70%;
+    --accent-foreground: 140 30% 14%;
 
-    --success: 160 60% 42%;
+    --success: 100 25% 42%;
     --success-foreground: 0 0% 100%;
 
-    --warning: 38 92% 50%;
+    --warning: 22 70% 60%;
     --warning-foreground: 0 0% 100%;
 
-    --destructive: 0 72% 55%;
+    --destructive: 0 65% 52%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 30 10% 90%;
-    --input: 30 10% 90%;
-    --ring: 142 71% 45%;
+    --border: 30 20% 88%;
+    --input: 30 20% 88%;
+    --ring: 100 18% 35%;
 
     --radius: 1rem;
 
-    --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.04);
-    --shadow-glow: 0 0 30px rgba(22,163,74, 0.08);
+    --shadow-soft: 0 4px 20px rgba(74, 103, 65, 0.06);
+    --shadow-glow: 0 0 30px rgba(232, 168, 124, 0.12);
   }
 }
 
