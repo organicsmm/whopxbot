@@ -4,19 +4,19 @@ import { ArrowRight, TrendingUp, Zap, Shield, BarChart3, CheckCircle2, Shuffle, 
 import logo from '@/assets/logo.jpg';
 import { PageMeta } from '@/components/seo/PageMeta';
 
-// Brand palette — clean light + soft orange
+// Brand palette — warm terracotta + sage
 const C = {
-  bg: '#FAFAF7',
-  ink: '#0B0B12',
-  ink2: '#5B5B6B',
-  muted: '#8A8A99',
-  line: 'rgba(11,11,18,.07)',
+  bg: '#FAF8F5',
+  ink: '#2A2418',
+  ink2: '#5B5448',
+  muted: '#8A8378',
+  line: 'rgba(42,36,24,.08)',
   card: '#FFFFFF',
-  orange: '#4A6741',
-  orangeDeep: '#15803D',
-  peach: '#E8F8EE',
-  soft: '0 1px 2px rgba(11,11,18,.04), 0 8px 24px rgba(11,11,18,.05)',
-  softLg: '0 2px 4px rgba(11,11,18,.04), 0 24px 60px rgba(22,163,74,.10)',
+  orange: '#C97A52',
+  orangeDeep: '#4A6741',
+  peach: '#F3EDE2',
+  soft: '0 1px 2px rgba(42,36,24,.04), 0 8px 24px rgba(42,36,24,.06)',
+  softLg: '0 2px 4px rgba(42,36,24,.05), 0 24px 60px rgba(74,103,65,.12)',
 };
 
 const Pill: React.FC<{ children: React.ReactNode }> = ({ children }) => (
