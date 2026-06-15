@@ -53,7 +53,7 @@ export default function Dashboard() {
   });
 
   const statusColor: Record<string, string> = {
-    completed: '#22c55e', processing: '#3b82f6', pending: '#f59e0b', failed: '#ef4444', paused: '#f59e0b',
+    completed: '#87a878', processing: '#3b82f6', pending: '#f59e0b', failed: '#ef4444', paused: '#f59e0b',
   };
 
   const typeIcon: Record<string, any> = { views: Eye, likes: Heart, comments: MessageCircle };
@@ -76,7 +76,7 @@ export default function Dashboard() {
           </div>
           <div className="flex gap-2">
             <button onClick={() => navigate('/engagement-order')} className="h-10 px-4 rounded-lg text-[12px] font-semibold flex items-center gap-1.5" style={{ border: '1px solid rgba(0,0,0,.08)', color: '#555' }}>
-              <Sparkles className="w-3.5 h-3.5" style={{ color: '#9333ea' }} /> Engagement
+              <Sparkles className="w-3.5 h-3.5" style={{ color: '#c97a52' }} /> Engagement
             </button>
             <button onClick={() => navigate('/order')} className="h-10 px-4 rounded-lg text-[12px] font-semibold text-white flex items-center gap-1.5" style={{ background: '#1a1a2e' }}>
               <Zap className="w-3.5 h-3.5" /> New Order
@@ -87,10 +87,10 @@ export default function Dashboard() {
         {/* Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[
-            { icon: Wallet, label: 'Balance', value: formatPrice(wallet?.balance || 0), sub: 'Available funds', accent: '#22c55e' },
+            { icon: Wallet, label: 'Balance', value: formatPrice(wallet?.balance || 0), sub: 'Available funds', accent: '#87a878' },
             { icon: ShoppingCart, label: 'Total Orders', value: stats?.totalOrders || 0, sub: `${stats?.completedOrders || 0} completed`, accent: '#3b82f6' },
             { icon: Activity, label: 'Active', value: stats?.activeOrders || 0, sub: 'In progress', accent: '#f59e0b' },
-            { icon: TrendingUp, label: 'Total Spent', value: formatPrice(stats?.totalSpent || 0), sub: 'All time', accent: '#9333ea' },
+            { icon: TrendingUp, label: 'Total Spent', value: formatPrice(stats?.totalSpent || 0), sub: 'All time', accent: '#c97a52' },
           ].map((s, i) => (
             <div key={i} className="rounded-xl p-5" style={cardStyle}>
               <div className="w-9 h-9 rounded-lg flex items-center justify-center mb-3" style={{ background: s.accent + '12', color: s.accent }}>
@@ -108,10 +108,10 @@ export default function Dashboard() {
           <div className="lg:col-span-3 rounded-xl overflow-hidden" style={cardStyle}>
             <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: '1px solid rgba(0,0,0,.06)' }}>
               <div className="flex items-center gap-2">
-                <BarChart3 className="w-4 h-4" style={{ color: '#9333ea' }} />
+                <BarChart3 className="w-4 h-4" style={{ color: '#c97a52' }} />
                 <h2 className="text-[14px] font-bold" style={{ color: '#1a1a2e' }}>Engagement Orders</h2>
               </div>
-              <Link to="/engagement-orders" className="text-[11px] font-medium flex items-center gap-0.5" style={{ color: '#9333ea' }}>
+              <Link to="/engagement-orders" className="text-[11px] font-medium flex items-center gap-0.5" style={{ color: '#c97a52' }}>
                 View all <ChevronRight className="w-3 h-3" />
               </Link>
             </div>
@@ -149,7 +149,7 @@ export default function Dashboard() {
                 <Package className="w-4 h-4" style={{ color: '#888' }} />
                 <h2 className="text-[14px] font-bold" style={{ color: '#1a1a2e' }}>Single Orders</h2>
               </div>
-              <Link to="/orders" className="text-[11px] font-medium flex items-center gap-0.5" style={{ color: '#9333ea' }}>
+              <Link to="/orders" className="text-[11px] font-medium flex items-center gap-0.5" style={{ color: '#c97a52' }}>
                 View all <ChevronRight className="w-3 h-3" />
               </Link>
             </div>
@@ -175,8 +175,8 @@ export default function Dashboard() {
         {/* Quick actions */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {[
-            { icon: Sparkles, label: 'Full Engagement', desc: 'Views + Likes + Comments', path: '/engagement-order', accent: '#9333ea' },
-            { icon: Wallet, label: 'Add Funds', desc: 'Deposit to wallet', path: '/wallet', accent: '#22c55e' },
+            { icon: Sparkles, label: 'Full Engagement', desc: 'Views + Likes + Comments', path: '/engagement-order', accent: '#c97a52' },
+            { icon: Wallet, label: 'Add Funds', desc: 'Deposit to wallet', path: '/wallet', accent: '#87a878' },
             { icon: Package, label: 'All Services', desc: 'Browse catalog', path: '/services', accent: '#3b82f6' },
           ].map((a, i) => (
             <Link key={i} to={a.path} className="group flex items-center gap-3.5 p-4 rounded-xl transition-all hover:-translate-y-0.5" style={cardStyle}>

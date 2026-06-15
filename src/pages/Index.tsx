@@ -12,7 +12,7 @@ const C = {
   muted: '#8A8A99',
   line: 'rgba(11,11,18,.07)',
   card: '#FFFFFF',
-  orange: '#16A34A',
+  orange: '#4A6741',
   orangeDeep: '#15803D',
   peach: '#E8F8EE',
   soft: '0 1px 2px rgba(11,11,18,.04), 0 8px 24px rgba(11,11,18,.05)',
@@ -51,7 +51,7 @@ const Index = () => {
           <Link to="/" className="flex items-center gap-2.5 group">
             <div className="relative">
               <div className="absolute -inset-1 rounded-2xl opacity-60 blur-md transition-opacity group-hover:opacity-90"
-                style={{ background: `linear-gradient(135deg, ${C.orange}, #86EFAC)` }} />
+                style={{ background: `linear-gradient(135deg, ${C.orange}, #cdddc4)` }} />
               <img src={logo} alt="Grinzo" className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-xl object-cover bg-white"
                 style={{ border: '1.5px solid white', boxShadow: C.soft }} />
             </div>
@@ -126,7 +126,7 @@ const Index = () => {
 
           <div className="flex items-center justify-center gap-x-5 gap-y-2 flex-wrap text-[12px] sm:text-[13px] font-medium" style={{ color: C.muted }}>
             {['No credit card', 'All features included', 'Setup in seconds'].map((t) => (
-              <span key={t} className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5" style={{ color: '#10b981' }} /> {t}</span>
+              <span key={t} className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5" style={{ color: '#5e8a5c' }} /> {t}</span>
             ))}
           </div>
 
@@ -207,12 +207,12 @@ const Index = () => {
               </div>
             </div>
             {/* Us */}
-            <div className="p-6 sm:p-9 relative" style={{ background: 'linear-gradient(180deg, #F1FCF4, #FFFFFF)' }}>
+            <div className="p-6 sm:p-9 relative" style={{ background: 'linear-gradient(180deg, #faf8f5, #FFFFFF)' }}>
               <span className="absolute top-5 right-5 text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-md"
                 style={{ background: C.orange, color: 'white' }}>This panel</span>
               <div className="flex items-center gap-2.5 mb-5">
                 <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: '#DCFCE7' }}>
-                  <CheckCircle2 className="w-4.5 h-4.5" style={{ color: '#16A34A', width: 18, height: 18 }} />
+                  <CheckCircle2 className="w-4.5 h-4.5" style={{ color: '#4A6741', width: 18, height: 18 }} />
                 </div>
                 <span className="text-[15px] font-bold" style={{ color: C.ink }}>Grinzo</span>
               </div>
@@ -224,7 +224,7 @@ const Index = () => {
                   '100% safe, zero bans reported',
                 ].map((t) => (
                   <div key={t} className="flex items-start gap-2.5">
-                    <div className="w-1.5 h-1.5 rounded-full mt-2 flex-shrink-0" style={{ background: '#16A34A' }} />
+                    <div className="w-1.5 h-1.5 rounded-full mt-2 flex-shrink-0" style={{ background: '#4A6741' }} />
                     <span className="text-[13px] leading-relaxed" style={{ color: C.ink2 }}>{t}</span>
                   </div>
                 ))}
@@ -331,7 +331,7 @@ const Index = () => {
             {/* Lifetime — Featured */}
             <div className="rounded-3xl p-7 sm:p-8 flex flex-col relative"
               style={{
-                background: `linear-gradient(180deg, #F1FCF4 0%, #FFFFFF 100%)`,
+                background: `linear-gradient(180deg, #faf8f5 0%, #FFFFFF 100%)`,
                 border: `2px solid ${C.orange}`,
                 boxShadow: C.softLg,
               }}>
@@ -388,12 +388,12 @@ const Index = () => {
 
           <div className="relative">
             <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-widest mb-5"
-              style={{ background: 'rgba(255,255,255,.1)', color: '#86EFAC', border: '1px solid rgba(134,239,172,.2)' }}>
+              style={{ background: 'rgba(255,255,255,.1)', color: '#cdddc4', border: '1px solid rgba(134,239,172,.2)' }}>
               <Sparkles className="w-3 h-3" /> Free to start
             </span>
             <h2 className="text-[1.85rem] sm:text-4xl lg:text-[2.75rem] font-extrabold tracking-tight mb-4 text-white"
               style={{ fontFamily: "'Outfit', system-ui" }}>
-              Ready to grow <span style={{ background: `linear-gradient(135deg, ${C.orange}, #86EFAC)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>organically</span>?
+              Ready to grow <span style={{ background: `linear-gradient(135deg, ${C.orange}, #cdddc4)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>organically</span>?
             </h2>
             <p className="text-[14.5px] sm:text-[16px] mb-8 max-w-md mx-auto" style={{ color: 'rgba(255,255,255,.7)' }}>
               Join thousands of creators using our organic delivery system. No credit card required.
@@ -470,7 +470,7 @@ const Index = () => {
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6" style={{ borderTop: `1px solid ${C.line}` }}>
             <p className="text-[12px]" style={{ color: C.muted }}>© {new Date().getFullYear()} Grinzo LLC — Dover, Delaware, USA. All rights reserved.</p>
             <div className="flex items-center gap-5 text-[12px] font-medium" style={{ color: C.muted }}>
-              <span className="flex items-center gap-1"><Shield className="w-3 h-3" style={{ color: '#10b981' }} /> SSL Secured</span>
+              <span className="flex items-center gap-1"><Shield className="w-3 h-3" style={{ color: '#5e8a5c' }} /> SSL Secured</span>
               <span className="flex items-center gap-1"><Zap className="w-3 h-3" style={{ color: C.orange }} /> 99.9% Uptime</span>
             </div>
           </div>

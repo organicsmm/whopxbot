@@ -24,9 +24,9 @@ export default function Wallet() {
 
   const getIcon = (type: string) => {
     switch (type) {
-      case 'deposit': return <ArrowDownLeft className="h-4 w-4" style={{ color: '#10b981' }} />;
+      case 'deposit': return <ArrowDownLeft className="h-4 w-4" style={{ color: '#5e8a5c' }} />;
       case 'order': return <ArrowUpRight className="h-4 w-4" style={{ color: '#ef4444' }} />;
-      case 'refund': return <RefreshCw className="h-4 w-4" style={{ color: '#16a34a' }} />;
+      case 'refund': return <RefreshCw className="h-4 w-4" style={{ color: '#4a6741' }} />;
       default: return <WalletIcon className="h-4 w-4" style={{ color: '#999' }} />;
     }
   };
@@ -42,9 +42,9 @@ export default function Wallet() {
 
   const getAmountColor = (type: string) => {
     switch (type) {
-      case 'deposit': return '#10b981';
+      case 'deposit': return '#5e8a5c';
       case 'order': return '#ef4444';
-      case 'refund': return '#16a34a';
+      case 'refund': return '#4a6741';
       default: return '#1a1a2e';
     }
   };
@@ -218,7 +218,7 @@ export default function Wallet() {
                   onClick={() => setFilter(f)}
                   className="px-3 py-1.5 rounded-lg text-[12px] font-medium transition-all"
                   style={{
-                    background: filter === f ? '#16a34a' : 'transparent',
+                    background: filter === f ? '#4a6741' : 'transparent',
                     color: filter === f ? 'white' : '#888',
                   }}
                 >
@@ -254,7 +254,7 @@ export default function Wallet() {
                           className="text-[9px] font-semibold px-1.5 py-0.5 rounded"
                           style={{
                             background: tx.status === 'pending' ? 'rgba(245,158,11,.1)' : tx.status === 'completed' ? 'rgba(16,185,129,.1)' : 'rgba(239,68,68,.1)',
-                            color: tx.status === 'pending' ? '#f59e0b' : tx.status === 'completed' ? '#10b981' : '#ef4444',
+                            color: tx.status === 'pending' ? '#f59e0b' : tx.status === 'completed' ? '#5e8a5c' : '#ef4444',
                           }}
                         >
                           {tx.status}
@@ -266,7 +266,7 @@ export default function Wallet() {
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-[11px] flex items-center gap-0.5 hover:underline"
-                            style={{ color: '#16a34a' }}
+                            style={{ color: '#4a6741' }}
                           >
                             BSCScan <ExternalLink className="h-3 w-3" />
                           </a>
@@ -291,7 +291,7 @@ export default function Wallet() {
           ) : (
             <div className="text-center py-12">
               <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: 'rgba(22, 163, 74,.08)' }}>
-                <WalletIcon className="h-6 w-6" style={{ color: '#16a34a' }} />
+                <WalletIcon className="h-6 w-6" style={{ color: '#4a6741' }} />
               </div>
               <p className="font-medium text-[14px]" style={{ color: '#666' }}>No transactions yet</p>
               <p className="text-[12px] mt-1" style={{ color: '#bbb' }}>Your deposits and spending history will appear here.</p>

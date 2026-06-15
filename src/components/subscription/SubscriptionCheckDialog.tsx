@@ -47,8 +47,8 @@ export function SubscriptionCheckDialog({ open, onOpenChange }: SubscriptionChec
             </DialogDescription>
           </DialogHeader>
 
-          <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-[#9b87f5]/10 border border-[#9b87f5]/20">
-            <Sparkles className="h-4 w-4 text-[#9b87f5] shrink-0" />
+          <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-[#e8a87c]/10 border border-[#e8a87c]/20">
+            <Sparkles className="h-4 w-4 text-[#e8a87c] shrink-0" />
             <p className="text-sm font-semibold text-foreground/80">
               🚀 High-performance Organic Growth for Serious Builders.
             </p>

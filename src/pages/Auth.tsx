@@ -94,7 +94,7 @@ export default function Auth() {
   const inputClass = "h-12 rounded-xl border-[#e5e5e5] bg-white focus:border-[#1a1a2e] focus:ring-1 focus:ring-[#1a1a2e] text-[#1a1a2e] font-medium px-4 placeholder:text-[#bbb] transition-all";
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-6 py-12" style={{ background: 'linear-gradient(180deg, #fff 0%, #f0fdf4 50%, #dcfce7 100%)' }}>
+    <div className="min-h-screen flex items-center justify-center px-6 py-12" style={{ background: 'linear-gradient(180deg, #fff 0%, #f3ede2 50%, #e2dcc7 100%)' }}>
       <PageMeta
         title={isLogin ? 'Sign in — Grinzo' : 'Create your account — Grinzo'}
         description="Sign in or create your free Grinzo account to launch organic Instagram, YouTube and TikTok growth campaigns. No credit card required."
@@ -106,7 +106,7 @@ export default function Auth() {
             <img src={logo} alt="Grinzo" className="w-10 h-10 rounded-xl object-cover shadow-sm" />
             <div className="flex flex-col">
               <span className="text-[16px] font-bold tracking-tight" style={{ color: '#1a1a2e' }}>Grinzo</span>
-              <span className="text-[9px] font-semibold uppercase tracking-[0.15em]" style={{ background: 'linear-gradient(90deg, #16a34a, #f97316)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>✦ Updated Version</span>
+              <span className="text-[9px] font-semibold uppercase tracking-[0.15em]" style={{ background: 'linear-gradient(90deg, #4a6741, #f97316)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>✦ Updated Version</span>
             </div>
           </div>
 
@@ -123,13 +123,13 @@ export default function Auth() {
 
           {showVerifyEmail ? (
             <div className="text-center py-8">
-              <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6" style={{ background: '#f0fdf4' }}>
-                <Mail className="w-7 h-7" style={{ color: '#22c55e' }} />
+              <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6" style={{ background: '#f3ede2' }}>
+                <Mail className="w-7 h-7" style={{ color: '#87a878' }} />
               </div>
               <h3 className="text-xl font-bold mb-2" style={{ color: '#1a1a2e' }}>Check your inbox</h3>
               <p className="text-[13px] mb-2" style={{ color: '#888' }}>Verification link sent to:</p>
               <p className="text-[13px] font-semibold mb-6" style={{ color: '#1a1a2e' }}>{email}</p>
-              <button onClick={() => { setShowVerifyEmail(false); setIsLogin(true); }} className="text-[13px] font-semibold" style={{ color: '#9333ea' }}>
+              <button onClick={() => { setShowVerifyEmail(false); setIsLogin(true); }} className="text-[13px] font-semibold" style={{ color: '#c97a52' }}>
                 ← Back to login
               </button>
             </div>
@@ -142,7 +142,7 @@ export default function Auth() {
                     <Input type="email" placeholder="name@example.com" value={email} onChange={e => setEmail(e.target.value)} className={inputClass} />
                   </div>
                   {error && <p className="text-[13px] font-medium" style={{ color: '#ef4444' }}>{error}</p>}
-                  {successMessage && <p className="text-[13px] font-medium" style={{ color: '#22c55e' }}>{successMessage}</p>}
+                  {successMessage && <p className="text-[13px] font-medium" style={{ color: '#87a878' }}>{successMessage}</p>}
                   <button type="submit" disabled={isSubmitting} className="w-full h-11 rounded-xl text-[13px] font-semibold text-white flex items-center justify-center gap-2" style={{ background: '#1a1a2e' }}>
                     {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <>Send reset link <ArrowRight className="w-3.5 h-3.5" /></>}
                   </button>
@@ -166,7 +166,7 @@ export default function Auth() {
                     <div className="flex items-center justify-between mb-1.5">
                       <Label className="text-[12px] font-semibold" style={{ color: '#555', textTransform: 'none', letterSpacing: 'normal' }}>Password</Label>
                       {isLogin && (
-                        <button type="button" onClick={() => setIsForgotPassword(true)} className="text-[11px] font-medium" style={{ color: '#9333ea' }}>
+                        <button type="button" onClick={() => setIsForgotPassword(true)} className="text-[11px] font-medium" style={{ color: '#c97a52' }}>
                           Forgot password?
                         </button>
                       )}
@@ -180,7 +180,7 @@ export default function Auth() {
                   </div>
 
                   {error && <p className="text-[13px] font-medium" style={{ color: '#ef4444' }}>{error}</p>}
-                  {successMessage && <p className="text-[13px] font-medium" style={{ color: '#22c55e' }}>{successMessage}</p>}
+                  {successMessage && <p className="text-[13px] font-medium" style={{ color: '#87a878' }}>{successMessage}</p>}
 
                   <button type="submit" disabled={isSubmitting} className="w-full h-11 rounded-xl text-[13px] font-semibold text-white flex items-center justify-center gap-2 disabled:opacity-70" style={{ background: '#1a1a2e' }}>
                     {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <>{isLogin ? 'Sign in' : 'Create account'} <ArrowRight className="w-3.5 h-3.5" /></>}
@@ -188,7 +188,7 @@ export default function Auth() {
 
                   <p className="text-center text-[13px]" style={{ color: '#999' }}>
                     {isLogin ? "Don't have an account? " : 'Already have an account? '}
-                    <button type="button" onClick={() => { setIsLogin(!isLogin); setError(''); setSuccessMessage(''); }} className="font-semibold" style={{ color: '#9333ea' }}>
+                    <button type="button" onClick={() => { setIsLogin(!isLogin); setError(''); setSuccessMessage(''); }} className="font-semibold" style={{ color: '#c97a52' }}>
                       {isLogin ? 'Sign up' : 'Sign in'}
                     </button>
                   </p>
