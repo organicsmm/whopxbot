@@ -96,16 +96,16 @@ export default function Auth() {
   return (
     <div className="min-h-screen flex items-center justify-center px-6 py-12" style={{ background: 'linear-gradient(180deg, #fff 0%, #f0fdf4 50%, #dcfce7 100%)' }}>
       <PageMeta
-        title={isLogin ? 'Sign in — OrganicSMM Pro' : 'Create your account — OrganicSMM Pro'}
-        description="Sign in or create your free OrganicSMM Pro account to launch organic Instagram, YouTube and TikTok growth campaigns. No credit card required."
+        title={isLogin ? 'Sign in — Grinzo' : 'Create your account — Grinzo'}
+        description="Sign in or create your free Grinzo account to launch organic Instagram, YouTube and TikTok growth campaigns. No credit card required."
         canonicalPath="/auth"
       />
       <div className="w-full max-w-[400px]">
           {/* Logo */}
           <div className="flex items-center justify-center gap-2.5 mb-10">
-            <img src={logo} alt="OrganicSMM Pro" className="w-10 h-10 rounded-xl object-cover shadow-sm" />
+            <img src={logo} alt="Grinzo" className="w-10 h-10 rounded-xl object-cover shadow-sm" />
             <div className="flex flex-col">
-              <span className="text-[16px] font-bold tracking-tight" style={{ color: '#1a1a2e' }}>OrganicSMM Pro</span>
+              <span className="text-[16px] font-bold tracking-tight" style={{ color: '#1a1a2e' }}>Grinzo</span>
               <span className="text-[9px] font-semibold uppercase tracking-[0.15em]" style={{ background: 'linear-gradient(90deg, #16a34a, #f97316)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>✦ Updated Version</span>
             </div>
           </div>
@@ -198,7 +198,7 @@ export default function Auth() {
           )}
 
           {/* Telegram */}
-          <a href="https://t.me/organicsmm" target="_blank" rel="noopener noreferrer" className="mt-8 flex items-center gap-3 p-3.5 rounded-xl transition-colors" style={{ border: '1px solid rgba(0,0,0,.06)', background: 'white' }}>
+          <a href="https://t.me/grinzo" target="_blank" rel="noopener noreferrer" className="mt-8 flex items-center gap-3 p-3.5 rounded-xl transition-colors" style={{ border: '1px solid rgba(0,0,0,.06)', background: 'white' }}>
             <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: '#0088cc15' }}>
               <svg className="w-4 h-4 fill-[#0088cc]" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.11.02-1.93 1.23-5.46 3.62-.51.35-.98.53-1.39.52-.46-.01-1.33-.26-1.98-.48-.8-.27-1.43-.42-1.37-.89.03-.25.38-.51 1.03-.78 4.04-1.76 6.74-2.92 8.09-3.48 3.85-1.61.8-1.88 1.77-1.88.21 0 .69.05.99.23.32.19.43.46.46.72.02.16.01.32-.01.48z" /></svg>
             </div>

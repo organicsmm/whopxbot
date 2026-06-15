@@ -1,5 +1,5 @@
-# OrganicSMM — robots.txt
-# Site:    https://organicsmm.online
+# Grinzo — robots.txt
+# Site:    https://grinzo.app
 # Updated: 2026-05-05
 
 # ───────────────────────────── Default rule ─────────────────────────────
@@ -98,5 +98,5 @@ User-agent: DotBot
 Disallow: /
 
 # ───────────────────────────── Sitemap & host ─────────────────────────────
-Sitemap: https://organicsmm.online/sitemap.xml
-Host: https://organicsmm.online
+Sitemap: https://grinzo.app/sitemap.xml
+Host: https://grinzo.app
