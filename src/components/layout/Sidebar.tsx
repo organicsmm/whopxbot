@@ -82,7 +82,7 @@ export function Sidebar({ onClose }: SidebarProps) {
           return (
             <Link key={item.path} to={item.path} onClick={onClose}
               className={cn('flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] font-medium mb-0.5 transition-all duration-150',
-                isActive ? 'font-semibold' : 'hover:bg-green-50/60'
+                isActive ? 'font-semibold' : 'hover:bg-stone-100/60'
               )}
               style={{
                 background: isActive ? '#f3ede2' : 'transparent',
