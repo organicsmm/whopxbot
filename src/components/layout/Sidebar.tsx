@@ -39,7 +39,7 @@ export function Sidebar({ onClose }: SidebarProps) {
           <img src={logo} alt="Grinzo" className="w-9 h-9 rounded-xl object-cover shadow-sm" />
           <div className="flex flex-col">
             <span className="text-[15px] font-bold tracking-tight leading-tight" style={{ color: '#1a1a2e' }}>Grinzo</span>
-            <span className="text-[9px] font-semibold uppercase tracking-[0.15em] leading-tight" style={{ background: 'linear-gradient(90deg, #16a34a, #f97316)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>✦ Updated Version</span>
+            <span className="text-[9px] font-semibold uppercase tracking-[0.15em] leading-tight" style={{ background: 'linear-gradient(90deg, #4a6741, #e8a87c)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>✦ Updated Version</span>
           </div>
         </Link>
         <button onClick={onClose} className="lg:hidden w-8 h-8 flex items-center justify-center rounded-lg" style={{ color: '#ccc' }}>
@@ -49,8 +49,8 @@ export function Sidebar({ onClose }: SidebarProps) {
 
       {/* User info */}
       {profile && (
-        <div className="mx-4 mb-3 flex items-center gap-2.5 px-3 py-2.5 rounded-xl" style={{ background: '#f0fdf4', border: '1px solid #dcfce7' }}>
-          <div className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold text-white shrink-0" style={{ background: '#16a34a' }}>
+        <div className="mx-4 mb-3 flex items-center gap-2.5 px-3 py-2.5 rounded-xl" style={{ background: '#f3ede2', border: '1px solid #e2dcc7' }}>
+          <div className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold text-white shrink-0" style={{ background: '#4a6741' }}>
             {profile.full_name?.[0]?.toUpperCase() || 'U'}
           </div>
           <div className="min-w-0 flex-1">
@@ -62,13 +62,13 @@ export function Sidebar({ onClose }: SidebarProps) {
 
       {/* Wallet */}
       <div className="mx-4 mb-4">
-        <div className="rounded-xl p-4" style={{ background: 'linear-gradient(135deg, #f0fdf4, #dcfce7)', border: '1px solid #dcfce7' }}>
+        <div className="rounded-xl p-4" style={{ background: 'linear-gradient(135deg, #f3ede2, #e2dcc7)', border: '1px solid #e2dcc7' }}>
           <div className="flex items-center gap-1.5 mb-1.5">
-            <Wallet className="w-3 h-3" style={{ color: '#16a34a' }} />
-            <span className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: '#16a34a' }}>Wallet Balance</span>
+            <Wallet className="w-3 h-3" style={{ color: '#4a6741' }} />
+            <span className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: '#4a6741' }}>Wallet Balance</span>
           </div>
           <p className="text-[22px] font-extrabold tracking-tight mb-3" style={{ color: '#1a1a2e' }}>{formatPrice(wallet?.balance || 0)}</p>
-          <Link to="/wallet" onClick={onClose} className="flex items-center justify-center gap-1.5 w-full h-8 rounded-lg text-[11px] font-semibold text-white" style={{ background: '#16a34a' }}>
+          <Link to="/wallet" onClick={onClose} className="flex items-center justify-center gap-1.5 w-full h-8 rounded-lg text-[11px] font-semibold text-white" style={{ background: '#4a6741' }}>
             <Wallet className="w-3 h-3" /> Add Funds
           </Link>
         </div>
@@ -82,18 +82,18 @@ export function Sidebar({ onClose }: SidebarProps) {
           return (
             <Link key={item.path} to={item.path} onClick={onClose}
               className={cn('flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] font-medium mb-0.5 transition-all duration-150',
-                isActive ? 'font-semibold' : 'hover:bg-green-50/60'
+                isActive ? 'font-semibold' : 'hover:bg-stone-100/60'
               )}
               style={{
-                background: isActive ? '#f0fdf4' : 'transparent',
-                color: isActive ? '#166534' : '#666',
-                border: isActive ? '1px solid #dcfce7' : '1px solid transparent',
+                background: isActive ? '#f3ede2' : 'transparent',
+                color: isActive ? '#3d5a3d' : '#666',
+                border: isActive ? '1px solid #e2dcc7' : '1px solid transparent',
               }}
             >
-              <item.icon className="w-4 h-4" style={{ color: isActive ? '#16a34a' : '#bbb' }} />
+              <item.icon className="w-4 h-4" style={{ color: isActive ? '#4a6741' : '#bbb' }} />
               <span className="flex-1">{item.label}</span>
               {(item as any).highlight && !isActive && (
-                <span className="text-[8px] px-1.5 py-0.5 rounded-full font-bold" style={{ background: '#dcfce7', color: '#16a34a' }}>HOT</span>
+                <span className="text-[8px] px-1.5 py-0.5 rounded-full font-bold" style={{ background: '#e2dcc7', color: '#4a6741' }}>HOT</span>
               )}
             </Link>
           );
