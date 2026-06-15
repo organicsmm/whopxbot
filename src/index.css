@@ -165,7 +165,7 @@ html {
   }
 
   .glow-neon {
-    box-shadow: 0 0 16px rgba(22,163,74, 0.08);
+    box-shadow: 0 0 16px rgba(232,168,124, 0.14);
   }
 
   /* Chrome autofill fix */
@@ -173,8 +173,8 @@ html {
   input:-webkit-autofill:hover,
   input:-webkit-autofill:focus,
   input:-webkit-autofill:active {
-    -webkit-box-shadow: 0 0 0 100px hsl(30 20% 98%) inset !important;
-    -webkit-text-fill-color: hsl(240 20% 12%) !important;
+    -webkit-box-shadow: 0 0 0 100px hsl(36 38% 97%) inset !important;
+    -webkit-text-fill-color: hsl(140 20% 14%) !important;
     transition: background-color 5000s ease-in-out 0s;
   }
 }
