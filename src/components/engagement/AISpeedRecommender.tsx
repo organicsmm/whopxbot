@@ -51,7 +51,7 @@ export function AISpeedRecommender({ link, platform, types, totalQuantity, onApp
   };
 
   const safety = rec?.safety_score || 0;
-  const safetyColor = safety >= 80 ? "#16a34a" : safety >= 60 ? "#f59e0b" : "#ef4444";
+  const safetyColor = safety >= 80 ? "#4a6741" : safety >= 60 ? "#f59e0b" : "#ef4444";
 
   return (
     <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (o) askAI(); }}>
@@ -60,7 +60,7 @@ export function AISpeedRecommender({ link, platform, types, totalQuantity, onApp
           type="button"
           variant="outline"
           size="sm"
-          className="gap-1.5 border-purple-300 bg-purple-50 text-purple-700 hover:bg-purple-100"
+          className="gap-1.5 border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100"
         >
           <Brain className="w-3.5 h-3.5" />
           Ask AI for best speed
@@ -69,7 +69,7 @@ export function AISpeedRecommender({ link, platform, types, totalQuantity, onApp
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-purple-600" />
+            <Sparkles className="w-4 h-4 text-amber-700" />
             AI Speed Recommender
           </DialogTitle>
           <DialogDescription className="text-xs">
@@ -79,7 +79,7 @@ export function AISpeedRecommender({ link, platform, types, totalQuantity, onApp
 
         {loading && (
           <div className="flex items-center justify-center py-8 gap-2 text-sm text-muted-foreground">
-            <Loader2 className="w-5 h-5 animate-spin text-purple-600" />
+            <Loader2 className="w-5 h-5 animate-spin text-amber-700" />
             Analyzing your post…
           </div>
         )}
@@ -128,7 +128,7 @@ export function AISpeedRecommender({ link, platform, types, totalQuantity, onApp
             {onApply && (
               <Button
                 onClick={() => { onApply(rec); setOpen(false); toast({ title: "Recommendation applied" }); }}
-                className="w-full bg-purple-600 hover:bg-purple-700"
+                className="w-full bg-amber-700 hover:bg-amber-800"
                 size="sm"
               >
                 <ShieldCheck className="w-3.5 h-3.5 mr-1.5" /> Apply this plan

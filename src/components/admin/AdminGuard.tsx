@@ -48,7 +48,7 @@ export function AdminGuard({ children }: AdminGuardProps) {
 
   if (isLoading || verified === null) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #f0fdf4 0%, #dcfce7 40%, #bbf7d0 70%, #f0fdf4 100%)' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #f3ede2 0%, #e2dcc7 40%, #cdddc4 70%, #f3ede2 100%)' }}>
         <Loader2 className="w-8 h-8 animate-spin text-green-500" />
       </div>
     );
@@ -58,7 +58,7 @@ export function AdminGuard({ children }: AdminGuardProps) {
 
   if (!verified) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #f0fdf4 0%, #dcfce7 40%, #bbf7d0 70%, #f0fdf4 100%)' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #f3ede2 0%, #e2dcc7 40%, #cdddc4 70%, #f3ede2 100%)' }}>
         <div className="text-center p-8 bg-white/80 rounded-2xl shadow-lg max-w-md">
           <ShieldAlert className="w-16 h-16 text-red-500 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Access Denied</h2>
