@@ -119,7 +119,7 @@ export default function RazorpayDepositCard() {
                 }}
               >
                 <img
-                  src={supportAvatar.url}
+                  src={supportAvatar}
                   alt="Support"
                   className="w-full h-full object-cover"
                   loading="lazy"
