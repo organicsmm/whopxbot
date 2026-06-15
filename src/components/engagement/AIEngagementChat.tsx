@@ -129,7 +129,7 @@ export function AIEngagementChat({ link, platform, engagements, totalQuantity }:
           type="button"
           variant="outline"
           size="sm"
-          className="gap-1.5 border-purple-300 bg-purple-50 text-purple-700 hover:bg-purple-100"
+          className="gap-1.5 border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100"
         >
           <Brain className="w-3.5 h-3.5" />
           Ask AI
@@ -138,7 +138,7 @@ export function AIEngagementChat({ link, platform, engagements, totalQuantity }:
       <DialogContent className="max-w-lg p-0 overflow-hidden">
         <DialogHeader className="px-4 pt-4 pb-2 border-b">
           <DialogTitle className="flex items-center gap-2 text-base">
-            <Sparkles className="w-4 h-4 text-purple-600" />
+            <Sparkles className="w-4 h-4 text-amber-700" />
             Organic AI Assistant
           </DialogTitle>
           <DialogDescription className="text-xs">
@@ -189,7 +189,7 @@ export function AIEngagementChat({ link, platform, engagements, totalQuantity }:
             <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
               <div className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm ${
                 m.role === "user"
-                  ? "bg-purple-600 text-white rounded-br-sm"
+                  ? "bg-amber-700 text-white rounded-br-sm"
                   : "bg-muted text-foreground rounded-bl-sm"
               }`}>
                 <div className="prose prose-sm max-w-none prose-p:my-1 prose-strong:text-current">
@@ -215,7 +215,7 @@ export function AIEngagementChat({ link, platform, engagements, totalQuantity }:
                 key={q}
                 onClick={() => send(q)}
                 disabled={loading}
-                className="text-[11px] px-2 py-1 rounded-full border border-purple-200 bg-purple-50 text-purple-700 hover:bg-purple-100 disabled:opacity-50"
+                className="text-[11px] px-2 py-1 rounded-full border border-amber-200 bg-amber-50 text-amber-800 hover:bg-amber-100 disabled:opacity-50"
               >
                 {q}
               </button>
@@ -236,7 +236,7 @@ export function AIEngagementChat({ link, platform, engagements, totalQuantity }:
             disabled={loading}
             className="h-9"
           />
-          <Button type="submit" size="sm" disabled={loading || !input.trim()} className="bg-purple-600 hover:bg-purple-700">
+          <Button type="submit" size="sm" disabled={loading || !input.trim()} className="bg-amber-700 hover:bg-amber-800">
             <Send className="w-4 h-4" />
           </Button>
         </form>
