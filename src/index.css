@@ -104,19 +104,14 @@ html {
 
   .glass-card {
     @apply relative overflow-hidden rounded-2xl border;
-    background: rgba(255,255,255,.85);
-    border-color: rgba(22,163,74,.12);
-    box-shadow: 0 4px 20px rgba(22,163,74,.06), 0 1px 3px rgba(0,0,0,.04);
+    background: rgba(255,255,255,.88);
+    border-color: rgba(74,103,65,.14);
+    box-shadow: 0 4px 20px rgba(74,103,65,.06), 0 1px 3px rgba(0,0,0,.04);
     backdrop-filter: blur(8px);
   }
 
-  .three-d-card {
-    @apply glass-card;
-  }
-
-  .glass-premium {
-    @apply glass-card;
-  }
+  .three-d-card { @apply glass-card; }
+  .glass-premium { @apply glass-card; }
 
   .glass-panel {
     @apply rounded-2xl bg-card border border-border;
@@ -125,25 +120,23 @@ html {
 
   .gradient-text {
     @apply bg-clip-text text-transparent font-extrabold;
-    background-image: linear-gradient(135deg, hsl(142 71% 45%), hsl(142 65% 55%));
+    background-image: linear-gradient(135deg, hsl(100 22% 38%), hsl(22 70% 65%));
   }
 
   /* ════ BUTTONS ════ */
   .btn-3d {
     @apply relative overflow-hidden font-bold rounded-xl flex items-center justify-center transition-all duration-200;
-    background: linear-gradient(135deg, hsl(142 71% 45%), hsl(142 71% 38%));
+    background: linear-gradient(135deg, hsl(100 22% 38%), hsl(100 22% 30%));
     color: white;
-    box-shadow: 0 4px 16px rgba(22,163,74, 0.2);
+    box-shadow: 0 4px 16px rgba(74,103,65, 0.22);
   }
 
   .btn-3d:hover {
     transform: translateY(-1px);
-    box-shadow: 0 6px 24px rgba(22,163,74, 0.3);
+    box-shadow: 0 6px 24px rgba(74,103,65, 0.3);
   }
 
-  .btn-3d:active {
-    transform: translateY(0);
-  }
+  .btn-3d:active { transform: translateY(0); }
 
   .btn-glass {
     @apply relative overflow-hidden font-bold rounded-xl bg-secondary text-foreground border border-border transition-all duration-200;
