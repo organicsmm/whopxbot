@@ -28,7 +28,7 @@ const TYPE_COLORS: Record<string, string> = {
   shares: '#e8a87c',
   followers: '#818cf8',
   subscribers: '#f87171',
-  watch_hours: '#fb923c',
+  watch_hours: '#e8a87c',
   retweets: '#2dd4bf',
   reposts: '#a4c19c',
 };

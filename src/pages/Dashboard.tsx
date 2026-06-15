@@ -70,7 +70,7 @@ export default function Dashboard() {
             <p className="text-[12px] font-medium mb-0.5" style={{ color: '#999' }}>
               Good {new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 18 ? 'afternoon' : 'evening'},
             </p>
-            <h1 className="text-2xl font-extrabold tracking-tight" style={{ color: '#1a1a2e', fontFamily: "'Outfit', system-ui, sans-serif" }}>
+            <h1 className="text-2xl font-extrabold tracking-tight" style={{ color: '#2a2418', fontFamily: "'Outfit', system-ui, sans-serif" }}>
               {profile?.full_name || 'User'}
             </h1>
           </div>
@@ -78,7 +78,7 @@ export default function Dashboard() {
             <button onClick={() => navigate('/engagement-order')} className="h-10 px-4 rounded-lg text-[12px] font-semibold flex items-center gap-1.5" style={{ border: '1px solid rgba(0,0,0,.08)', color: '#555' }}>
               <Sparkles className="w-3.5 h-3.5" style={{ color: '#c97a52' }} /> Engagement
             </button>
-            <button onClick={() => navigate('/order')} className="h-10 px-4 rounded-lg text-[12px] font-semibold text-white flex items-center gap-1.5" style={{ background: '#1a1a2e' }}>
+            <button onClick={() => navigate('/order')} className="h-10 px-4 rounded-lg text-[12px] font-semibold text-white flex items-center gap-1.5" style={{ background: '#2a2418' }}>
               <Zap className="w-3.5 h-3.5" /> New Order
             </button>
           </div>
@@ -97,7 +97,7 @@ export default function Dashboard() {
                 <s.icon className="w-4 h-4" />
               </div>
               <p className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: '#aaa' }}>{s.label}</p>
-              <p className="text-2xl font-extrabold tracking-tight" style={{ color: '#1a1a2e' }}>{s.value}</p>
+              <p className="text-2xl font-extrabold tracking-tight" style={{ color: '#2a2418' }}>{s.value}</p>
               <p className="text-[11px] mt-1" style={{ color: '#bbb' }}>{s.sub}</p>
             </div>
           ))}
@@ -109,7 +109,7 @@ export default function Dashboard() {
             <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: '1px solid rgba(0,0,0,.06)' }}>
               <div className="flex items-center gap-2">
                 <BarChart3 className="w-4 h-4" style={{ color: '#c97a52' }} />
-                <h2 className="text-[14px] font-bold" style={{ color: '#1a1a2e' }}>Engagement Orders</h2>
+                <h2 className="text-[14px] font-bold" style={{ color: '#2a2418' }}>Engagement Orders</h2>
               </div>
               <Link to="/engagement-orders" className="text-[11px] font-medium flex items-center gap-0.5" style={{ color: '#c97a52' }}>
                 View all <ChevronRight className="w-3 h-3" />
@@ -123,7 +123,7 @@ export default function Dashboard() {
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="w-8 h-8 rounded-lg flex items-center justify-center text-[10px] font-mono" style={{ background: '#f5f5f3', color: '#888' }}>#{order.order_number}</div>
                     <div className="min-w-0">
-                      <p className="text-[13px] font-medium truncate max-w-[200px]" style={{ color: '#1a1a2e' }}>{order.link?.replace('https://', '').slice(0, 35)}...</p>
+                      <p className="text-[13px] font-medium truncate max-w-[200px]" style={{ color: '#2a2418' }}>{order.link?.replace('https://', '').slice(0, 35)}...</p>
                       <div className="flex items-center gap-2 mt-0.5">
                         {order.items?.slice(0, 3).map((item: any, idx: number) => {
                           const Icon = typeIcon[item.engagement_type] || Eye;
@@ -137,7 +137,7 @@ export default function Dashboard() {
               )) : (
                 <div className="px-5 py-12 text-center">
                   <p className="text-[13px] mb-3" style={{ color: '#999' }}>No engagement orders yet</p>
-                  <button onClick={() => navigate('/engagement-order')} className="text-[12px] font-semibold px-4 py-2 rounded-lg text-white" style={{ background: '#1a1a2e' }}>Create First Order</button>
+                  <button onClick={() => navigate('/engagement-order')} className="text-[12px] font-semibold px-4 py-2 rounded-lg text-white" style={{ background: '#2a2418' }}>Create First Order</button>
                 </div>
               )}
             </div>
@@ -147,7 +147,7 @@ export default function Dashboard() {
             <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: '1px solid rgba(0,0,0,.06)' }}>
               <div className="flex items-center gap-2">
                 <Package className="w-4 h-4" style={{ color: '#888' }} />
-                <h2 className="text-[14px] font-bold" style={{ color: '#1a1a2e' }}>Single Orders</h2>
+                <h2 className="text-[14px] font-bold" style={{ color: '#2a2418' }}>Single Orders</h2>
               </div>
               <Link to="/orders" className="text-[11px] font-medium flex items-center gap-0.5" style={{ color: '#c97a52' }}>
                 View all <ChevronRight className="w-3 h-3" />
@@ -157,7 +157,7 @@ export default function Dashboard() {
               {recentOrders && recentOrders.length > 0 ? recentOrders.slice(0, 4).map((order: any) => (
                 <div key={order.id} className="flex items-center justify-between px-5 py-3.5" style={{ borderBottom: '1px solid rgba(0,0,0,.04)' }}>
                   <div className="min-w-0">
-                    <p className="text-[13px] font-medium truncate max-w-[150px]" style={{ color: '#1a1a2e' }}>{order.service?.name || 'Service'}</p>
+                    <p className="text-[13px] font-medium truncate max-w-[150px]" style={{ color: '#2a2418' }}>{order.service?.name || 'Service'}</p>
                     <p className="text-[11px] mt-0.5" style={{ color: '#999' }}>{order.quantity?.toLocaleString()} • {formatPrice(Number(order.price))}</p>
                   </div>
                   <span className="text-[10px] font-semibold px-2 py-1 rounded-md" style={{ background: (statusColor[order.status] || '#999') + '14', color: statusColor[order.status] || '#999' }}>{order.status}</span>
@@ -165,7 +165,7 @@ export default function Dashboard() {
               )) : (
                 <div className="px-5 py-12 text-center">
                   <p className="text-[13px] mb-3" style={{ color: '#999' }}>No orders yet</p>
-                  <button onClick={() => navigate('/order')} className="text-[12px] font-semibold px-4 py-2 rounded-lg text-white" style={{ background: '#1a1a2e' }}>Place Order</button>
+                  <button onClick={() => navigate('/order')} className="text-[12px] font-semibold px-4 py-2 rounded-lg text-white" style={{ background: '#2a2418' }}>Place Order</button>
                 </div>
               )}
             </div>
@@ -184,7 +184,7 @@ export default function Dashboard() {
                 <a.icon className="w-4.5 h-4.5" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[13px] font-semibold" style={{ color: '#1a1a2e' }}>{a.label}</p>
+                <p className="text-[13px] font-semibold" style={{ color: '#2a2418' }}>{a.label}</p>
                 <p className="text-[11px]" style={{ color: '#999' }}>{a.desc}</p>
               </div>
               <ArrowUpRight className="w-4 h-4 shrink-0" style={{ color: '#ccc' }} />

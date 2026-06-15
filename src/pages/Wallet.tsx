@@ -45,7 +45,7 @@ export default function Wallet() {
       case 'deposit': return '#5e8a5c';
       case 'order': return '#ef4444';
       case 'refund': return '#4a6741';
-      default: return '#1a1a2e';
+      default: return '#2a2418';
     }
   };
 
@@ -103,7 +103,7 @@ export default function Wallet() {
     <DashboardLayout>
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-bold" style={{ color: '#1a1a2e' }}>Wallet</h1>
+          <h1 className="text-2xl font-bold" style={{ color: '#2a2418' }}>Wallet</h1>
           <p className="text-[13px] mt-1" style={{ color: '#999' }}>Manage your balance and transactions.</p>
         </div>
 
@@ -112,7 +112,7 @@ export default function Wallet() {
           className="relative overflow-hidden rounded-[28px] p-6 md:p-8 text-white"
           style={{
             background:
-              'linear-gradient(135deg, #ff7a18 0%, #ea580c 45%, #c2410c 100%)',
+              'linear-gradient(135deg, #c97a52 0%, #b56a3f 45%, #c2410c 100%)',
             boxShadow:
               '0 20px 40px -12px rgba(234,88,12,.45), inset 0 1px 0 rgba(255,255,255,.18)',
           }}
@@ -210,7 +210,7 @@ export default function Wallet() {
         {/* Transaction History */}
         <div className="rounded-2xl p-6" style={{ background: 'white', border: '1px solid rgba(0,0,0,.06)', boxShadow: '0 2px 12px rgba(0,0,0,.04)' }}>
           <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
-            <h2 className="text-lg font-bold" style={{ color: '#1a1a2e' }}>Transaction History</h2>
+            <h2 className="text-lg font-bold" style={{ color: '#2a2418' }}>Transaction History</h2>
             <div className="flex gap-1 p-1 rounded-xl" style={{ background: 'rgba(0,0,0,.03)' }}>
               {(['all', 'deposit', 'order', 'refund'] as const).map((f) => (
                 <button
@@ -241,7 +241,7 @@ export default function Wallet() {
                       {getIcon(tx.type)}
                     </div>
                     <div className="min-w-0">
-                      <p className="font-medium text-[13px] leading-tight truncate max-w-[260px]" style={{ color: '#1a1a2e' }}>
+                      <p className="font-medium text-[13px] leading-tight truncate max-w-[260px]" style={{ color: '#2a2418' }}>
                         {tx.displayDescription}
                       </p>
                       <div className="flex items-center flex-wrap gap-x-2 gap-y-0.5 mt-1">

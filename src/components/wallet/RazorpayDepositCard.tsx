@@ -65,7 +65,7 @@ export default function RazorpayDepositCard() {
               <WalletIcon className="h-5 w-5 text-white" />
             </div>
             <div className="flex-1 min-w-0">
-              <h2 className="text-[18px] font-bold" style={{ color: '#1a1a2e' }}>
+              <h2 className="text-[18px] font-bold" style={{ color: '#2a2418' }}>
                 💰 Add Funds — Manual
               </h2>
               <p className="text-[12px] mt-0.5" style={{ color: '#888' }}>

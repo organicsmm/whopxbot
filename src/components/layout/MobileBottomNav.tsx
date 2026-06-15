@@ -15,7 +15,7 @@ export function MobileBottomNav() {
           </button>
           <div className="flex items-center gap-2">
             <img src={logo} alt="Grinzo" className="w-7 h-7 rounded-md object-cover" />
-            <span className="text-[14px] font-bold tracking-tight" style={{ color: '#1a1a2e' }}>Grinzo</span>
+            <span className="text-[14px] font-bold tracking-tight" style={{ color: '#2a2418' }}>Grinzo</span>
           </div>
           <div className="w-9" />
         </div>

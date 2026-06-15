@@ -38,7 +38,7 @@ export function Sidebar({ onClose }: SidebarProps) {
         <Link to="/" className="flex items-center gap-2.5">
           <img src={logo} alt="Grinzo" className="w-9 h-9 rounded-xl object-cover shadow-sm" />
           <div className="flex flex-col">
-            <span className="text-[15px] font-bold tracking-tight leading-tight" style={{ color: '#1a1a2e' }}>Grinzo</span>
+            <span className="text-[15px] font-bold tracking-tight leading-tight" style={{ color: '#2a2418' }}>Grinzo</span>
             <span className="text-[9px] font-semibold uppercase tracking-[0.15em] leading-tight" style={{ background: 'linear-gradient(90deg, #4a6741, #e8a87c)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>✦ Updated Version</span>
           </div>
         </Link>
@@ -54,7 +54,7 @@ export function Sidebar({ onClose }: SidebarProps) {
             {profile.full_name?.[0]?.toUpperCase() || 'U'}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-[12px] font-semibold truncate" style={{ color: '#1a1a2e' }}>{profile.full_name || 'User'}</p>
+            <p className="text-[12px] font-semibold truncate" style={{ color: '#2a2418' }}>{profile.full_name || 'User'}</p>
             <p className="text-[10px] truncate" style={{ color: '#aaa' }}>{profile.email}</p>
           </div>
         </div>
@@ -67,7 +67,7 @@ export function Sidebar({ onClose }: SidebarProps) {
             <Wallet className="w-3 h-3" style={{ color: '#4a6741' }} />
             <span className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: '#4a6741' }}>Wallet Balance</span>
           </div>
-          <p className="text-[22px] font-extrabold tracking-tight mb-3" style={{ color: '#1a1a2e' }}>{formatPrice(wallet?.balance || 0)}</p>
+          <p className="text-[22px] font-extrabold tracking-tight mb-3" style={{ color: '#2a2418' }}>{formatPrice(wallet?.balance || 0)}</p>
           <Link to="/wallet" onClick={onClose} className="flex items-center justify-center gap-1.5 w-full h-8 rounded-lg text-[11px] font-semibold text-white" style={{ background: '#4a6741' }}>
             <Wallet className="w-3 h-3" /> Add Funds
           </Link>
