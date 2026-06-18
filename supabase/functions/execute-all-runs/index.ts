@@ -8,6 +8,19 @@ const corsHeaders = {
 
 const PROJECT_ANON_KEY_FALLBACK = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx2cmJoZ3VseHFkc2FtaGRqemt3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyNDYyNDIsImV4cCI6MjA5NjgyMjI0Mn0._I4OukQ6LlNmTxvPp2yvPat-jiYxOaCEZXGxRl9NqeM'
 
+function isProjectAnonJwt(token: string) {
+  try {
+    const [, payloadPart] = token.split('.')
+    if (!payloadPart) return false
+    const padded = payloadPart.replace(/-/g, '+').replace(/_/g, '/').padEnd(Math.ceil(payloadPart.length / 4) * 4, '=')
+    const payload = JSON.parse(atob(padded))
+    const projectRef = new URL(Deno.env.get('SUPABASE_URL') ?? '').hostname.split('.')[0]
+    return payload?.iss === 'supabase' && payload?.role === 'anon' && payload?.ref === projectRef
+  } catch {
+    return false
+  }
+}
+
 const MAX_RETRIES = 3
 const RETRY_DELAY_MS = 2000
 const MAX_RUN_RETRIES = 9999
@@ -512,7 +525,7 @@ serve(async (req) => {
     const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     const cronSecret = Deno.env.get('CRON_SECRET') ?? ''
     const anonKey = Deno.env.get('SUPABASE_ANON_KEY') || PROJECT_ANON_KEY_FALLBACK
-    const isSystemCall = (serviceKey && token === serviceKey) || (cronSecret && token === cronSecret) || (anonKey && token === anonKey)
+    const isSystemCall = (serviceKey && token === serviceKey) || (cronSecret && token === cronSecret) || (anonKey && token === anonKey) || isProjectAnonJwt(token)
 
     if (!isSystemCall) {
       const { data: { user }, error: authError } = await supabase.auth.getUser(token)
