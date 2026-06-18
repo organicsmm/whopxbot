@@ -90,7 +90,7 @@ class MappingCache {
     if (!this.cache.has(serviceId)) {
       const { data: mappings, error } = await supabase
         .from('service_provider_mapping')
-        .select(`*, provider_account:provider_accounts(*)`)
+        .select(`*, provider_account:provider_accounts!service_provider_mapping_provider_account_id_fkey(*), backup_provider_account:provider_accounts!service_provider_mapping_backup_provider_account_id_fkey(*)`)
         .eq('service_id', serviceId)
         .eq('is_active', true)
         .order('sort_order', { ascending: true })
@@ -107,15 +107,11 @@ class MappingCache {
           return aTime - bTime
         })
         
-        // Fetch each provider-service min_quantity from services table (by provider_service_id + provider_id)
         const providerServiceIds = sorted
-          .map((m: any) => m.provider_service_id)
-          .filter(Boolean)
-        const accountIds = sorted
-          .map((m: any) => m.provider_account?.id)
+          .flatMap((m: any) => [m.provider_service_id, m.backup_provider_service_id])
           .filter(Boolean)
         const minByKey = new Map<string, number>()
-        if (providerServiceIds.length > 0 && accountIds.length > 0) {
+        if (providerServiceIds.length > 0) {
           const { data: providerSvcRows } = await supabase
             .from('services')
             .select('provider_service_id, provider_id, min_quantity')
@@ -128,18 +124,36 @@ class MappingCache {
         }
 
         const accounts: { account: ProviderAccount; providerServiceId: string; minQuantity: number }[] = []
-        for (const mapping of sorted) {
-          const account = mapping.provider_account as ProviderAccount
-          if (account && account.is_active && isValidHttpUrl(account.api_url)) {
-            const legacyKey = `${account.provider_id}:${mapping.provider_service_id}`
-            const serviceKey = `${account.provider_id?.replace(/just$/i, '')}:${mapping.provider_service_id}`
-            accounts.push({
-              account,
-              providerServiceId: mapping.provider_service_id,
-              minQuantity: minByKey.get(legacyKey) || minByKey.get(serviceKey) || 0,
-            })
-          } else if (account && account.is_active && !isValidHttpUrl(account.api_url)) {
+        const pushed = new Set<string>()
+        const pushAccount = (account: ProviderAccount | null | undefined, providerServiceId: string | null | undefined) => {
+          if (!account || !providerServiceId) return
+          if (!account.is_active) return
+          if (!isValidHttpUrl(account.api_url)) {
             console.log(`⚠️ Skipping provider ${account.name}: invalid api_url`)
+            return
+          }
+          const dedupKey = `${account.id}:${providerServiceId}`
+          if (pushed.has(dedupKey)) return
+          pushed.add(dedupKey)
+          const legacyKey = `${account.provider_id}:${providerServiceId}`
+          const serviceKey = `${account.provider_id?.replace(/just$/i, '')}:${providerServiceId}`
+          accounts.push({
+            account,
+            providerServiceId,
+            minQuantity: minByKey.get(legacyKey) || minByKey.get(serviceKey) || 0,
+          })
+        }
+
+        // Primary mappings first
+        for (const mapping of sorted) {
+          pushAccount(mapping.provider_account as ProviderAccount, mapping.provider_service_id)
+        }
+        // Auto-fallback: backup providers appended after primaries
+        for (const mapping of sorted) {
+          const backupAcc = mapping.backup_provider_account as ProviderAccount | undefined
+          const backupSvc = mapping.backup_provider_service_id || mapping.provider_service_id
+          if (backupAcc) {
+            pushAccount(backupAcc, backupSvc)
           }
         }
         this.cache.set(serviceId, accounts)
