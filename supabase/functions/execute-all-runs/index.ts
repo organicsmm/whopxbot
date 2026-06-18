@@ -6,6 +6,19 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 }
 
+function isProjectAnonJwt(token: string) {
+  try {
+    const [, payloadPart] = token.split('.')
+    if (!payloadPart) return false
+    const padded = payloadPart.replace(/-/g, '+').replace(/_/g, '/').padEnd(Math.ceil(payloadPart.length / 4) * 4, '=')
+    const payload = JSON.parse(atob(padded))
+    const projectRef = new URL(Deno.env.get('SUPABASE_URL') ?? '').hostname.split('.')[0]
+    return payload?.iss === 'supabase' && payload?.role === 'anon' && payload?.ref === projectRef
+  } catch {
+    return false
+  }
+}
+
 const MAX_RETRIES = 3
 const RETRY_DELAY_MS = 2000
 const MAX_RUN_RETRIES = 9999
@@ -509,7 +522,7 @@ serve(async (req) => {
     const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     const cronSecret = Deno.env.get('CRON_SECRET') ?? ''
     const anonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? ''
-    const isSystemCall = (serviceKey && token === serviceKey) || (cronSecret && token === cronSecret) || (anonKey && token === anonKey)
+    const isSystemCall = (serviceKey && token === serviceKey) || (cronSecret && token === cronSecret) || (anonKey && token === anonKey) || isProjectAnonJwt(token)
 
     if (!isSystemCall) {
       const { data: { user }, error: authError } = await supabase.auth.getUser(token)
