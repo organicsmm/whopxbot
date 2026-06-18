@@ -1473,14 +1473,36 @@ async function processAllRuns(supabase: any, executionId: string, startTime: num
               continue
             }
 
-            // SKIP immediate verification — let check-order-status handle it
-            // This saves 3-5 seconds per run, roughly doubling throughput
-            verifiedStatus = 'Pending'
-            providerResult = { add: result }
+            const verification = await checkProviderOrderStatusWithRetries({
+              apiUrl: selectedAccount.api_url,
+              apiKey: selectedAccount.api_key,
+              providerOrderId,
+              maxAttempts: 3,
+              attemptDelayMs: 1500,
+            })
+
+            if (!verification.ok) {
+              lastError = `Provider order ${providerOrderId} not verified after add: ${verification.error}`
+              providerResult = { add: result, verification_error: verification.error, verification_raw: verification.rawText }
+              console.log(`⚠️ ${lastError}`)
+              continue
+            }
+
+            const statusResult = verification.data || {}
+            const parsedStartCount = Number.parseInt(statusResult.start_count)
+            const parsedRemains = Number.parseInt(statusResult.remains)
+            const parsedCharge = Number.parseFloat(statusResult.charge)
+
+            verifiedStatus = statusResult.status || 'Pending'
+            verifiedStartCount = Number.isFinite(parsedStartCount) ? parsedStartCount : null
+            verifiedRemains = Number.isFinite(parsedRemains) ? parsedRemains : null
+            verifiedCharge = Number.isFinite(parsedCharge) ? parsedCharge : null
+            verifiedLastStatusCheck = new Date().toISOString()
+            providerResult = { add: result, status: statusResult }
             successAccount = selectedAccount
             success = true
             await updateAccountLastUsed(supabase, selectedAccount.id)
-            console.log(`✅ Run #${run.run_number} placed via ${selectedAccount.name}! Order ID: ${providerOrderId} (status check deferred)`)
+            console.log(`✅ Run #${run.run_number} placed + verified via ${selectedAccount.name}! Order ID: ${providerOrderId}, status: ${verifiedStatus}`)
             break
           }
         } catch (fetchError: any) {
