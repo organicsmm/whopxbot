@@ -201,6 +201,7 @@ async function checkProviderBalance(account: ProviderAccount): Promise<{ hasBala
 
     let result
     try { result = JSON.parse(responseText) } catch {
+      console.log(`⚠️ ${account.name} balance non-JSON response: ${responseText.slice(0, 200)}`)
       return { hasBalance: true, balance: -1 }
     }
 
