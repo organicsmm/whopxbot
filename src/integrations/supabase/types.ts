@@ -1123,6 +1123,8 @@ export type Database = {
       }
       service_provider_mapping: {
         Row: {
+          backup_provider_account_id: string | null
+          backup_provider_service_id: string | null
           created_at: string | null
           id: string
           is_active: boolean | null
@@ -1132,6 +1134,8 @@ export type Database = {
           sort_order: number | null
         }
         Insert: {
+          backup_provider_account_id?: string | null
+          backup_provider_service_id?: string | null
           created_at?: string | null
           id?: string
           is_active?: boolean | null
@@ -1141,6 +1145,8 @@ export type Database = {
           sort_order?: number | null
         }
         Update: {
+          backup_provider_account_id?: string | null
+          backup_provider_service_id?: string | null
           created_at?: string | null
           id?: string
           is_active?: boolean | null
@@ -1150,6 +1156,13 @@ export type Database = {
           sort_order?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "service_provider_mapping_backup_provider_account_id_fkey"
+            columns: ["backup_provider_account_id"]
+            isOneToOne: false
+            referencedRelation: "provider_accounts"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "service_provider_mapping_provider_account_id_fkey"
             columns: ["provider_account_id"]
