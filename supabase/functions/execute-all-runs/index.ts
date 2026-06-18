@@ -970,18 +970,24 @@ async function processAllRuns(supabase: any, executionId: string, startTime: num
       
       // Build busy account list
       const busyAccountIds: string[] = []
+      const hardBusyAccountIds: string[] = []
+      const addBusyAccount = (accountId?: string | null, hard = false) => {
+        if (!accountId) return
+        if (!busyAccountIds.includes(accountId)) busyAccountIds.push(accountId)
+        if (hard && !hardBusyAccountIds.includes(accountId)) hardBusyAccountIds.push(accountId)
+      }
       
       // From execution-level tracking
       const usedProvidersForKey = executionProviderMap.get(localExecutionKey) || new Set<string>()
       for (const usedId of usedProvidersForKey) {
-        if (!busyAccountIds.includes(usedId)) busyAccountIds.push(usedId)
+        addBusyAccount(usedId)
       }
       
       // From pre-fetched recently busy runs
       const busyForLinkType = recentlyBusyByLinkType.get(localExecutionKey)
       if (busyForLinkType) {
         for (const accId of busyForLinkType) {
-          if (!busyAccountIds.includes(accId)) busyAccountIds.push(accId)
+          addBusyAccount(accId)
         }
       }
 
@@ -989,7 +995,7 @@ async function processAllRuns(supabase: any, executionId: string, startTime: num
       // so the system tries a backup provider instead of repeating the same one.
       if (isRetry && run.provider_account_id) {
         if (!busyAccountIds.includes(run.provider_account_id)) {
-          busyAccountIds.push(run.provider_account_id)
+          addBusyAccount(run.provider_account_id)
           console.log(`🔁 Retry run #${run.run_number}: excluding previous provider ${run.provider_account_name || run.provider_account_id} (failed/cancelled), will try backup`)
         }
       }
@@ -999,7 +1005,7 @@ async function processAllRuns(supabase: any, executionId: string, startTime: num
       const triedProviders: string[] = Array.isArray(run.provider_response?.tried_providers)
         ? run.provider_response.tried_providers : []
       for (const tp of triedProviders) {
-        if (tp && !busyAccountIds.includes(tp)) busyAccountIds.push(tp)
+        addBusyAccount(tp)
       }
 
       // FALLBACK: Also exclude any provider_account_id that already failed/cancelled
@@ -1022,7 +1028,7 @@ async function processAllRuns(supabase: any, executionId: string, startTime: num
               ps.includes('cancel') || ps.includes('refund') ||
               em.includes('cancel') || em.includes('refund')
             if (wasCancelled && pr.id !== run.id && pr.provider_account_id && !busyAccountIds.includes(pr.provider_account_id)) {
-              busyAccountIds.push(pr.provider_account_id)
+              addBusyAccount(pr.provider_account_id)
             }
           }
         }
@@ -1110,13 +1116,13 @@ async function processAllRuns(supabase: any, executionId: string, startTime: num
             
             if (!stuckRun.provider_order_id && runAge <= 60) {
               if (!busyAccountIds.includes(stuckRun.provider_account_id)) {
-                busyAccountIds.push(stuckRun.provider_account_id)
+                addBusyAccount(stuckRun.provider_account_id, true)
               }
               continue
             }
             
             if (!busyAccountIds.includes(stuckRun.provider_account_id)) {
-              busyAccountIds.push(stuckRun.provider_account_id)
+              addBusyAccount(stuckRun.provider_account_id, true)
             }
           }
         }
@@ -1167,6 +1173,17 @@ async function processAllRuns(supabase: any, executionId: string, startTime: num
         })
       }
       
+      if (accountsToTry.length === 0) {
+        const fallbackAccounts = hardBusyAccountIds.length > 0
+          ? []
+          : await mappingCache.getForService(supabase, item.service.id, [], executionId)
+
+        if (fallbackAccounts.length > 0) {
+          console.log(`⚠️ Run #${run.run_number}: soft busy filters removed all providers; forcing retry on ${fallbackAccounts.length} mapped provider(s)`)
+          accountsToTry.push(...fallbackAccounts)
+        }
+      }
+
       if (accountsToTry.length === 0) {
         if (mappingCache.hasAnyForService(item.service.id)) {
           // POSTPONE: All providers busy — push scheduled_at forward so we don't waste cycles
