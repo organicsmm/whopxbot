@@ -129,11 +129,12 @@ class MappingCache {
         for (const mapping of sorted) {
           const account = mapping.provider_account as ProviderAccount
           if (account && account.is_active && isValidHttpUrl(account.api_url)) {
-            const key = `${account.provider_id}:${mapping.provider_service_id}`
+            const legacyKey = `${account.provider_id}:${mapping.provider_service_id}`
+            const serviceKey = `${account.provider_id?.replace(/just$/i, '')}:${mapping.provider_service_id}`
             accounts.push({
               account,
               providerServiceId: mapping.provider_service_id,
-              minQuantity: minByKey.get(key) || 0,
+              minQuantity: minByKey.get(legacyKey) || minByKey.get(serviceKey) || 0,
             })
           } else if (account && account.is_active && !isValidHttpUrl(account.api_url)) {
             console.log(`⚠️ Skipping provider ${account.name}: invalid api_url`)
