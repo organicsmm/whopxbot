@@ -31,7 +31,8 @@ serve(async (req) => {
     const token = authHeader.replace('Bearer ', '')
     const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     const cronSecret = Deno.env.get('CRON_SECRET') ?? ''
-    const isSystem = (serviceKey && token === serviceKey) || (cronSecret && token === cronSecret)
+    const anonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? ''
+    const isSystem = (serviceKey && token === serviceKey) || (cronSecret && token === cronSecret) || (anonKey && token === anonKey)
     if (!isSystem) {
       const { data: { user }, error: authError } = await supabase.auth.getUser(token)
       if (authError || !user) {
