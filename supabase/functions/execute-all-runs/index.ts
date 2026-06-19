@@ -72,6 +72,45 @@ interface ServiceMapping {
 
 // Module-level caches
 const balanceCache = new Map<string, { balance: number; checkedAt: number }>()
+const zeroBalanceAlertCache = new Map<string, number>()
+const fallbackAlertCache = new Map<string, number>()
+const ALERT_THROTTLE_MS = 60 * 60 * 1000 // 1 hour
+
+async function notifyAdminTelegram(message: string) {
+  try {
+    const url = `${Deno.env.get('SUPABASE_URL')}/functions/v1/send-telegram-notification`
+    const key = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    await fetch(url, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${key}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ message, parse_mode: 'HTML' }),
+    })
+  } catch (e) {
+    console.error('Telegram notify failed:', e)
+  }
+}
+
+async function alertZeroBalance(account: ProviderAccount) {
+  const last = zeroBalanceAlertCache.get(account.id) || 0
+  if (Date.now() - last < ALERT_THROTTLE_MS) return
+  zeroBalanceAlertCache.set(account.id, Date.now())
+  await notifyAdminTelegram(
+    `⚠️ <b>Provider balance is 0</b>\nProvider: <b>${account.name}</b>\nAPI: ${account.api_url}\nPlease add funds — orders to this account are being skipped.`
+  )
+}
+
+async function alertFallbackUsed(primary: string | null, backup: ProviderAccount, serviceLabel: string) {
+  const key = `${backup.id}:${serviceLabel}`
+  const last = fallbackAlertCache.get(key) || 0
+  if (Date.now() - last < ALERT_THROTTLE_MS) return
+  fallbackAlertCache.set(key, Date.now())
+  await notifyAdminTelegram(
+    `🔁 <b>Fallback provider used</b>\nService: <code>${serviceLabel}</code>\nPrimary failed: <b>${primary ?? 'unknown'}</b>\nBackup placed: <b>${backup.name}</b>`
+  )
+}
 
 const supabaseModule = createClient(
   Deno.env.get('SUPABASE_URL') ?? '',
