@@ -1330,17 +1330,27 @@ async function processAllRuns(supabase: any, executionId: string, startTime: num
           })
           console.log(`🧩 Run #${run.run_number} merged to ${combinedQty} for ${item.engagement_type} to satisfy provider min ${smallestAccountMin}`)
         } else {
-          const postponeUntil = new Date(Date.now() + ACTIVE_ORDER_RETRY_MS).toISOString()
+          // No future runs to merge with — bump quantity up to provider minimum
+          // so the order actually places instead of being postponed forever.
+          effectiveQty = smallestAccountMin
+          quantityToSend = smallestAccountMin
+          run.quantity_to_send = smallestAccountMin
+          run.base_quantity = smallestAccountMin
           await supabase.from('organic_run_schedule').update({
-            status: 'pending',
-            scheduled_at: postponeUntil,
-            error_message: `[Waiting for merge] Scheduled ${originalQty} below provider min ${smallestAccountMin}`,
+            quantity_to_send: smallestAccountMin,
+            base_quantity: smallestAccountMin,
+            error_message: `Bumped ${originalQty} → ${smallestAccountMin} (provider min, no future runs to merge)`,
             last_status_check: new Date().toISOString(),
           }).eq('id', run.id)
-          skipped++
-          console.log(`⏳ Run #${run.run_number} postponed: ${originalQty} below provider min ${smallestAccountMin} and no mergeable future runs yet`)
-          continue
+          accountsToTry.sort((a, b) => {
+            const aFits = (a.minQuantity || 0) <= effectiveQty ? 0 : 1
+            const bFits = (b.minQuantity || 0) <= effectiveQty ? 0 : 1
+            if (aFits !== bFits) return aFits - bFits
+            return (a.minQuantity || 0) - (b.minQuantity || 0)
+          })
+          console.log(`⬆️ Run #${run.run_number} bumped ${originalQty} → ${smallestAccountMin} to satisfy provider min (no mergeable runs)`)
         }
+
       }
 
       console.log(`🔄 Run #${run.run_number}: ${effectiveQty} ${item.engagement_type}, trying ${accountsToTry.length} accounts`)
