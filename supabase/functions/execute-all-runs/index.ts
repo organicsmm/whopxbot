@@ -1564,6 +1564,9 @@ async function processAllRuns(supabase: any, executionId: string, startTime: num
             success = true
             await updateAccountLastUsed(supabase, selectedAccount.id)
             console.log(`✅ Run #${run.run_number} placed + verified via ${selectedAccount.name}! Order ID: ${providerOrderId}, status: ${verifiedStatus}`)
+            if (isBackup) {
+              alertFallbackUsed(lastPrimaryName, selectedAccount, item.service?.name || item.engagement_type || 'unknown').catch(() => {})
+            }
             break
           }
         } catch (fetchError: any) {
