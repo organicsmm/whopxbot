@@ -1361,7 +1361,8 @@ async function processAllRuns(supabase: any, executionId: string, startTime: num
       let verifiedCharge: number | null = null
       let verifiedLastStatusCheck: string | null = null
       
-      for (const { account: selectedAccount, providerServiceId, minQuantity: accountMinQty } of accountsToTry) {
+      let lastPrimaryName: string | null = null
+      for (const { account: selectedAccount, providerServiceId, minQuantity: accountMinQty, isBackup } of accountsToTry) {
         // NEVER boost quantity above what was scheduled — that causes over-delivery
         // (e.g. scheduled 112 views but provider min is 500 → user sees 500+ delivered).
         // Instead, skip providers whose min exceeds the scheduled qty and try the next one.
