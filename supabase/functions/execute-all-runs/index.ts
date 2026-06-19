@@ -248,6 +248,9 @@ async function checkProviderBalance(account: ProviderAccount): Promise<{ hasBala
     const balance = parseFloat(result.balance || result.funds || result.amount || '0')
     balanceCache.set(account.id, { balance, checkedAt: Date.now() })
     console.log(`💰 ${account.name} balance: ${balance}`)
+    if (balance === 0) {
+      alertZeroBalance(account).catch(() => {})
+    }
     return { hasBalance: balance > 0, balance }
   } catch (error) {
     return { hasBalance: true, balance: -1 }
