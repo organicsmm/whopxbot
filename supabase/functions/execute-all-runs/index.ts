@@ -1026,17 +1026,19 @@ async function processAllRuns(supabase: any, executionId: string, startTime: num
       // FALLBACK: Also exclude any provider_account_id that already failed/cancelled
       // for this SAME engagement_order_item (prevents same-provider repeat across retries).
       try {
+        // Only consider RECENT cancellations (last 60 min). Older cancellations
+        // shouldn't permanently block a provider — the issue is usually transient.
+        const sixtyMinAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString()
         const { data: priorFailedForItem } = await supabase
           .from('organic_run_schedule')
-          .select('id, provider_account_id, error_message, provider_status, status')
+          .select('id, provider_account_id, error_message, provider_status, status, completed_at')
           .eq('engagement_order_item_id', item.id)
           .in('status', ['failed', 'cancelled'])
           .not('provider_account_id', 'is', null)
-          .limit(200)
+          .gte('completed_at', sixtyMinAgo)
+          .limit(50)
         if (priorFailedForItem) {
           for (const pr of priorFailedForItem as any[]) {
-            // Exclude only providers that CANCELLED/REFUNDED previously on this item.
-            // Successful providers (priority #1) can keep handling future runs.
             const ps = (pr.provider_status || '').toLowerCase()
             const em = (pr.error_message || '').toLowerCase()
             const wasCancelled =
