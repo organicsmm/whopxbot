@@ -122,9 +122,9 @@ const supabaseModule = createClient(
 // Avoids repeated DB queries for same service
 // ==========================================
 class MappingCache {
-  private cache = new Map<string, { account: ProviderAccount; providerServiceId: string; minQuantity: number }[]>()
+  private cache = new Map<string, { account: ProviderAccount; providerServiceId: string; minQuantity: number; isBackup: boolean }[]>()
   
-  async getForService(supabase: any, serviceId: string, excludeIds: string[], executionId: string): Promise<{ account: ProviderAccount; providerServiceId: string; minQuantity: number }[]> {
+  async getForService(supabase: any, serviceId: string, excludeIds: string[], executionId: string): Promise<{ account: ProviderAccount; providerServiceId: string; minQuantity: number; isBackup: boolean }[]> {
     // Fetch once per service per invocation
     if (!this.cache.has(serviceId)) {
       const { data: mappings, error } = await supabase
@@ -162,9 +162,9 @@ class MappingCache {
           }
         }
 
-        const accounts: { account: ProviderAccount; providerServiceId: string; minQuantity: number }[] = []
+        const accounts: { account: ProviderAccount; providerServiceId: string; minQuantity: number; isBackup: boolean }[] = []
         const pushed = new Set<string>()
-        const pushAccount = (account: ProviderAccount | null | undefined, providerServiceId: string | null | undefined) => {
+        const pushAccount = (account: ProviderAccount | null | undefined, providerServiceId: string | null | undefined, isBackup: boolean) => {
           if (!account || !providerServiceId) return
           if (!account.is_active) return
           if (!isValidHttpUrl(account.api_url)) {
@@ -180,19 +180,20 @@ class MappingCache {
             account,
             providerServiceId,
             minQuantity: minByKey.get(legacyKey) || minByKey.get(serviceKey) || 0,
+            isBackup,
           })
         }
 
         // Primary mappings first
         for (const mapping of sorted) {
-          pushAccount(mapping.provider_account as ProviderAccount, mapping.provider_service_id)
+          pushAccount(mapping.provider_account as ProviderAccount, mapping.provider_service_id, false)
         }
         // Auto-fallback: backup providers appended after primaries
         for (const mapping of sorted) {
           const backupAcc = mapping.backup_provider_account as ProviderAccount | undefined
           const backupSvc = mapping.backup_provider_service_id || mapping.provider_service_id
           if (backupAcc) {
-            pushAccount(backupAcc, backupSvc)
+            pushAccount(backupAcc, backupSvc, true)
           }
         }
         this.cache.set(serviceId, accounts)
