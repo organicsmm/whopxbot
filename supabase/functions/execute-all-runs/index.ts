@@ -72,6 +72,45 @@ interface ServiceMapping {
 
 // Module-level caches
 const balanceCache = new Map<string, { balance: number; checkedAt: number }>()
+const zeroBalanceAlertCache = new Map<string, number>()
+const fallbackAlertCache = new Map<string, number>()
+const ALERT_THROTTLE_MS = 60 * 60 * 1000 // 1 hour
+
+async function notifyAdminTelegram(message: string) {
+  try {
+    const url = `${Deno.env.get('SUPABASE_URL')}/functions/v1/send-telegram-notification`
+    const key = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    await fetch(url, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${key}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ message, parse_mode: 'HTML' }),
+    })
+  } catch (e) {
+    console.error('Telegram notify failed:', e)
+  }
+}
+
+async function alertZeroBalance(account: ProviderAccount) {
+  const last = zeroBalanceAlertCache.get(account.id) || 0
+  if (Date.now() - last < ALERT_THROTTLE_MS) return
+  zeroBalanceAlertCache.set(account.id, Date.now())
+  await notifyAdminTelegram(
+    `⚠️ <b>Provider balance is 0</b>\nProvider: <b>${account.name}</b>\nAPI: ${account.api_url}\nPlease add funds — orders to this account are being skipped.`
+  )
+}
+
+async function alertFallbackUsed(primary: string | null, backup: ProviderAccount, serviceLabel: string) {
+  const key = `${backup.id}:${serviceLabel}`
+  const last = fallbackAlertCache.get(key) || 0
+  if (Date.now() - last < ALERT_THROTTLE_MS) return
+  fallbackAlertCache.set(key, Date.now())
+  await notifyAdminTelegram(
+    `🔁 <b>Fallback provider used</b>\nService: <code>${serviceLabel}</code>\nPrimary failed: <b>${primary ?? 'unknown'}</b>\nBackup placed: <b>${backup.name}</b>`
+  )
+}
 
 const supabaseModule = createClient(
   Deno.env.get('SUPABASE_URL') ?? '',
@@ -83,9 +122,9 @@ const supabaseModule = createClient(
 // Avoids repeated DB queries for same service
 // ==========================================
 class MappingCache {
-  private cache = new Map<string, { account: ProviderAccount; providerServiceId: string; minQuantity: number }[]>()
+  private cache = new Map<string, { account: ProviderAccount; providerServiceId: string; minQuantity: number; isBackup: boolean }[]>()
   
-  async getForService(supabase: any, serviceId: string, excludeIds: string[], executionId: string): Promise<{ account: ProviderAccount; providerServiceId: string; minQuantity: number }[]> {
+  async getForService(supabase: any, serviceId: string, excludeIds: string[], executionId: string): Promise<{ account: ProviderAccount; providerServiceId: string; minQuantity: number; isBackup: boolean }[]> {
     // Fetch once per service per invocation
     if (!this.cache.has(serviceId)) {
       const { data: mappings, error } = await supabase
@@ -123,9 +162,9 @@ class MappingCache {
           }
         }
 
-        const accounts: { account: ProviderAccount; providerServiceId: string; minQuantity: number }[] = []
+        const accounts: { account: ProviderAccount; providerServiceId: string; minQuantity: number; isBackup: boolean }[] = []
         const pushed = new Set<string>()
-        const pushAccount = (account: ProviderAccount | null | undefined, providerServiceId: string | null | undefined) => {
+        const pushAccount = (account: ProviderAccount | null | undefined, providerServiceId: string | null | undefined, isBackup: boolean) => {
           if (!account || !providerServiceId) return
           if (!account.is_active) return
           if (!isValidHttpUrl(account.api_url)) {
@@ -141,19 +180,20 @@ class MappingCache {
             account,
             providerServiceId,
             minQuantity: minByKey.get(legacyKey) || minByKey.get(serviceKey) || 0,
+            isBackup,
           })
         }
 
         // Primary mappings first
         for (const mapping of sorted) {
-          pushAccount(mapping.provider_account as ProviderAccount, mapping.provider_service_id)
+          pushAccount(mapping.provider_account as ProviderAccount, mapping.provider_service_id, false)
         }
         // Auto-fallback: backup providers appended after primaries
         for (const mapping of sorted) {
           const backupAcc = mapping.backup_provider_account as ProviderAccount | undefined
           const backupSvc = mapping.backup_provider_service_id || mapping.provider_service_id
           if (backupAcc) {
-            pushAccount(backupAcc, backupSvc)
+            pushAccount(backupAcc, backupSvc, true)
           }
         }
         this.cache.set(serviceId, accounts)
@@ -208,6 +248,9 @@ async function checkProviderBalance(account: ProviderAccount): Promise<{ hasBala
     const balance = parseFloat(result.balance || result.funds || result.amount || '0')
     balanceCache.set(account.id, { balance, checkedAt: Date.now() })
     console.log(`💰 ${account.name} balance: ${balance}`)
+    if (balance === 0) {
+      alertZeroBalance(account).catch(() => {})
+    }
     return { hasBalance: balance > 0, balance }
   } catch (error) {
     return { hasBalance: true, balance: -1 }
@@ -1318,7 +1361,9 @@ async function processAllRuns(supabase: any, executionId: string, startTime: num
       let verifiedCharge: number | null = null
       let verifiedLastStatusCheck: string | null = null
       
-      for (const { account: selectedAccount, providerServiceId, minQuantity: accountMinQty } of accountsToTry) {
+      let lastPrimaryName: string | null = null
+      for (const { account: selectedAccount, providerServiceId, minQuantity: accountMinQty, isBackup } of accountsToTry) {
+        if (!isBackup) lastPrimaryName = selectedAccount.name
         // NEVER boost quantity above what was scheduled — that causes over-delivery
         // (e.g. scheduled 112 views but provider min is 500 → user sees 500+ delivered).
         // Instead, skip providers whose min exceeds the scheduled qty and try the next one.
@@ -1520,6 +1565,9 @@ async function processAllRuns(supabase: any, executionId: string, startTime: num
             success = true
             await updateAccountLastUsed(supabase, selectedAccount.id)
             console.log(`✅ Run #${run.run_number} placed + verified via ${selectedAccount.name}! Order ID: ${providerOrderId}, status: ${verifiedStatus}`)
+            if (isBackup) {
+              alertFallbackUsed(lastPrimaryName, selectedAccount, item.service?.name || item.engagement_type || 'unknown').catch(() => {})
+            }
             break
           }
         } catch (fetchError: any) {
