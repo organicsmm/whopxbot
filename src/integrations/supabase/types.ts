@@ -1492,6 +1492,54 @@ export type Database = {
         }
         Relationships: []
       }
+      zapupi_deposits: {
+        Row: {
+          amount_inr: number
+          amount_usd: number | null
+          created_at: string
+          credited: boolean
+          id: string
+          order_id: string
+          payment_url: string | null
+          raw_response: Json | null
+          status: string
+          txn_id: string | null
+          updated_at: string
+          user_id: string
+          utr: string | null
+        }
+        Insert: {
+          amount_inr: number
+          amount_usd?: number | null
+          created_at?: string
+          credited?: boolean
+          id?: string
+          order_id: string
+          payment_url?: string | null
+          raw_response?: Json | null
+          status?: string
+          txn_id?: string | null
+          updated_at?: string
+          user_id: string
+          utr?: string | null
+        }
+        Update: {
+          amount_inr?: number
+          amount_usd?: number | null
+          created_at?: string
+          credited?: boolean
+          id?: string
+          order_id?: string
+          payment_url?: string | null
+          raw_response?: Json | null
+          status?: string
+          txn_id?: string | null
+          updated_at?: string
+          user_id?: string
+          utr?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       providers_public: {
@@ -1534,6 +1582,17 @@ export type Database = {
           p_amount_usd: number
           p_payment_id: string
           p_user_id: string
+        }
+        Returns: Json
+      }
+      credit_wallet_zapupi: {
+        Args: {
+          p_amount_inr: number
+          p_amount_usd: number
+          p_order_id: string
+          p_txn_id: string
+          p_user_id: string
+          p_utr: string
         }
         Returns: Json
       }
