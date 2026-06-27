@@ -214,7 +214,7 @@ export default function AdminTopupPlan() {
               <CardContent className="p-4">
                 <div className="text-xs text-muted-foreground">Total Pending (user-facing)</div>
                 <div className="text-xl font-bold mt-1">{inr(totalPendingUsd)}</div>
-                <div className="text-xs text-muted-foreground">≈ {inr(totalPendingUsd)}</div>
+                <div className="text-xs text-muted-foreground">All amounts in INR</div>
               </CardContent>
             </Card>
             <Card className="glass-card">
