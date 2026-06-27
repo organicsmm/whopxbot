@@ -92,7 +92,7 @@ const Index = () => {
 
           {/* Headline */}
           <h1
-            className="text-5xl sm:text-7xl lg:text-[88px] font-extrabold tracking-tight leading-[1.02] mb-6"
+            className="!text-white text-5xl sm:text-7xl lg:text-[88px] font-extrabold tracking-tight leading-[1.02] mb-6"
             style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
           >
             The Growth Engine
@@ -159,7 +159,7 @@ const Index = () => {
             <p className="text-[11px] tracking-[0.22em] uppercase text-purple-300/70 mb-4">
               The Software
             </p>
-            <h2 className="text-3xl sm:text-5xl font-bold tracking-tight leading-[1.1]">
+            <h2 className="!text-white text-3xl sm:text-5xl font-bold tracking-tight leading-[1.1]">
               Engineered like infrastructure,
               <br />
               <span
@@ -226,7 +226,7 @@ const Index = () => {
             <p className="text-[11px] tracking-[0.22em] uppercase text-purple-300/70 mb-4">
               Cross-platform
             </p>
-            <h2 className="text-3xl sm:text-5xl font-bold tracking-tight leading-[1.1] mb-5">
+            <h2 className="!text-white text-3xl sm:text-5xl font-bold tracking-tight leading-[1.1] mb-5">
               One control room for{' '}
               <span
                 className="italic text-purple-300"
@@ -299,7 +299,7 @@ const Index = () => {
             <p className="text-[11px] tracking-[0.22em] uppercase text-purple-300/70 mb-4">
               Pricing
             </p>
-            <h2 className="text-3xl sm:text-5xl font-bold tracking-tight leading-[1.1]">
+            <h2 className="!text-white text-3xl sm:text-5xl font-bold tracking-tight leading-[1.1]">
               Two plans.{' '}
               <span
                 className="italic text-purple-300"
@@ -377,7 +377,7 @@ const Index = () => {
       {/* CTA band */}
       <section className="relative py-24 border-t border-white/5">
         <div className="max-w-4xl mx-auto px-5 sm:px-8 text-center">
-          <h2 className="text-3xl sm:text-5xl font-bold tracking-tight leading-[1.1] mb-5">
+          <h2 className="!text-white text-3xl sm:text-5xl font-bold tracking-tight leading-[1.1] mb-5">
             Ready to ship{' '}
             <span
               className="italic text-purple-300"
