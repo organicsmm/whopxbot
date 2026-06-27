@@ -5,6 +5,7 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianG
 import { ENGAGEMENT_CONFIG, EngagementType } from "@/lib/engagement-types";
 import { format } from "date-fns";
 import { Activity, TrendingUp, Clock, CheckCircle2 } from "lucide-react";
+import { isTargetMetAutoCompleted } from "@/lib/run-status";
 
 interface Run {
   id: string;
