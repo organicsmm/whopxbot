@@ -234,7 +234,21 @@ serve(async (req) => {
       })
     }
 
-    const rawResponse = await response.json()
+    const responseText = await response.text()
+    let rawResponse: any
+    try {
+      rawResponse = JSON.parse(responseText)
+    } catch (parseErr) {
+      console.error('Provider returned non-JSON response:', responseText.slice(0, 300))
+      return new Response(JSON.stringify({
+        error: `Provider ${provider_id} returned non-JSON response (likely HTML error page or wrong API URL).`,
+        details: responseText.slice(0, 500),
+        hint: 'Check that the API URL is correct (usually ends with /api/v2) and the API key is valid.'
+      }), {
+        status: 502,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      })
+    }
 
     // Handle provider error responses (they return { error: "..." } instead of array)
     if (!Array.isArray(rawResponse)) {
