@@ -1596,6 +1596,16 @@ export type Database = {
         }
         Returns: Json
       }
+      debit_wallet_for_order: {
+        Args: {
+          p_amount: number
+          p_description?: string
+          p_idempotency_key?: string
+          p_order_id?: string
+          p_user_id: string
+        }
+        Returns: Json
+      }
       get_admin_dashboard_stats: { Args: never; Returns: Json }
       get_admin_users_summary: { Args: never; Returns: Json }
       get_public_markup: { Args: never; Returns: number }
