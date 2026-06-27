@@ -66,18 +66,15 @@ Deno.serve(async (req) => {
     const webhookUrl = `https://${projectRef}.supabase.co/functions/v1/zapupi-webhook`;
 
     const payload = {
-      key: ZAP_KEY,
-      client_txn_id: orderId,
+      zap_key: ZAP_KEY,
+      order_id: orderId,
       amount: String(amountInr),
-      p_info: "Wallet Top-up",
-      customer_name: (user.email || "user").split("@")[0],
-      customer_email: user.email || "user@example.com",
       customer_mobile: "9999999999",
-      redirect_url: `${origin}/wallet?deposit=success&order_id=${orderId}`,
+      remark: `Wallet Top-up | ${user.id}`,
       webhook_url: webhookUrl,
-      udf1: user.id,
-      udf2: orderId,
-      udf3: "wallet",
+      success_url: `${origin}/wallet?deposit=success&order_id=${orderId}`,
+      failed_url: `${origin}/wallet?deposit=failed&order_id=${orderId}`,
+      timeout_url: `${origin}/wallet?deposit=timeout&order_id=${orderId}`,
     };
 
     const upstream = await fetch(ZAPUPI_URL, {
@@ -90,7 +87,8 @@ Deno.serve(async (req) => {
     let data: any = null;
     try { data = JSON.parse(raw); } catch { data = { raw }; }
 
-    if (!upstream.ok || !(data?.status === true || data?.status === "true" || data?.success === true)) {
+    const status = String(data?.status || "").toLowerCase();
+    if (!upstream.ok || !(status === "success" || status === "true" || data?.status === true || data?.success === true)) {
       console.error("[zapupi-create-order] upstream error", upstream.status, raw);
       await supabase.from("zapupi_deposits")
         .update({ status: "failed", raw_response: data })
@@ -99,13 +97,13 @@ Deno.serve(async (req) => {
     }
 
     const paymentUrl =
-      data?.data?.payment_url ||
       data?.payment_url ||
+      data?.data?.payment_url ||
       data?.result?.payment_url ||
       data?.data?.url ||
       data?.url;
     const upstreamOrder =
-      data?.data?.order_id || data?.order_id || data?.data?.id || null;
+      data?.order_id || data?.data?.order_id || data?.data?.id || null;
 
     if (!paymentUrl) {
       console.error("[zapupi-create-order] no payment_url", data);

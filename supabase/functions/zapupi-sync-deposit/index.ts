@@ -49,7 +49,7 @@ Deno.serve(async (req) => {
     const resp = await fetch(STATUS_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ key: ZAP_KEY, client_txn_id: orderId }),
+      body: JSON.stringify({ zap_key: ZAP_KEY, order_id: orderId }),
     });
     const raw = await resp.text();
     let data: any = null;
