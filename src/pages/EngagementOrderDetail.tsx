@@ -52,6 +52,7 @@ import { BottingScoreCard } from "@/components/engagement/BottingScoreCard";
 import type { Counts } from "@/lib/engagement-ratio";
 import { AutoRefillToggle } from "@/components/engagement/AutoRefillToggle";
 import { OrderProgressChart } from "@/components/engagement/OrderProgressChart";
+import { isTargetMetAutoCompleted } from "@/lib/run-status";
 
 const ENGAGEMENT_ICONS = {
   views: { icon: Eye, label: "Views", emoji: "👁️" },
@@ -541,6 +542,9 @@ export default function EngagementOrderDetail() {
     const normalizeProviderStatus = (s: any): string => (s ?? '').toString().toLowerCase().trim();
 
     const calculateActualDelivered = (run: any): number => {
+      // Target-met auto-cancellation counts as fully delivered
+      if (isTargetMetAutoCompleted(run)) return run.quantity_to_send;
+
       const ps = normalizeProviderStatus(run.provider_status);
 
       // Provider-confirmed completion
@@ -870,8 +874,11 @@ export default function EngagementOrderDetail() {
               provider_remains: run.provider_remains ?? null,
               last_status_check: run.last_status_check || null,
             }));
-            // Calculate ACTUAL delivered from provider data
+            // Calculate ACTUAL delivered from provider data (incl. target-met auto-completed)
             const itemDelivered = itemRuns.reduce((sum: number, r: any) => {
+              if (isTargetMetAutoCompleted(r)) {
+                return sum + r.quantity_to_send;
+              }
               if (r.status === 'completed') {
                 return sum + r.quantity_to_send;
               } else if ((r.status === 'started' || r.status === 'failed') && r.provider_remains !== null && r.provider_remains !== undefined) {

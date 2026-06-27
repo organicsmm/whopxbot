@@ -941,17 +941,22 @@ async function processAllRuns(supabase: any, executionId: string, startTime: num
           const alreadySent = Math.max(askedSent, actualDelivered)
           const remaining = orderedQty - alreadySent
           if (remaining <= 0) {
-            // Target met (or exceeded via over-delivery) — cancel ALL remaining pending runs
+            // Target met (or exceeded via over-delivery) — cancel ALL remaining pending runs.
+            // IMPORTANT: error_message MUST start with "Target met" so the UI helper
+            // (isTargetMetAutoCompleted) treats these as Completed, not Cancelled.
+            const publicDelta = actualDelivered // platform-observed delta
+            const observed = Math.max(askedSent, actualDelivered)
+            const marker = `Target met (asked=${askedSent}, observed=${observed}, public_delta=${publicDelta}, target=${orderedQty}) — cancelling remaining runs`
             await supabase.from('organic_run_schedule').update({
               status: 'cancelled',
-              error_message: `Target met (asked=${askedSent}, actual=${actualDelivered}, target=${orderedQty}) — cancelling remaining runs`,
+              error_message: marker,
               completed_at: new Date().toISOString(),
             }).eq('engagement_order_item_id', item.id).eq('status', 'pending')
             await supabase.from('engagement_order_items').update({
               status: 'completed', updated_at: new Date().toISOString(),
             }).eq('id', item.id).neq('status', 'completed')
             skipped++
-            console.log(`🛡️ Item ${item.id} target met — asked=${askedSent}, actual=${actualDelivered}, target=${orderedQty}. Cancelling remaining.`)
+            console.log(`🛡️ Item ${item.id} target met — ${marker}`)
             continue
           }
           if (run.quantity_to_send > remaining) {

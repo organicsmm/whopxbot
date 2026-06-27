@@ -9,6 +9,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
 import { toast } from "sonner";
+import { isTargetMetAutoCompleted } from "@/lib/run-status";
 
 const ENGAGEMENT_CONFIG: Record<string, { icon: typeof Eye; label: string; emoji: string; color: string; bg: string; border: string }> = {
   views: { icon: Eye, label: "views", emoji: "👁️", color: "text-cyan-400", bg: "bg-cyan-500/20", border: "border-cyan-500/40" },
@@ -64,6 +65,9 @@ export function MergedTimeline({ runs, onEditRun, nextRun, onRefresh, typeTarget
   const normalizeProviderStatus = (s?: string | null) => (s ?? '').toString().toLowerCase().trim();
 
   const getEffectiveStatus = (run: MergedRun): 'pending' | 'started' | 'completed' | 'failed' | 'cancelled' => {
+    // Target-met auto cancellations should be presented as completed
+    if (isTargetMetAutoCompleted(run)) return 'completed';
+
     const ps = normalizeProviderStatus(run.provider_status);
 
     if (ps === 'completed' || ps === 'complete' || ps === 'partial') return 'completed';
@@ -79,6 +83,10 @@ export function MergedTimeline({ runs, onEditRun, nextRun, onRefresh, typeTarget
   };
 
   const getDeliveredFromProvider = (run: MergedRun): number => {
+    // Target-met cancel = treat the asked quantity as delivered (no provider call was made,
+    // but the overall target was already reached, so this run counts toward delivery).
+    if (isTargetMetAutoCompleted(run)) return run.quantity_to_send;
+
     const ps = normalizeProviderStatus(run.provider_status);
 
     // Provider-confirmed completion
@@ -236,11 +244,13 @@ export function MergedTimeline({ runs, onEditRun, nextRun, onRefresh, typeTarget
             const Icon = engConfig.icon;
             const scheduledDate = new Date(run.scheduled_at);
             const now = new Date();
-            const isPending = run.status === 'pending';
-            const isActive = run.status === 'started';
-            const isCompleted = run.status === 'completed';
-            const isFailed = run.status === 'failed';
-            const isCancelled = run.status === 'cancelled';
+
+            const autoCompleted = isTargetMetAutoCompleted(run);
+            const isPending = !autoCompleted && run.status === 'pending';
+            const isActive = !autoCompleted && run.status === 'started';
+            const isCompleted = autoCompleted || run.status === 'completed';
+            const isFailed = !autoCompleted && run.status === 'failed';
+            const isCancelled = !autoCompleted && run.status === 'cancelled';
 
             const isAlreadyExecuted = isCompleted || isFailed || isActive;
             const isScheduledInPast = scheduledDate < now;
@@ -250,6 +260,7 @@ export function MergedTimeline({ runs, onEditRun, nextRun, onRefresh, typeTarget
             // If provider_status exists, use it directly (real-time from provider)
             // If pending + future = "Scheduled", pending + past = "Queued"
             const getDisplayStatus = () => {
+              if (autoCompleted) return 'Completed';
               if (run.provider_status) return run.provider_status;
               if (isCancelled) return 'CANCELLED';
               if (isFailed) return 'FAILED';
@@ -261,8 +272,8 @@ export function MergedTimeline({ runs, onEditRun, nextRun, onRefresh, typeTarget
             };
             const displayStatus = getDisplayStatus();
 
-            // Provider progress data
-            const providerRemains = run.provider_remains ?? null;
+            // Provider progress data (hidden when target-met auto completed)
+            const providerRemains = autoCompleted ? null : (run.provider_remains ?? null);
             const delivered = providerRemains !== null ? (run.quantity_to_send - providerRemains) : null;
             const progressPercent = providerRemains !== null && run.quantity_to_send > 0
               ? Math.min(100, Math.max(0, ((run.quantity_to_send - providerRemains) / run.quantity_to_send) * 100))
@@ -326,7 +337,7 @@ export function MergedTimeline({ runs, onEditRun, nextRun, onRefresh, typeTarget
                       </div>
 
                       {/* Provider source badge - shows where this came from */}
-                      {run.provider_account_name && (
+                      {!autoCompleted && run.provider_account_name && (
                         <Badge className="bg-purple-500/20 text-purple-400 border border-purple-500/40 text-xs truncate max-w-[200px] sm:max-w-none">
                           via {run.provider_account_name}
                         </Badge>
@@ -403,8 +414,8 @@ export function MergedTimeline({ runs, onEditRun, nextRun, onRefresh, typeTarget
                       )}
                     </div>
 
-                    {/* SMART STATUS MESSAGE - Shows real-time provider status */}
-                    {(run.error_message || run.provider_status || run.provider_order_id) && (
+                    {/* SMART STATUS MESSAGE - Shows real-time provider status (hidden when target-met auto completed) */}
+                    {!autoCompleted && (run.error_message || run.provider_status || run.provider_order_id) && (
                       <div className={`mt-2 px-3 py-2 rounded-lg text-sm ${run.provider_status === 'Completed' || run.provider_status === 'Partial'
                         ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400'
                         : run.provider_status === 'In progress' || run.provider_status === 'Processing'
@@ -483,15 +494,15 @@ export function MergedTimeline({ runs, onEditRun, nextRun, onRefresh, typeTarget
 
                   {/* Provider Name + ID + Actions */}
                   <div className="flex flex-row sm:flex-col items-center sm:items-end gap-2 shrink-0 flex-wrap">
-                    {/* Provider/Service Name - visible to all users */}
-                    {run.provider_account_name && (
+                    {/* Provider/Service Name - visible to all users (hidden when target-met auto completed) */}
+                    {!autoCompleted && run.provider_account_name && (
                       <div className="text-right">
                         <p className="text-xs text-muted-foreground uppercase">Provider</p>
                         <p className="text-sm font-bold text-purple-400">{run.provider_account_name}</p>
                       </div>
                     )}
 
-                    {run.provider_order_id && (
+                    {!autoCompleted && run.provider_order_id && (
                       <div className="text-right">
                         <p className="text-xs text-muted-foreground uppercase">Order ID</p>
                         <p className="text-sm font-mono text-teal-400">{run.provider_order_id}</p>

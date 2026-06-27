@@ -21,6 +21,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { isTargetMetAutoCompleted } from "@/lib/run-status";
 
 const ENGAGEMENT_CONFIG = {
   views: { icon: Eye, label: "Views" },
@@ -91,6 +92,8 @@ export function TypeHistoryCard({
   const normalizeProviderStatus = (s?: string | null) => (s ?? '').toString().toLowerCase().trim();
 
   const getEffectiveStatus = (run: Run): 'pending' | 'started' | 'completed' | 'failed' => {
+    if (isTargetMetAutoCompleted(run)) return 'completed';
+
     const ps = normalizeProviderStatus(run.provider_status);
 
     if (ps === 'completed' || ps === 'complete' || ps === 'partial') return 'completed';
@@ -106,6 +109,8 @@ export function TypeHistoryCard({
 
   // Helper to calculate actual delivered from provider data
   const calculateActualDelivered = (run: Run): number => {
+    if (isTargetMetAutoCompleted(run)) return run.quantity_to_send;
+
     const ps = normalizeProviderStatus(run.provider_status);
 
     // Provider-confirmed completion
@@ -340,10 +345,11 @@ export function TypeHistoryCard({
           <div className="max-h-[600px] overflow-y-auto">
             <div className="divide-y divide-border">
               {runsWithSchedule.map((run, idx) => {
-                const isPending = run.status === 'pending';
-                const isActive = run.status === 'started';
-                const isCompleted = run.status === 'completed';
-                const isFailed = run.status === 'failed';
+                const autoCompleted = isTargetMetAutoCompleted(run);
+                const isPending = !autoCompleted && run.status === 'pending';
+                const isActive = !autoCompleted && run.status === 'started';
+                const isCompleted = autoCompleted || run.status === 'completed';
+                const isFailed = !autoCompleted && run.status === 'failed';
                 const scheduledDate = new Date(run.scheduled_at);
                 const isUpcoming = isPending && scheduledDate > now;
                 const isPastDue = scheduledDate < now && isPending;
@@ -351,6 +357,7 @@ export function TypeHistoryCard({
 
                 // Smart status: provider_status > mapped internal status
                 const getDisplayStatus = () => {
+                  if (autoCompleted) return 'Completed';
                   if (run.provider_status) return run.provider_status;
                   if (run.status === 'cancelled') return 'CANCELLED';
                   if (isFailed) return 'FAILED';
@@ -447,15 +454,15 @@ export function TypeHistoryCard({
 
                       {/* Right Side - Provider Name + ID & Edit */}
                       <div className="flex items-center gap-4">
-                        {/* Provider Account Name */}
-                        {run.provider_account_name && (
+                        {/* Provider Account Name (hidden when target-met auto completed) */}
+                        {!autoCompleted && run.provider_account_name && (
                           <div className="text-right">
                             <p className="text-xs text-muted-foreground uppercase">Provider</p>
                             <p className="text-sm font-bold text-purple-400">{run.provider_account_name}</p>
                           </div>
                         )}
 
-                        {run.provider_order_id && (
+                        {!autoCompleted && run.provider_order_id && (
                           <div className="text-right">
                             <p className="text-xs text-muted-foreground uppercase">Order ID</p>
                             <p className="text-sm font-mono text-teal-400">{run.provider_order_id}</p>

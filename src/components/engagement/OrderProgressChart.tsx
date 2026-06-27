@@ -5,6 +5,7 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianG
 import { ENGAGEMENT_CONFIG, EngagementType } from "@/lib/engagement-types";
 import { format } from "date-fns";
 import { Activity, TrendingUp, Clock, CheckCircle2 } from "lucide-react";
+import { isTargetMetAutoCompleted } from "@/lib/run-status";
 
 interface Run {
   id: string;
@@ -16,6 +17,7 @@ interface Run {
   started_at?: string;
   completed_at?: string;
   provider_remains?: number;
+  error_message?: string | null;
 }
 
 interface OrderProgressChartProps {
@@ -53,6 +55,7 @@ export function OrderProgressChart({ runs, perType }: OrderProgressChartProps) {
 
     // Filter only runs that have ACTUAL delivery (completed or started with some delivery)
     const deliveredRuns = runs.filter(run => {
+      if (isTargetMetAutoCompleted(run)) return true;
       if (run.status === 'completed') return true;
       if ((run.status === 'started' || run.status === 'failed') && 
           run.provider_remains !== null && run.provider_remains !== undefined) {
@@ -98,9 +101,11 @@ export function OrderProgressChart({ runs, perType }: OrderProgressChartProps) {
     sortedRuns.forEach((run) => {
       const runTime = new Date(run.completed_at || run.started_at || run.scheduled_at);
       
-      // Calculate ACTUAL delivered quantity
+      // Calculate ACTUAL delivered quantity (incl. target-met auto-completed)
       let deliveredQty = 0;
-      if (run.status === 'completed') {
+      if (isTargetMetAutoCompleted(run)) {
+        deliveredQty = run.quantity_to_send;
+      } else if (run.status === 'completed') {
         deliveredQty = run.quantity_to_send;
       } else if ((run.status === 'started' || run.status === 'failed') && 
                  run.provider_remains !== null && run.provider_remains !== undefined) {
@@ -136,7 +141,7 @@ export function OrderProgressChart({ runs, perType }: OrderProgressChartProps) {
     // Calculate stats
     const totalScheduled = perType.reduce((sum, t) => sum + t.scheduled, 0);
     const totalDelivered = perType.reduce((sum, t) => sum + t.delivered, 0);
-    const completedRuns = runs.filter(r => r.status === 'completed').length;
+    const completedRuns = runs.filter(r => r.status === 'completed' || isTargetMetAutoCompleted(r)).length;
     const pendingRuns = runs.filter(r => r.status === 'pending').length;
     const startedRuns = runs.filter(r => r.status === 'started').length;
 
