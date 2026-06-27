@@ -874,8 +874,11 @@ export default function EngagementOrderDetail() {
               provider_remains: run.provider_remains ?? null,
               last_status_check: run.last_status_check || null,
             }));
-            // Calculate ACTUAL delivered from provider data
+            // Calculate ACTUAL delivered from provider data (incl. target-met auto-completed)
             const itemDelivered = itemRuns.reduce((sum: number, r: any) => {
+              if (isTargetMetAutoCompleted(r)) {
+                return sum + r.quantity_to_send;
+              }
               if (r.status === 'completed') {
                 return sum + r.quantity_to_send;
               } else if ((r.status === 'started' || r.status === 'failed') && r.provider_remains !== null && r.provider_remains !== undefined) {
