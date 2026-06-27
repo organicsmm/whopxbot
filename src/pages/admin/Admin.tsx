@@ -226,24 +226,6 @@ export default function Admin() {
 
         {/* Quick Access Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Link to="/admin/services">
-            <Card className="glass-card h-full hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10 transition-all cursor-pointer group">
-              <CardContent className="p-5">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <Package className="h-6 w-6 text-primary" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold group-hover:text-primary transition-colors">
-                      Services
-                    </h3>
-                    <p className="text-xs text-muted-foreground">Import & manage</p>
-                  </div>
-                  <ArrowUpRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
 
           <Link to="/admin/bundles">
             <Card className="glass-card h-full hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10 transition-all cursor-pointer group border-2 border-primary/20">
@@ -267,24 +249,6 @@ export default function Admin() {
             </Card>
           </Link>
 
-          <Link to="/admin/orders">
-            <Card className="glass-card h-full hover:border-success/50 hover:shadow-lg hover:shadow-success/10 transition-all cursor-pointer group">
-              <CardContent className="p-5">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-success/20 to-success/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <ShoppingCart className="h-6 w-6 text-success" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold group-hover:text-success transition-colors">
-                      Orders
-                    </h3>
-                    <p className="text-xs text-muted-foreground">View all orders</p>
-                  </div>
-                  <ArrowUpRight className="h-4 w-4 text-muted-foreground group-hover:text-success transition-colors" />
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
 
           <Link to="/admin/users">
             <Card className="glass-card h-full hover:border-accent/50 hover:shadow-lg hover:shadow-accent/10 transition-all cursor-pointer group">
@@ -394,49 +358,6 @@ export default function Admin() {
             </Card>
           </Link>
 
-          <Link to="/admin/service-provider-mapping">
-            <Card className="glass-card h-full hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10 transition-all cursor-pointer group border-2 border-primary/30">
-              <CardContent className="p-5">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/30 to-primary/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <Zap className="h-6 w-6 text-primary" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-semibold group-hover:text-primary transition-colors">
-                        Service Mapping
-                      </h3>
-                      <Badge className="text-[10px] h-4 px-1.5 bg-primary">NEW</Badge>
-                    </div>
-                    <p className="text-xs text-muted-foreground">Failover & Rotation</p>
-                  </div>
-                  <ArrowUpRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-
-          <Link to="/admin/deposits">
-            <Card className="glass-card h-full hover:border-amber-500/50 hover:shadow-lg hover:shadow-amber-500/10 transition-all cursor-pointer group border-2 border-amber-500/30">
-              <CardContent className="p-5">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500/30 to-amber-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <CreditCard className="h-6 w-6 text-amber-500" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-semibold group-hover:text-amber-500 transition-colors">
-                        Deposit Requests
-                      </h3>
-                      <Badge className="text-[10px] h-4 px-1.5 bg-amber-500 text-amber-500-foreground">PENDING</Badge>
-                    </div>
-                    <p className="text-xs text-muted-foreground">Approve Razorpay payments</p>
-                  </div>
-                  <ArrowUpRight className="h-4 w-4 text-muted-foreground group-hover:text-amber-500 transition-colors" />
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
 
           <Link to="/admin/subscriptions">
             <Card className="glass-card h-full hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10 transition-all cursor-pointer group border-2 border-primary/30">
