@@ -1,5 +1,5 @@
 # Grinzo — robots.txt
-# Site:    https://grinzo.app
+# Site:    https://whopxbot.lovable.app
 # Updated: 2026-05-05
 
 # ───────────────────────────── Default rule ─────────────────────────────
@@ -98,5 +98,5 @@ User-agent: DotBot
 Disallow: /
 
 # ───────────────────────────── Sitemap & host ─────────────────────────────
-Sitemap: https://grinzo.app/sitemap.xml
-Host: https://grinzo.app
+Sitemap: https://whopxbot.lovable.app/sitemap.xml
+Host: https://whopxbot.lovable.app
