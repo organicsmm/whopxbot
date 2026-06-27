@@ -345,10 +345,11 @@ export function TypeHistoryCard({
           <div className="max-h-[600px] overflow-y-auto">
             <div className="divide-y divide-border">
               {runsWithSchedule.map((run, idx) => {
-                const isPending = run.status === 'pending';
-                const isActive = run.status === 'started';
-                const isCompleted = run.status === 'completed';
-                const isFailed = run.status === 'failed';
+                const autoCompleted = isTargetMetAutoCompleted(run);
+                const isPending = !autoCompleted && run.status === 'pending';
+                const isActive = !autoCompleted && run.status === 'started';
+                const isCompleted = autoCompleted || run.status === 'completed';
+                const isFailed = !autoCompleted && run.status === 'failed';
                 const scheduledDate = new Date(run.scheduled_at);
                 const isUpcoming = isPending && scheduledDate > now;
                 const isPastDue = scheduledDate < now && isPending;
@@ -356,6 +357,7 @@ export function TypeHistoryCard({
 
                 // Smart status: provider_status > mapped internal status
                 const getDisplayStatus = () => {
+                  if (autoCompleted) return 'Completed';
                   if (run.provider_status) return run.provider_status;
                   if (run.status === 'cancelled') return 'CANCELLED';
                   if (isFailed) return 'FAILED';
