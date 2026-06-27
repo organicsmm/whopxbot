@@ -414,8 +414,8 @@ export function MergedTimeline({ runs, onEditRun, nextRun, onRefresh, typeTarget
                       )}
                     </div>
 
-                    {/* SMART STATUS MESSAGE - Shows real-time provider status */}
-                    {(run.error_message || run.provider_status || run.provider_order_id) && (
+                    {/* SMART STATUS MESSAGE - Shows real-time provider status (hidden when target-met auto completed) */}
+                    {!autoCompleted && (run.error_message || run.provider_status || run.provider_order_id) && (
                       <div className={`mt-2 px-3 py-2 rounded-lg text-sm ${run.provider_status === 'Completed' || run.provider_status === 'Partial'
                         ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400'
                         : run.provider_status === 'In progress' || run.provider_status === 'Processing'
