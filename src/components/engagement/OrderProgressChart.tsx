@@ -101,9 +101,11 @@ export function OrderProgressChart({ runs, perType }: OrderProgressChartProps) {
     sortedRuns.forEach((run) => {
       const runTime = new Date(run.completed_at || run.started_at || run.scheduled_at);
       
-      // Calculate ACTUAL delivered quantity
+      // Calculate ACTUAL delivered quantity (incl. target-met auto-completed)
       let deliveredQty = 0;
-      if (run.status === 'completed') {
+      if (isTargetMetAutoCompleted(run)) {
+        deliveredQty = run.quantity_to_send;
+      } else if (run.status === 'completed') {
         deliveredQty = run.quantity_to_send;
       } else if ((run.status === 'started' || run.status === 'failed') && 
                  run.provider_remains !== null && run.provider_remains !== undefined) {
