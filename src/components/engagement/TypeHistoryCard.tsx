@@ -454,15 +454,15 @@ export function TypeHistoryCard({
 
                       {/* Right Side - Provider Name + ID & Edit */}
                       <div className="flex items-center gap-4">
-                        {/* Provider Account Name */}
-                        {run.provider_account_name && (
+                        {/* Provider Account Name (hidden when target-met auto completed) */}
+                        {!autoCompleted && run.provider_account_name && (
                           <div className="text-right">
                             <p className="text-xs text-muted-foreground uppercase">Provider</p>
                             <p className="text-sm font-bold text-purple-400">{run.provider_account_name}</p>
                           </div>
                         )}
 
-                        {run.provider_order_id && (
+                        {!autoCompleted && run.provider_order_id && (
                           <div className="text-right">
                             <p className="text-xs text-muted-foreground uppercase">Order ID</p>
                             <p className="text-sm font-mono text-teal-400">{run.provider_order_id}</p>
