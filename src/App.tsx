@@ -41,6 +41,7 @@ const AdminDeposits = lazy(() => import("./pages/admin/AdminDeposits"));
 const AdminProviderAccounts = lazy(() => import("./pages/admin/AdminProviderAccounts"));
 const AdminServiceProviderMapping = lazy(() => import("./pages/admin/AdminServiceProviderMapping"));
 const AdminSubscriptions = lazy(() => import("./pages/admin/AdminSubscriptions"));
+const AdminTopupPlan = lazy(() => import("./pages/admin/AdminTopupPlan"));
 
 const TermsOfService = lazy(() => import("./pages/legal/TermsOfService"));
 const PrivacyPolicy = lazy(() => import("./pages/legal/PrivacyPolicy"));
@@ -129,6 +130,7 @@ const App = () => {
                     <Route path="/admin/provider-accounts" element={<AdminGuard><AdminProviderAccounts /></AdminGuard>} />
                     <Route path="/admin/service-provider-mapping" element={<AdminGuard><AdminServiceProviderMapping /></AdminGuard>} />
                     <Route path="/admin/subscriptions" element={<AdminGuard><AdminSubscriptions /></AdminGuard>} />
+                    <Route path="/admin/topup-plan" element={<AdminGuard><AdminTopupPlan /></AdminGuard>} />
 
                     {/* Legal */}
                     <Route path="/terms" element={<TermsOfService />} />
