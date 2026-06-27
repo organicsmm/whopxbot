@@ -71,18 +71,18 @@ Deno.serve(async (req) => {
             if (runsError) throw new Error("Error fetching runs: " + runsError.message);
 
             if (pendingRuns && pendingRuns.length > 0) {
-                // Calculate refund
                 const totalPendingQuantity = pendingRuns.reduce((sum: number, run: any) => sum + run.quantity_to_send, 0);
-                refundedQuantity = totalPendingQuantity;
 
-                if (order.quantity > 0) {
-                    refundAmount = (totalPendingQuantity / order.quantity) * Number(order.price);
+                // Refund ONLY when admin cancels. User-initiated cancels do not refund.
+                if (isAdmin) {
+                    refundedQuantity = totalPendingQuantity;
+                    if (order.quantity > 0) {
+                        refundAmount = (totalPendingQuantity / order.quantity) * Number(order.price);
+                    }
                 }
 
-                // Output debug
-                console.log(`Cancelling ${pendingRuns.length} runs. Quantity = ${totalPendingQuantity}. Refund = ${refundAmount}`);
+                console.log(`Cancelling ${pendingRuns.length} runs. Qty=${totalPendingQuantity}. Admin=${isAdmin}. Refund=${refundAmount}`);
 
-                // Update runs
                 const runIds = pendingRuns.map((r: any) => r.id);
                 const { error: updateRunsError } = await supabase
                     .from('organic_run_schedule')
@@ -92,10 +92,8 @@ Deno.serve(async (req) => {
                 if (updateRunsError) throw new Error("Failed to update runs: " + updateRunsError.message);
             }
         } else {
-            // Normal order. If pending or processing, and hasn't gone up yet?
-            // For now, if admin cancels it, refund the whole amount? Or check provider_order_id?
-            // Since normal orders usually process immediately, it's safer to only refund if it's strictly 'pending'.
-            if (order.status === 'pending') {
+            // Normal order: refund only if admin cancels a still-pending order.
+            if (isAdmin && order.status === 'pending') {
                 refundAmount = Number(order.price);
                 refundedQuantity = order.quantity;
             }
