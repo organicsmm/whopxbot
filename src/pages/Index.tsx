@@ -75,7 +75,7 @@ const Index = () => {
           </div>
         </div>
       </header>
-
+      <main>
       {/* Hero */}
       <section className="relative">
         <div className="max-w-5xl mx-auto px-5 sm:px-8 pt-20 sm:pt-28 pb-20 sm:pb-28 text-center">
