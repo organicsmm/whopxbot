@@ -104,10 +104,11 @@ html {
 
   .glass-card {
     @apply relative overflow-hidden rounded-2xl border;
-    background: rgba(255,255,255,.88);
-    border-color: rgba(74,103,65,.14);
-    box-shadow: 0 4px 20px rgba(74,103,65,.06), 0 1px 3px rgba(0,0,0,.04);
-    backdrop-filter: blur(8px);
+    background: rgba(255,255,255,.03);
+    border-color: rgba(255,255,255,.10);
+    box-shadow: 0 8px 32px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.04);
+    backdrop-filter: blur(12px);
+    color: hsl(var(--foreground));
   }
 
   .three-d-card { @apply glass-card; }
@@ -120,20 +121,20 @@ html {
 
   .gradient-text {
     @apply bg-clip-text text-transparent font-extrabold;
-    background-image: linear-gradient(135deg, hsl(100 22% 38%), hsl(22 70% 65%));
+    background-image: linear-gradient(135deg, hsl(270 95% 75%), hsl(290 90% 75%));
   }
 
   /* ════ BUTTONS ════ */
   .btn-3d {
     @apply relative overflow-hidden font-bold rounded-xl flex items-center justify-center transition-all duration-200;
-    background: linear-gradient(135deg, hsl(100 22% 38%), hsl(100 22% 30%));
+    background: linear-gradient(135deg, hsl(270 95% 65%), hsl(280 90% 55%));
     color: white;
-    box-shadow: 0 4px 16px rgba(74,103,65, 0.22);
+    box-shadow: 0 4px 16px rgba(168,85,247, 0.32);
   }
 
   .btn-3d:hover {
     transform: translateY(-1px);
-    box-shadow: 0 6px 24px rgba(74,103,65, 0.3);
+    box-shadow: 0 6px 24px rgba(168,85,247, 0.45);
   }
 
   .btn-3d:active { transform: translateY(0); }
@@ -165,18 +166,79 @@ html {
   }
 
   .glow-neon {
-    box-shadow: 0 0 16px rgba(232,168,124, 0.14);
+    box-shadow: 0 0 16px rgba(168,85,247, 0.25);
   }
 
-  /* Chrome autofill fix */
+  /* Chrome autofill fix — dark */
   input:-webkit-autofill,
   input:-webkit-autofill:hover,
   input:-webkit-autofill:focus,
   input:-webkit-autofill:active {
-    -webkit-box-shadow: 0 0 0 100px hsl(36 38% 97%) inset !important;
-    -webkit-text-fill-color: hsl(140 20% 14%) !important;
+    -webkit-box-shadow: 0 0 0 100px hsl(240 15% 12%) inset !important;
+    -webkit-text-fill-color: hsl(0 0% 100%) !important;
+    caret-color: white !important;
     transition: background-color 5000s ease-in-out 0s;
   }
+
+  /* ════ GLOBAL DARK OVERRIDES for inner dashboard pages ════
+     Many inner pages use hardcoded light Tailwind classes. Remap them
+     inside <main> (dashboard scope) to glass-dark equivalents. */
+  main .bg-white,
+  main .bg-stone-50,
+  main .bg-stone-100,
+  main .bg-neutral-50,
+  main .bg-neutral-100,
+  main .bg-gray-50,
+  main .bg-gray-100,
+  main .bg-slate-50,
+  main .bg-slate-100,
+  main .bg-zinc-50,
+  main .bg-zinc-100 {
+    background-color: rgba(255,255,255,0.035) !important;
+    backdrop-filter: blur(10px);
+  }
+
+  main .text-black,
+  main .text-stone-900,
+  main .text-neutral-900,
+  main .text-gray-900,
+  main .text-slate-900,
+  main .text-zinc-900 {
+    color: rgba(255,255,255,0.95) !important;
+  }
+  main .text-stone-800, main .text-neutral-800, main .text-gray-800, main .text-slate-800, main .text-zinc-800 { color: rgba(255,255,255,0.88) !important; }
+  main .text-stone-700, main .text-neutral-700, main .text-gray-700, main .text-slate-700, main .text-zinc-700 { color: rgba(255,255,255,0.78) !important; }
+  main .text-stone-600, main .text-neutral-600, main .text-gray-600, main .text-slate-600, main .text-zinc-600 { color: rgba(255,255,255,0.65) !important; }
+  main .text-stone-500, main .text-neutral-500, main .text-gray-500, main .text-slate-500, main .text-zinc-500 { color: rgba(255,255,255,0.55) !important; }
+  main .text-stone-400, main .text-neutral-400, main .text-gray-400, main .text-slate-400, main .text-zinc-400 { color: rgba(255,255,255,0.45) !important; }
+
+  main .border-stone-200, main .border-neutral-200, main .border-gray-200, main .border-slate-200, main .border-zinc-200,
+  main .border-stone-100, main .border-neutral-100, main .border-gray-100, main .border-slate-100, main .border-zinc-100 {
+    border-color: rgba(255,255,255,0.10) !important;
+  }
+  main .border-stone-300, main .border-neutral-300, main .border-gray-300, main .border-slate-300, main .border-zinc-300 {
+    border-color: rgba(255,255,255,0.14) !important;
+  }
+
+  /* Inputs/textareas/selects inside dashboard */
+  main input:not([type='checkbox']):not([type='radio']):not([type='range']),
+  main textarea,
+  main select {
+    background-color: rgba(255,255,255,0.04) !important;
+    color: white !important;
+    border-color: rgba(255,255,255,0.12) !important;
+  }
+  main input::placeholder,
+  main textarea::placeholder { color: rgba(255,255,255,0.35) !important; }
+
+  /* Common subtle backgrounds */
+  main .bg-amber-50, main .bg-yellow-50 { background-color: rgba(251,191,36,0.10) !important; }
+  main .bg-red-50, main .bg-rose-50 { background-color: rgba(248,113,113,0.10) !important; }
+  main .bg-green-50, main .bg-emerald-50 { background-color: rgba(52,211,153,0.10) !important; }
+  main .bg-blue-50, main .bg-sky-50, main .bg-indigo-50 { background-color: rgba(96,165,250,0.10) !important; }
+  main .bg-purple-50, main .bg-violet-50, main .bg-fuchsia-50 { background-color: rgba(168,85,247,0.12) !important; }
+  main .bg-orange-50 { background-color: rgba(251,146,60,0.10) !important; }
+}
 }
 
 @layer utilities {
