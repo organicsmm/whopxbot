@@ -65,25 +65,25 @@ Deno.serve(async (req) => {
       .split(".")[0];
     const webhookUrl = `https://${projectRef}.supabase.co/functions/v1/zapupi-webhook`;
 
-    const params = new URLSearchParams();
-    params.set("zap_key", ZAP_KEY);
-    params.set("customer_name", (user.email || "user").split("@")[0]);
-    params.set("customer_email", user.email || "user@example.com");
-    params.set("customer_mobile", "9999999999");
-    params.set("user_token", orderId); // our reference
-    params.set("amount", String(amountInr));
-    params.set("redirect_url", `${origin}/wallet?deposit=success&order_id=${orderId}`);
-    params.set("success_url", `${origin}/wallet?deposit=success&order_id=${orderId}`);
-    params.set("failed_url", `${origin}/wallet?deposit=failed&order_id=${orderId}`);
-    params.set("timeout_url", `${origin}/wallet?deposit=timeout&order_id=${orderId}`);
-    params.set("webhook_url", webhookUrl);
-    params.set("remark1", user.id);
-    params.set("remark2", orderId);
+    const payload = {
+      key: ZAP_KEY,
+      client_txn_id: orderId,
+      amount: String(amountInr),
+      p_info: "Wallet Top-up",
+      customer_name: (user.email || "user").split("@")[0],
+      customer_email: user.email || "user@example.com",
+      customer_mobile: "9999999999",
+      redirect_url: `${origin}/wallet?deposit=success&order_id=${orderId}`,
+      webhook_url: webhookUrl,
+      udf1: user.id,
+      udf2: orderId,
+      udf3: "wallet",
+    };
 
     const upstream = await fetch(ZAPUPI_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: params.toString(),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
     });
 
     const raw = await upstream.text();

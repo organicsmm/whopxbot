@@ -46,14 +46,10 @@ Deno.serve(async (req) => {
     }
 
     // Query provider
-    const params = new URLSearchParams();
-    params.set("zap_key", ZAP_KEY);
-    params.set("user_token", orderId);
-    params.set("client_txn_id", orderId);
     const resp = await fetch(STATUS_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: params.toString(),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ key: ZAP_KEY, client_txn_id: orderId }),
     });
     const raw = await resp.text();
     let data: any = null;
