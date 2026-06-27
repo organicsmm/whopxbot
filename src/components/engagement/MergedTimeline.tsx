@@ -244,11 +244,6 @@ export function MergedTimeline({ runs, onEditRun, nextRun, onRefresh, typeTarget
             const Icon = engConfig.icon;
             const scheduledDate = new Date(run.scheduled_at);
             const now = new Date();
-            const isPending = run.status === 'pending';
-            const isActive = run.status === 'started';
-            const isCompleted = run.status === 'completed';
-            const isFailed = run.status === 'failed';
-            const isCancelled = run.status === 'cancelled';
 
             const autoCompleted = isTargetMetAutoCompleted(run);
             const isPending = !autoCompleted && run.status === 'pending';
