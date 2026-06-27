@@ -41,6 +41,7 @@ const AdminDeposits = lazy(() => import("./pages/admin/AdminDeposits"));
 const AdminProviderAccounts = lazy(() => import("./pages/admin/AdminProviderAccounts"));
 const AdminServiceProviderMapping = lazy(() => import("./pages/admin/AdminServiceProviderMapping"));
 const AdminSubscriptions = lazy(() => import("./pages/admin/AdminSubscriptions"));
+const AdminTopupPlan = lazy(() => import("./pages/admin/AdminTopupPlan"));
 
 const TermsOfService = lazy(() => import("./pages/legal/TermsOfService"));
 const PrivacyPolicy = lazy(() => import("./pages/legal/PrivacyPolicy"));
