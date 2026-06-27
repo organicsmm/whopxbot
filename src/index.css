@@ -239,7 +239,7 @@ html {
   main .bg-purple-50, main .bg-violet-50, main .bg-fuchsia-50 { background-color: rgba(168,85,247,0.12) !important; }
   main .bg-orange-50 { background-color: rgba(251,146,60,0.10) !important; }
 }
-}
+
 
 @layer utilities {
   .scrollbar-thin {
