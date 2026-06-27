@@ -250,6 +250,13 @@ export function MergedTimeline({ runs, onEditRun, nextRun, onRefresh, typeTarget
             const isFailed = run.status === 'failed';
             const isCancelled = run.status === 'cancelled';
 
+            const autoCompleted = isTargetMetAutoCompleted(run);
+            const isPending = !autoCompleted && run.status === 'pending';
+            const isActive = !autoCompleted && run.status === 'started';
+            const isCompleted = autoCompleted || run.status === 'completed';
+            const isFailed = !autoCompleted && run.status === 'failed';
+            const isCancelled = !autoCompleted && run.status === 'cancelled';
+
             const isAlreadyExecuted = isCompleted || isFailed || isActive;
             const isScheduledInPast = scheduledDate < now;
             const isUpcoming = isPending && !isScheduledInPast;
@@ -258,6 +265,7 @@ export function MergedTimeline({ runs, onEditRun, nextRun, onRefresh, typeTarget
             // If provider_status exists, use it directly (real-time from provider)
             // If pending + future = "Scheduled", pending + past = "Queued"
             const getDisplayStatus = () => {
+              if (autoCompleted) return 'Completed';
               if (run.provider_status) return run.provider_status;
               if (isCancelled) return 'CANCELLED';
               if (isFailed) return 'FAILED';
@@ -269,8 +277,8 @@ export function MergedTimeline({ runs, onEditRun, nextRun, onRefresh, typeTarget
             };
             const displayStatus = getDisplayStatus();
 
-            // Provider progress data
-            const providerRemains = run.provider_remains ?? null;
+            // Provider progress data (hidden when target-met auto completed)
+            const providerRemains = autoCompleted ? null : (run.provider_remains ?? null);
             const delivered = providerRemains !== null ? (run.quantity_to_send - providerRemains) : null;
             const progressPercent = providerRemains !== null && run.quantity_to_send > 0
               ? Math.min(100, Math.max(0, ((run.quantity_to_send - providerRemains) / run.quantity_to_send) * 100))
