@@ -92,6 +92,8 @@ export function TypeHistoryCard({
   const normalizeProviderStatus = (s?: string | null) => (s ?? '').toString().toLowerCase().trim();
 
   const getEffectiveStatus = (run: Run): 'pending' | 'started' | 'completed' | 'failed' => {
+    if (isTargetMetAutoCompleted(run)) return 'completed';
+
     const ps = normalizeProviderStatus(run.provider_status);
 
     if (ps === 'completed' || ps === 'complete' || ps === 'partial') return 'completed';
@@ -107,6 +109,8 @@ export function TypeHistoryCard({
 
   // Helper to calculate actual delivered from provider data
   const calculateActualDelivered = (run: Run): number => {
+    if (isTargetMetAutoCompleted(run)) return run.quantity_to_send;
+
     const ps = normalizeProviderStatus(run.provider_status);
 
     // Provider-confirmed completion
