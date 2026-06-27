@@ -107,13 +107,12 @@ async function verifyOrder(
 ): Promise<{ success: boolean; failed?: boolean; amount?: number; txnId?: string; utr?: string; raw?: any }> {
   try {
     const params = new URLSearchParams();
-    params.set("zap_key", zapKey);
-    params.set("user_token", orderId);
+    params.set("key", zapKey);
     params.set("client_txn_id", orderId);
     const resp = await fetch(STATUS_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: params.toString(),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ key: zapKey, client_txn_id: orderId }),
     });
     const raw = await resp.text();
     let data: any = null;
