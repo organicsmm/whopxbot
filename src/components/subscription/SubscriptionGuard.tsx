@@ -87,7 +87,7 @@ export function SubscriptionGuard({ children }: SubscriptionGuardProps) {
                 </div>
                 <h3 className="font-semibold mb-1">Monthly Plan</h3>
                 <div className="flex items-baseline gap-1 mb-3">
-                  <span className="text-3xl font-bold">$10</span>
+                  <span className="text-3xl font-bold">₹999</span>
                   <span className="text-muted-foreground">/month</span>
                 </div>
                 <ul className="space-y-1.5 text-sm text-muted-foreground">
@@ -125,7 +125,7 @@ export function SubscriptionGuard({ children }: SubscriptionGuardProps) {
                 </div>
                 <h3 className="font-semibold mb-1">Lifetime Plan</h3>
                 <div className="flex items-baseline gap-1 mb-3">
-                  <span className="text-3xl font-bold">$50</span>
+                  <span className="text-3xl font-bold">₹8,250</span>
                   <span className="text-muted-foreground">one-time</span>
                 </div>
                 <ul className="space-y-1.5 text-sm text-muted-foreground">

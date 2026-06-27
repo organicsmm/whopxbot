@@ -15,11 +15,16 @@ import { cn } from "@/lib/utils";
 
 const INR_RATE = 83.5;
 
-const usd = (n: number) =>
-  `$${(n || 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+// INR-only mode: internal values stored as USD, displayed everywhere as INR.
 const inr = (n: number) =>
   `₹${Math.round((n || 0) * INR_RATE).toLocaleString("en-IN")}`;
-const num = (n: number) => (n || 0).toLocaleString("en-US");
+const inrFromAny = (n: number, currency?: string | null) => {
+  const code = (currency || "").toUpperCase();
+  // Provider balances may already be in INR; otherwise treat as USD and convert.
+  if (code === "INR") return `₹${Math.round(n || 0).toLocaleString("en-IN")}`;
+  return inr(n);
+};
+const num = (n: number) => (n || 0).toLocaleString("en-IN");
 
 type PlanRow = {
   provider_account_id: string;
@@ -208,8 +213,8 @@ export default function AdminTopupPlan() {
             <Card className="glass-card">
               <CardContent className="p-4">
                 <div className="text-xs text-muted-foreground">Total Pending (user-facing)</div>
-                <div className="text-xl font-bold mt-1">{usd(totalPendingUsd)}</div>
-                <div className="text-xs text-muted-foreground">≈ {inr(totalPendingUsd)}</div>
+                <div className="text-xl font-bold mt-1">{inr(totalPendingUsd)}</div>
+                <div className="text-xs text-muted-foreground">All amounts in INR</div>
               </CardContent>
             </Card>
             <Card className="glass-card">
@@ -228,7 +233,7 @@ export default function AdminTopupPlan() {
                   <>
                     <div className="text-sm font-semibold mt-1 truncate">{largestBucket.provider_name}</div>
                     <div className="text-xs text-muted-foreground truncate">
-                      {largestBucket.service_name} — {usd(Number(largestBucket.pending_user_usd))}
+                      {largestBucket.service_name} — {inr(Number(largestBucket.pending_user_usd))}
                     </div>
                   </>
                 ) : (
@@ -275,21 +280,18 @@ export default function AdminTopupPlan() {
                         <div>
                           <div className="text-xs text-muted-foreground">Balance</div>
                           <div className="text-2xl font-bold">
-                            {a.balance != null ? `${a.balance.toFixed(2)} ${a.balance_currency || ""}` : "—"}
+                            {a.balance != null ? inrFromAny(a.balance, a.balance_currency) : "—"}
                           </div>
-                          {a.balance != null && (a.balance_currency || "").toUpperCase() === "USD" && (
-                            <div className="text-xs text-muted-foreground">≈ {inr(a.balance)}</div>
-                          )}
                         </div>
                         <div className="grid grid-cols-2 gap-2 text-sm">
                           <div>
                             <div className="text-xs text-muted-foreground">Pending cost</div>
-                            <div className="font-semibold">{usd(cost)}</div>
+                            <div className="font-semibold">{inr(cost)}</div>
                           </div>
                           <div>
                             <div className="text-xs text-muted-foreground">Delta</div>
                             <div className={cn("font-semibold", delta >= 0 ? "text-success" : "text-destructive")}>
-                              {delta >= 0 ? usd(delta) : `-${usd(Math.abs(delta))}`}
+                              {delta >= 0 ? inr(delta) : `-${inr(Math.abs(delta))}`}
                             </div>
                           </div>
                         </div>
@@ -348,10 +350,9 @@ export default function AdminTopupPlan() {
                         <th className="text-left px-4 py-2 w-8"></th>
                         <th className="text-left px-4 py-2">Provider</th>
                         <th className="text-right px-4 py-2">Pending runs</th>
-                        <th className="text-right px-4 py-2">User USD</th>
-                        <th className="text-right px-4 py-2">Provider cost</th>
-                        <th className="text-right px-4 py-2">INR</th>
-                      </tr>
+                        <th className="text-right px-4 py-2">User (INR)</th>
+                        <th className="text-right px-4 py-2">Provider cost (INR)</th>
+                        </tr>
                     </thead>
                     <tbody>
                       {(plan.data || []).map((r) => {
@@ -370,14 +371,14 @@ export default function AdminTopupPlan() {
                               </td>
                               <td className="px-4 py-2 font-medium">{r.provider_name}</td>
                               <td className="px-4 py-2 text-right">{num(r.pending_runs)}</td>
-                              <td className="px-4 py-2 text-right">{usd(Number(r.pending_user_usd))}</td>
-                              <td className="px-4 py-2 text-right">{usd(cost)}</td>
-                              <td className="px-4 py-2 text-right text-muted-foreground">{inr(cost)}</td>
+                              <td className="px-4 py-2 text-right">{inr(Number(r.pending_user_usd))}</td>
+                              <td className="px-4 py-2 text-right">{inr(cost)}</td>
+                              
                             </tr>
                             {isOpen && (
                               <tr key={r.provider_account_id + "-exp"} className="bg-muted/10">
                                 <td></td>
-                                <td colSpan={5} className="px-4 py-3">
+                                <td colSpan={4} className="px-4 py-3">
                                   {rows.length === 0 ? (
                                     <div className="text-xs text-muted-foreground">No breakdown.</div>
                                   ) : (
@@ -387,8 +388,8 @@ export default function AdminTopupPlan() {
                                           <th className="text-left py-1">Service</th>
                                           <th className="text-right py-1">Runs</th>
                                           <th className="text-right py-1">Quantity</th>
-                                          <th className="text-right py-1">User USD</th>
-                                          <th className="text-right py-1">Cost USD</th>
+                                          <th className="text-right py-1">User (INR)</th>
+                                          <th className="text-right py-1">Cost (INR)</th>
                                         </tr>
                                       </thead>
                                       <tbody>
@@ -408,8 +409,8 @@ export default function AdminTopupPlan() {
                                               </td>
                                               <td className="py-1 text-right">{num(b.pending_runs)}</td>
                                               <td className="py-1 text-right">{num(b.pending_quantity)}</td>
-                                              <td className="py-1 text-right">{usd(Number(b.pending_user_usd))}</td>
-                                              <td className="py-1 text-right text-muted-foreground">{usd(bcost)}</td>
+                                              <td className="py-1 text-right">{inr(Number(b.pending_user_usd))}</td>
+                                              <td className="py-1 text-right text-muted-foreground">{inr(bcost)}</td>
                                             </tr>
                                           );
                                         })}
@@ -428,8 +429,8 @@ export default function AdminTopupPlan() {
                         <td></td>
                         <td className="px-4 py-2 font-semibold">Total</td>
                         <td></td>
-                        <td className="px-4 py-2 text-right font-semibold">{usd(totalPendingUsd)}</td>
-                        <td className="px-4 py-2 text-right font-semibold">{usd(totalPendingCost)}</td>
+                        <td className="px-4 py-2 text-right font-semibold">{inr(totalPendingUsd)}</td>
+                        <td className="px-4 py-2 text-right font-semibold">{inr(totalPendingCost)}</td>
                         <td className="px-4 py-2 text-right font-semibold text-muted-foreground">{inr(totalPendingCost)}</td>
                       </tr>
                     </tfoot>

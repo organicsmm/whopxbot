@@ -304,7 +304,7 @@ const Index = () => {
                   style={{ background: C.peach, color: C.orangeDeep }}>Flexible</span>
               </div>
               <div className="flex items-baseline gap-1.5 mb-1">
-                <span className="text-[44px] font-black tracking-tight" style={{ color: C.ink, fontFamily: "'Outfit', system-ui" }}>$10</span>
+                <span className="text-[44px] font-black tracking-tight" style={{ color: C.ink, fontFamily: "'Outfit', system-ui" }}>₹999</span>
                 <span className="text-[14px] font-medium" style={{ color: C.muted }}>/month</span>
               </div>
               <p className="text-[13px] mb-6" style={{ color: C.ink2 }}>Billed monthly. Full access to all features.</p>
@@ -345,8 +345,8 @@ const Index = () => {
                   style={{ background: C.orange, color: 'white' }}>One-time</span>
               </div>
               <div className="flex items-baseline gap-2 mb-1">
-                <span className="text-[44px] font-black tracking-tight" style={{ color: C.ink, fontFamily: "'Outfit', system-ui" }}>$99</span>
-                <span className="text-[14px] font-medium line-through" style={{ color: C.muted }}>$240/yr</span>
+                <span className="text-[44px] font-black tracking-tight" style={{ color: C.ink, fontFamily: "'Outfit', system-ui" }}>₹8,250</span>
+                <span className="text-[14px] font-medium line-through" style={{ color: C.muted }}>₹19,920/yr</span>
               </div>
               <p className="text-[13px] mb-6" style={{ color: C.ink2 }}>Pay once. Use forever. No renewals.</p>
               <ul className="space-y-2.5 mb-7 flex-1">
