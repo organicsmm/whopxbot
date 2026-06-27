@@ -5,7 +5,7 @@ import { ArrowLeft, RefreshCw, Wallet, TrendingUp, ChevronDown, ChevronRight, Al
 import { formatDistanceToNow } from "date-fns";
 
 import { supabase } from "@/integrations/supabase/client";
-import DashboardLayout from "@/components/DashboardLayout";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
