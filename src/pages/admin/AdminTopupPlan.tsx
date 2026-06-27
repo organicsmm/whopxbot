@@ -378,7 +378,7 @@ export default function AdminTopupPlan() {
                             {isOpen && (
                               <tr key={r.provider_account_id + "-exp"} className="bg-muted/10">
                                 <td></td>
-                                <td colSpan={5} className="px-4 py-3">
+                                <td colSpan={4} className="px-4 py-3">
                                   {rows.length === 0 ? (
                                     <div className="text-xs text-muted-foreground">No breakdown.</div>
                                   ) : (
@@ -388,8 +388,8 @@ export default function AdminTopupPlan() {
                                           <th className="text-left py-1">Service</th>
                                           <th className="text-right py-1">Runs</th>
                                           <th className="text-right py-1">Quantity</th>
-                                          <th className="text-right py-1">User USD</th>
-                                          <th className="text-right py-1">Cost USD</th>
+                                          <th className="text-right py-1">User (INR)</th>
+                                          <th className="text-right py-1">Cost (INR)</th>
                                         </tr>
                                       </thead>
                                       <tbody>
