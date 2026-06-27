@@ -280,11 +280,8 @@ export default function AdminTopupPlan() {
                         <div>
                           <div className="text-xs text-muted-foreground">Balance</div>
                           <div className="text-2xl font-bold">
-                            {a.balance != null ? `${a.balance.toFixed(2)} ${a.balance_currency || ""}` : "—"}
+                            {a.balance != null ? inrFromAny(a.balance, a.balance_currency) : "—"}
                           </div>
-                          {a.balance != null && (a.balance_currency || "").toUpperCase() === "USD" && (
-                            <div className="text-xs text-muted-foreground">≈ {inr(a.balance)}</div>
-                          )}
                         </div>
                         <div className="grid grid-cols-2 gap-2 text-sm">
                           <div>
