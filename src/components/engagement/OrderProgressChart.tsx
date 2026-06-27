@@ -55,6 +55,7 @@ export function OrderProgressChart({ runs, perType }: OrderProgressChartProps) {
 
     // Filter only runs that have ACTUAL delivery (completed or started with some delivery)
     const deliveredRuns = runs.filter(run => {
+      if (isTargetMetAutoCompleted(run)) return true;
       if (run.status === 'completed') return true;
       if ((run.status === 'started' || run.status === 'failed') && 
           run.provider_remains !== null && run.provider_remains !== undefined) {
