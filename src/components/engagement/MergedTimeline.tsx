@@ -65,6 +65,9 @@ export function MergedTimeline({ runs, onEditRun, nextRun, onRefresh, typeTarget
   const normalizeProviderStatus = (s?: string | null) => (s ?? '').toString().toLowerCase().trim();
 
   const getEffectiveStatus = (run: MergedRun): 'pending' | 'started' | 'completed' | 'failed' | 'cancelled' => {
+    // Target-met auto cancellations should be presented as completed
+    if (isTargetMetAutoCompleted(run)) return 'completed';
+
     const ps = normalizeProviderStatus(run.provider_status);
 
     if (ps === 'completed' || ps === 'complete' || ps === 'partial') return 'completed';
@@ -80,6 +83,10 @@ export function MergedTimeline({ runs, onEditRun, nextRun, onRefresh, typeTarget
   };
 
   const getDeliveredFromProvider = (run: MergedRun): number => {
+    // Target-met cancel = treat the asked quantity as delivered (no provider call was made,
+    // but the overall target was already reached, so this run counts toward delivery).
+    if (isTargetMetAutoCompleted(run)) return run.quantity_to_send;
+
     const ps = normalizeProviderStatus(run.provider_status);
 
     // Provider-confirmed completion
