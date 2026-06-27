@@ -213,7 +213,7 @@ export default function AdminTopupPlan() {
             <Card className="glass-card">
               <CardContent className="p-4">
                 <div className="text-xs text-muted-foreground">Total Pending (user-facing)</div>
-                <div className="text-xl font-bold mt-1">{usd(totalPendingUsd)}</div>
+                <div className="text-xl font-bold mt-1">{inr(totalPendingUsd)}</div>
                 <div className="text-xs text-muted-foreground">≈ {inr(totalPendingUsd)}</div>
               </CardContent>
             </Card>
@@ -233,7 +233,7 @@ export default function AdminTopupPlan() {
                   <>
                     <div className="text-sm font-semibold mt-1 truncate">{largestBucket.provider_name}</div>
                     <div className="text-xs text-muted-foreground truncate">
-                      {largestBucket.service_name} — {usd(Number(largestBucket.pending_user_usd))}
+                      {largestBucket.service_name} — {inr(Number(largestBucket.pending_user_usd))}
                     </div>
                   </>
                 ) : (
@@ -289,12 +289,12 @@ export default function AdminTopupPlan() {
                         <div className="grid grid-cols-2 gap-2 text-sm">
                           <div>
                             <div className="text-xs text-muted-foreground">Pending cost</div>
-                            <div className="font-semibold">{usd(cost)}</div>
+                            <div className="font-semibold">{inr(cost)}</div>
                           </div>
                           <div>
                             <div className="text-xs text-muted-foreground">Delta</div>
                             <div className={cn("font-semibold", delta >= 0 ? "text-success" : "text-destructive")}>
-                              {delta >= 0 ? usd(delta) : `-${usd(Math.abs(delta))}`}
+                              {delta >= 0 ? inr(delta) : `-${inr(Math.abs(delta))}`}
                             </div>
                           </div>
                         </div>
@@ -375,8 +375,8 @@ export default function AdminTopupPlan() {
                               </td>
                               <td className="px-4 py-2 font-medium">{r.provider_name}</td>
                               <td className="px-4 py-2 text-right">{num(r.pending_runs)}</td>
-                              <td className="px-4 py-2 text-right">{usd(Number(r.pending_user_usd))}</td>
-                              <td className="px-4 py-2 text-right">{usd(cost)}</td>
+                              <td className="px-4 py-2 text-right">{inr(Number(r.pending_user_usd))}</td>
+                              <td className="px-4 py-2 text-right">{inr(cost)}</td>
                               <td className="px-4 py-2 text-right text-muted-foreground">{inr(cost)}</td>
                             </tr>
                             {isOpen && (
@@ -413,8 +413,8 @@ export default function AdminTopupPlan() {
                                               </td>
                                               <td className="py-1 text-right">{num(b.pending_runs)}</td>
                                               <td className="py-1 text-right">{num(b.pending_quantity)}</td>
-                                              <td className="py-1 text-right">{usd(Number(b.pending_user_usd))}</td>
-                                              <td className="py-1 text-right text-muted-foreground">{usd(bcost)}</td>
+                                              <td className="py-1 text-right">{inr(Number(b.pending_user_usd))}</td>
+                                              <td className="py-1 text-right text-muted-foreground">{inr(bcost)}</td>
                                             </tr>
                                           );
                                         })}
@@ -433,8 +433,8 @@ export default function AdminTopupPlan() {
                         <td></td>
                         <td className="px-4 py-2 font-semibold">Total</td>
                         <td></td>
-                        <td className="px-4 py-2 text-right font-semibold">{usd(totalPendingUsd)}</td>
-                        <td className="px-4 py-2 text-right font-semibold">{usd(totalPendingCost)}</td>
+                        <td className="px-4 py-2 text-right font-semibold">{inr(totalPendingUsd)}</td>
+                        <td className="px-4 py-2 text-right font-semibold">{inr(totalPendingCost)}</td>
                         <td className="px-4 py-2 text-right font-semibold text-muted-foreground">{inr(totalPendingCost)}</td>
                       </tr>
                     </tfoot>
