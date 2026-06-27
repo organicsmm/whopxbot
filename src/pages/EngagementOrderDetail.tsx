@@ -52,6 +52,7 @@ import { BottingScoreCard } from "@/components/engagement/BottingScoreCard";
 import type { Counts } from "@/lib/engagement-ratio";
 import { AutoRefillToggle } from "@/components/engagement/AutoRefillToggle";
 import { OrderProgressChart } from "@/components/engagement/OrderProgressChart";
+import { isTargetMetAutoCompleted } from "@/lib/run-status";
 
 const ENGAGEMENT_ICONS = {
   views: { icon: Eye, label: "Views", emoji: "👁️" },
