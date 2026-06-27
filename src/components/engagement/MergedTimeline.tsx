@@ -337,7 +337,7 @@ export function MergedTimeline({ runs, onEditRun, nextRun, onRefresh, typeTarget
                       </div>
 
                       {/* Provider source badge - shows where this came from */}
-                      {run.provider_account_name && (
+                      {!autoCompleted && run.provider_account_name && (
                         <Badge className="bg-purple-500/20 text-purple-400 border border-purple-500/40 text-xs truncate max-w-[200px] sm:max-w-none">
                           via {run.provider_account_name}
                         </Badge>
