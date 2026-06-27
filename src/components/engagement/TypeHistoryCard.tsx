@@ -21,6 +21,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { isTargetMetAutoCompleted } from "@/lib/run-status";
 
 const ENGAGEMENT_CONFIG = {
   views: { icon: Eye, label: "Views" },
