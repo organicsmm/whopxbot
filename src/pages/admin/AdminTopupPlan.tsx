@@ -352,8 +352,7 @@ export default function AdminTopupPlan() {
                         <th className="text-right px-4 py-2">Pending runs</th>
                         <th className="text-right px-4 py-2">User (INR)</th>
                         <th className="text-right px-4 py-2">Provider cost (INR)</th>
-                        <th className="text-right px-4 py-2">INR</th>
-                      </tr>
+                        </tr>
                     </thead>
                     <tbody>
                       {(plan.data || []).map((r) => {
