@@ -397,6 +397,7 @@ const Index = () => {
           </Link>
         </div>
       </section>
+      </main>
 
       {/* Footer */}
       <footer className="border-t border-white/5 py-10">
