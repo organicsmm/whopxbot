@@ -494,15 +494,15 @@ export function MergedTimeline({ runs, onEditRun, nextRun, onRefresh, typeTarget
 
                   {/* Provider Name + ID + Actions */}
                   <div className="flex flex-row sm:flex-col items-center sm:items-end gap-2 shrink-0 flex-wrap">
-                    {/* Provider/Service Name - visible to all users */}
-                    {run.provider_account_name && (
+                    {/* Provider/Service Name - visible to all users (hidden when target-met auto completed) */}
+                    {!autoCompleted && run.provider_account_name && (
                       <div className="text-right">
                         <p className="text-xs text-muted-foreground uppercase">Provider</p>
                         <p className="text-sm font-bold text-purple-400">{run.provider_account_name}</p>
                       </div>
                     )}
 
-                    {run.provider_order_id && (
+                    {!autoCompleted && run.provider_order_id && (
                       <div className="text-right">
                         <p className="text-xs text-muted-foreground uppercase">Order ID</p>
                         <p className="text-sm font-mono text-teal-400">{run.provider_order_id}</p>
