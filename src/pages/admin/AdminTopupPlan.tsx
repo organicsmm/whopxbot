@@ -350,8 +350,8 @@ export default function AdminTopupPlan() {
                         <th className="text-left px-4 py-2 w-8"></th>
                         <th className="text-left px-4 py-2">Provider</th>
                         <th className="text-right px-4 py-2">Pending runs</th>
-                        <th className="text-right px-4 py-2">User USD</th>
-                        <th className="text-right px-4 py-2">Provider cost</th>
+                        <th className="text-right px-4 py-2">User (INR)</th>
+                        <th className="text-right px-4 py-2">Provider cost (INR)</th>
                         <th className="text-right px-4 py-2">INR</th>
                       </tr>
                     </thead>
