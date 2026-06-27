@@ -91,7 +91,7 @@ export function SubscriptionCheckDialog({ open, onOpenChange }: SubscriptionChec
                   </div>
                   <h3 className="font-semibold text-sm mb-1 text-foreground">Monthly Plan</h3>
                   <div className="flex items-baseline gap-1 mb-2">
-                    <span className="text-2xl font-[1000] text-foreground">$10</span>
+                    <span className="text-2xl font-[1000] text-foreground">₹999</span>
                     <span className="text-xs font-bold text-muted-foreground">/month</span>
                   </div>
                   <ul className="space-y-1 text-[11px] font-bold text-muted-foreground/80">
@@ -132,7 +132,7 @@ export function SubscriptionCheckDialog({ open, onOpenChange }: SubscriptionChec
                   </div>
                   <h3 className="font-semibold text-sm mb-1 text-foreground">Lifetime Plan</h3>
                   <div className="flex items-baseline gap-1 mb-2">
-                    <span className="text-2xl font-[1000] text-foreground">$99</span>
+                    <span className="text-2xl font-[1000] text-foreground">₹8,250</span>
                     <span className="text-xs font-bold text-muted-foreground">one-time</span>
                   </div>
                   <ul className="space-y-1 text-[11px] font-bold text-muted-foreground/80">
