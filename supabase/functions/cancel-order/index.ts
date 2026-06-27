@@ -61,7 +61,7 @@ Deno.serve(async (req) => {
         let refundedQuantity = 0;
 
         if (order.is_organic_mode) {
-            // Find pending runs
+            // Find pending runs and cancel them. No refund is issued to anyone.
             const { data: pendingRuns, error: runsError } = await supabase
                 .from('organic_run_schedule')
                 .select('id, quantity_to_send')
@@ -71,18 +71,6 @@ Deno.serve(async (req) => {
             if (runsError) throw new Error("Error fetching runs: " + runsError.message);
 
             if (pendingRuns && pendingRuns.length > 0) {
-                const totalPendingQuantity = pendingRuns.reduce((sum: number, run: any) => sum + run.quantity_to_send, 0);
-
-                // Refund ONLY when admin cancels. User-initiated cancels do not refund.
-                if (isAdmin) {
-                    refundedQuantity = totalPendingQuantity;
-                    if (order.quantity > 0) {
-                        refundAmount = (totalPendingQuantity / order.quantity) * Number(order.price);
-                    }
-                }
-
-                console.log(`Cancelling ${pendingRuns.length} runs. Qty=${totalPendingQuantity}. Admin=${isAdmin}. Refund=${refundAmount}`);
-
                 const runIds = pendingRuns.map((r: any) => r.id);
                 const { error: updateRunsError } = await supabase
                     .from('organic_run_schedule')
@@ -90,14 +78,11 @@ Deno.serve(async (req) => {
                     .in('id', runIds);
 
                 if (updateRunsError) throw new Error("Failed to update runs: " + updateRunsError.message);
-            }
-        } else {
-            // Normal order: refund only if admin cancels a still-pending order.
-            if (isAdmin && order.status === 'pending') {
-                refundAmount = Number(order.price);
-                refundedQuantity = order.quantity;
+
+                console.log(`Cancelled ${pendingRuns.length} pending runs for order ${orderId}. No refund issued.`);
             }
         }
+        // Normal (non-organic) orders: no refund either.
 
         // Update order status
         const { error: updateOrderError } = await supabase
