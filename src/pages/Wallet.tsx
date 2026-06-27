@@ -3,7 +3,7 @@ import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { useWallet } from '@/hooks/useWallet';
 import { useTransactions, type TransactionFilter } from '@/hooks/useTransactions';
 import { useCurrency } from '@/hooks/useCurrency';
-import RazorpayDepositCard from '@/components/wallet/RazorpayDepositCard';
+import ZapUpiDepositCard from '@/components/wallet/ZapUpiDepositCard';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import {
@@ -204,8 +204,8 @@ export default function Wallet() {
           </div>
         </div>
 
-        {/* Deposit Section — UPI / Cards only (USDT removed for security) */}
-        <RazorpayDepositCard />
+        {/* Deposit Section — ZapUPI instant auto-credit */}
+        <ZapUpiDepositCard />
 
         {/* Transaction History */}
         <div className="rounded-2xl p-6" style={{ background: 'white', border: '1px solid rgba(0,0,0,.06)', boxShadow: '0 2px 12px rgba(0,0,0,.04)' }}>
