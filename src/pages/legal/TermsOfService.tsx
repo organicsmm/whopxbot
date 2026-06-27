@@ -6,7 +6,7 @@ import { PageMeta } from "@/components/seo/PageMeta";
 export default function TermsOfService() {
   return (
     <>
-      <PageMeta title="Terms of Service | Grinzo" description="Read the Terms of Service for Grinzo platform." canonicalPath="/terms" breadcrumbs={[{ name: "Home", path: "/" }, { name: "Terms of Service", path: "/terms" }]} />
+      <PageMeta title="Terms of Service | Grinzo" description="Read Grinzo's Terms of Service covering account use, orders, payments, refunds, intellectual property and user responsibilities on our SMM platform." canonicalPath="/terms" breadcrumbs={[{ name: "Home", path: "/" }, { name: "Terms of Service", path: "/terms" }]} />
       <div className="min-h-screen bg-background text-foreground">
         <div className="max-w-4xl mx-auto px-4 py-12">
           <Link to="/"><Button variant="ghost" size="sm" className="mb-8 gap-2"><ArrowLeft className="h-4 w-4" /> Back to Home</Button></Link>
