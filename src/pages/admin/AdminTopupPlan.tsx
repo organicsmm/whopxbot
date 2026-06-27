@@ -15,11 +15,16 @@ import { cn } from "@/lib/utils";
 
 const INR_RATE = 83.5;
 
-const usd = (n: number) =>
-  `$${(n || 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+// INR-only mode: internal values stored as USD, displayed everywhere as INR.
 const inr = (n: number) =>
   `₹${Math.round((n || 0) * INR_RATE).toLocaleString("en-IN")}`;
-const num = (n: number) => (n || 0).toLocaleString("en-US");
+const inrFromAny = (n: number, currency?: string | null) => {
+  const code = (currency || "").toUpperCase();
+  // Provider balances may already be in INR; otherwise treat as USD and convert.
+  if (code === "INR") return `₹${Math.round(n || 0).toLocaleString("en-IN")}`;
+  return inr(n);
+};
+const num = (n: number) => (n || 0).toLocaleString("en-IN");
 
 type PlanRow = {
   provider_account_id: string;
