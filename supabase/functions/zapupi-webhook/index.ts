@@ -38,12 +38,15 @@ Deno.serve(async (req) => {
     console.log("[zapupi-webhook] received", JSON.stringify(payload).slice(0, 500));
 
     const orderId =
+      payload.client_txn_id ||
       payload.user_token ||
       payload.order_id ||
+      payload.udf2 ||
       payload.remark2 ||
-      payload.client_txn_id ||
+      payload.data?.client_txn_id ||
       payload.data?.user_token ||
-      payload.data?.order_id;
+      payload.data?.order_id ||
+      payload.data?.udf2;
 
     if (!orderId) {
       console.warn("[zapupi-webhook] no order id in payload");
