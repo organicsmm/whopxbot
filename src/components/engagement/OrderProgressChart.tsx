@@ -141,7 +141,7 @@ export function OrderProgressChart({ runs, perType }: OrderProgressChartProps) {
     // Calculate stats
     const totalScheduled = perType.reduce((sum, t) => sum + t.scheduled, 0);
     const totalDelivered = perType.reduce((sum, t) => sum + t.delivered, 0);
-    const completedRuns = runs.filter(r => r.status === 'completed').length;
+    const completedRuns = runs.filter(r => r.status === 'completed' || isTargetMetAutoCompleted(r)).length;
     const pendingRuns = runs.filter(r => r.status === 'pending').length;
     const startedRuns = runs.filter(r => r.status === 'started').length;
 
