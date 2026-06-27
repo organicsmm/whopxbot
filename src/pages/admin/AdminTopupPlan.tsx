@@ -373,7 +373,7 @@ export default function AdminTopupPlan() {
                               <td className="px-4 py-2 text-right">{num(r.pending_runs)}</td>
                               <td className="px-4 py-2 text-right">{inr(Number(r.pending_user_usd))}</td>
                               <td className="px-4 py-2 text-right">{inr(cost)}</td>
-                              <td className="px-4 py-2 text-right text-muted-foreground">{inr(cost)}</td>
+                              
                             </tr>
                             {isOpen && (
                               <tr key={r.provider_account_id + "-exp"} className="bg-muted/10">
