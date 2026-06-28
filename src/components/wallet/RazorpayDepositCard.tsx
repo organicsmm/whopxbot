@@ -12,7 +12,7 @@ const WHATSAPP_NUMBER = '255637520201'; // +255 637 520 201
 function buildSupportMessage(email?: string) {
   return (
     `Hi! 👋\n\n` +
-    `Mujhe apne Grinzo wallet me funds add karne hain.\n` +
+    `Mujhe apne OrganicSMM Pro wallet me funds add karne hain.\n` +
     (email ? `My account email: ${email}\n` : '') +
     `\nPlease help me with the payment process. 🙏`
   );

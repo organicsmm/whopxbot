@@ -1,4 +1,4 @@
-# Grinzo — robots.txt
+# OrganicSMM Pro — robots.txt
 # Site:    https://whopxbot.lovable.app
 # Updated: 2026-05-05
 

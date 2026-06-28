@@ -7,8 +7,8 @@ export default function ContactUs() {
   return (
     <>
       <PageMeta
-        title="Contact Us | Grinzo"
-        description="Get in touch with Grinzo support team. Email, WhatsApp and business address for customer support."
+        title="Contact Us | OrganicSMM Pro"
+        description="Get in touch with OrganicSMM Pro support team. Email, WhatsApp and business address for customer support."
         canonicalPath="/contact"
         breadcrumbs={[{ name: "Home", path: "/" }, { name: "Contact Us", path: "/contact" }]}
       />
@@ -33,8 +33,8 @@ export default function ContactUs() {
                 </div>
                 <h3 className="font-semibold">Email Support</h3>
               </div>
-              <a href="mailto:support@grinzo.app" className="text-sm text-orange-500 hover:underline break-all">
-                support@grinzo.app
+              <a href="mailto:support@organicsmm.app" className="text-sm text-orange-500 hover:underline break-all">
+                support@organicsmm.app
               </a>
               <p className="text-xs text-muted-foreground mt-2">For all general queries, billing & technical support.</p>
             </div>
@@ -86,7 +86,7 @@ export default function ContactUs() {
               <div>
                 <h3 className="font-semibold mb-2">Registered Business Address</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Grinzo LLC<br />
+                  OrganicSMM Pro LLC<br />
                   8 The Green, Suite #14490,<br />
                   Dover, DE 19901,<br />
                   United States of America
@@ -97,7 +97,7 @@ export default function ContactUs() {
 
           <div className="mt-10 text-sm text-muted-foreground">
             <p>
-              For grievances, please email <a className="text-orange-500 hover:underline" href="mailto:support@grinzo.app">support@grinzo.app</a> with subject line "Grievance" — our grievance officer will respond within 48 hours.
+              For grievances, please email <a className="text-orange-500 hover:underline" href="mailto:support@organicsmm.app">support@organicsmm.app</a> with subject line "Grievance" — our grievance officer will respond within 48 hours.
             </p>
           </div>
         </div>
