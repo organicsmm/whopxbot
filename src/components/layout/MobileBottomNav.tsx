@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, Rocket, Droplets, Sparkles, Wallet, Code2,
-  LifeBuoy, Settings, Shield, LogOut, MoreHorizontal, X
+  LifeBuoy, Settings, Shield, LogOut, MoreHorizontal, X, History
 } from 'lucide-react';
 import logo from '@/assets/logo.jpg';
 import { useAuth } from '@/hooks/useAuth';
@@ -17,6 +17,7 @@ const primary = [
 ];
 
 const more = [
+  { icon: History, label: 'Order History', path: '/orders' },
   { icon: Sparkles, label: 'Engagement Orders', path: '/engagement-orders' },
   { icon: Code2, label: 'API Access', path: '/api-access' },
   { icon: LifeBuoy, label: 'Support', path: '/support' },
