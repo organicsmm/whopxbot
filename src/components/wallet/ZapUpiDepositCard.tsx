@@ -125,41 +125,28 @@ export default function ZapUpiDepositCard() {
   }
 
   return (
-    <div
-      className="rounded-2xl overflow-hidden relative"
-      style={{
-        background: 'linear-gradient(180deg, #ffffff, #fffaf5)',
-        border: '1px solid rgba(234,88,12,.18)',
-        boxShadow: '0 8px 32px rgba(234,88,12,.08), 0 2px 8px rgba(0,0,0,.04)',
-      }}
-    >
-      <div className="h-1.5" style={{ background: 'linear-gradient(90deg,#ea580c,#f97316,#ea580c)' }} />
+    <div className="rounded-2xl overflow-hidden relative border border-white/10 bg-[#0a0a14]/80 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
+      <div className="h-1 bg-gradient-to-r from-purple-500 via-fuchsia-500 to-emerald-400" />
 
-      <div className="p-6">
-        <div className="flex items-center gap-3 mb-1">
-          <div
-            className="w-11 h-11 rounded-2xl flex items-center justify-center"
-            style={{ background: 'linear-gradient(135deg,#ea580c,#c2410c)' }}
-          >
+      <div className="p-6 relative">
+        <div aria-hidden className="pointer-events-none absolute -top-16 -right-10 w-56 h-56 bg-purple-500/15 blur-[100px] rounded-full" />
+
+        <div className="relative flex items-center gap-3 mb-1">
+          <div className="w-11 h-11 rounded-2xl flex items-center justify-center bg-gradient-to-br from-purple-500 to-fuchsia-600 shadow-[0_0_20px_rgba(168,85,247,0.35)]">
             <Zap className="h-5 w-5 text-white" />
           </div>
           <div>
-            <h2 className="text-lg font-bold" style={{ color: '#2a2418' }}>
-              Add Funds — Instant UPI
-            </h2>
-            <p className="text-[12px]" style={{ color: '#888' }}>
-              Pay with any UPI app · auto credit in seconds
-            </p>
+            <h2 className="text-lg font-bold !text-white tracking-tight">Add Funds — Instant UPI</h2>
+            <p className="text-[12px] text-white/50">Pay with any UPI app · auto credit in seconds</p>
           </div>
         </div>
 
-        <div className="mt-5">
-          <label className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: '#888' }}>
+        <div className="relative mt-5">
+          <label className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/50">
             Amount (INR)
           </label>
-          <div className="mt-2 flex items-center gap-2 rounded-xl border px-3 py-2.5"
-            style={{ borderColor: 'rgba(0,0,0,.08)', background: '#fff' }}>
-            <span className="text-lg font-bold" style={{ color: '#2a2418' }}>₹</span>
+          <div className="mt-2 flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2.5 focus-within:border-purple-400/40 focus-within:bg-white/[0.05] transition-colors">
+            <span className="text-lg font-bold text-white/70">₹</span>
             <input
               type="number"
               inputMode="numeric"
@@ -167,37 +154,35 @@ export default function ZapUpiDepositCard() {
               max={MAX_AMOUNT}
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              className="flex-1 bg-transparent outline-none text-lg font-bold"
-              style={{ color: '#2a2418' }}
+              className="flex-1 bg-transparent outline-none text-lg font-bold !text-white placeholder:text-white/30"
               placeholder="100"
             />
           </div>
 
           <div className="mt-3 grid grid-cols-4 gap-2">
-            {QUICK_AMOUNTS.map((q) => (
-              <button
-                key={q}
-                onClick={() => setAmount(String(q))}
-                className="py-2 rounded-lg text-[13px] font-semibold transition-all"
-                style={{
-                  background: Number(amount) === q ? '#ea580c' : 'rgba(234,88,12,.08)',
-                  color: Number(amount) === q ? 'white' : '#c2410c',
-                  border: '1px solid rgba(234,88,12,.15)',
-                }}
-              >
-                ₹{q}
-              </button>
-            ))}
+            {QUICK_AMOUNTS.map((q) => {
+              const active = Number(amount) === q;
+              return (
+                <button
+                  key={q}
+                  onClick={() => setAmount(String(q))}
+                  className={
+                    'py-2 rounded-lg text-[13px] font-semibold transition-all border ' +
+                    (active
+                      ? 'bg-gradient-to-br from-purple-500 to-fuchsia-600 text-white border-purple-400/50 shadow-[0_0_18px_rgba(168,85,247,0.35)]'
+                      : 'bg-white/[0.03] text-white/70 border-white/10 hover:bg-white/[0.06] hover:text-white')
+                  }
+                >
+                  ₹{q}
+                </button>
+              );
+            })}
           </div>
 
           <button
             onClick={handlePay}
             disabled={loading || polling}
-            className="mt-5 w-full py-3 rounded-xl font-bold text-white flex items-center justify-center gap-2 transition-all disabled:opacity-60"
-            style={{
-              background: 'linear-gradient(135deg,#ea580c,#c2410c)',
-              boxShadow: '0 8px 20px rgba(234,88,12,.3)',
-            }}
+            className="mt-5 w-full py-3 rounded-xl font-bold !text-white flex items-center justify-center gap-2 transition-all disabled:opacity-60 bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-600 shadow-[0_10px_30px_rgba(168,85,247,0.35)] hover:shadow-[0_12px_36px_rgba(168,85,247,0.5)]"
           >
             {loading ? (
               <><Loader2 className="h-4 w-4 animate-spin" /> Opening UPI…</>
@@ -208,8 +193,8 @@ export default function ZapUpiDepositCard() {
             )}
           </button>
 
-          <div className="mt-4 flex items-center gap-2 text-[11px]" style={{ color: '#888' }}>
-            <ShieldCheck className="h-3.5 w-3.5" style={{ color: '#5e8a5c' }} />
+          <div className="mt-4 flex items-center gap-2 text-[11px] text-white/50">
+            <ShieldCheck className="h-3.5 w-3.5 text-emerald-300" />
             Secure UPI payment · auto wallet credit · no manual approval
           </div>
         </div>
@@ -217,3 +202,4 @@ export default function ZapUpiDepositCard() {
     </div>
   );
 }
+
