@@ -62,7 +62,7 @@ export default function Dashboard() {
 
   return (
     <DashboardLayout>
-      <PageMeta title="Dashboard" description="Manage your Grinzo social media growth orders, track wallet balance, monitor active engagement campaigns and view delivery progress." noIndex />
+      <PageMeta title="Dashboard" description="Manage your OrganicSMM Pro social media growth orders, track wallet balance, monitor active engagement campaigns and view delivery progress." noIndex />
       <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

@@ -8,7 +8,7 @@ import { PageMeta } from '@/components/seo/PageMeta';
 import logo from '@/assets/logo.jpg';
 
 /**
- * Grinzo — Software-style landing (Violet Aurora).
+ * OrganicSMM Pro — Software-style landing (Violet Aurora).
  * Dark canvas, fine grid, violet aurora glows, display headline with serif italic accent.
  */
 
@@ -16,7 +16,7 @@ const Index = () => {
   return (
     <div className="min-h-screen w-full bg-[#030303] text-white overflow-x-hidden selection:bg-purple-500/30 antialiased">
       <PageMeta
-        title="Grinzo — The Growth Engine for Social Magic"
+        title="OrganicSMM Pro — The Growth Engine for Social Magic"
         description="Precision-engineered organic engagement for Instagram, TikTok and YouTube. Multi-provider failover, wallet, live dashboard."
         canonicalPath="/"
         breadcrumbs={[{ name: 'Home', path: '/' }]}
@@ -47,8 +47,8 @@ const Index = () => {
       <header className="sticky top-0 z-40 backdrop-blur-md bg-[#030303]/60 border-b border-white/5">
         <div className="max-w-6xl mx-auto px-5 sm:px-8 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2.5">
-            <img src={logo} alt="Grinzo" className="h-8 w-8 rounded-md object-cover ring-1 ring-white/10" />
-            <span className="text-[15px] font-semibold tracking-tight">Grinzo</span>
+            <img src={logo} alt="OrganicSMM Pro" className="h-8 w-8 rounded-md object-cover ring-1 ring-white/10" />
+            <span className="text-[15px] font-semibold tracking-tight">OrganicSMM Pro</span>
             <span className="hidden sm:inline text-[10px] uppercase tracking-[0.18em] text-white/40 ml-2 px-1.5 py-0.5 rounded border border-white/10">v2</span>
           </Link>
 
@@ -86,7 +86,7 @@ const Index = () => {
               <span className="relative inline-flex rounded-full h-2 w-2 bg-purple-500" />
             </span>
             <span className="text-[11px] font-medium tracking-[0.18em] uppercase text-purple-200/70">
-              Grinzo Software v2.0
+              OrganicSMM Pro Software v2.0
             </span>
           </div>
 
@@ -236,7 +236,7 @@ const Index = () => {
               </span>
             </h2>
             <p className="text-slate-400 leading-relaxed mb-8 max-w-lg">
-              Plug in a URL, pick a bundle, hit launch. Grinzo handles the
+              Plug in a URL, pick a bundle, hit launch. OrganicSMM Pro handles the
               routing, the dispatch, and the retries — so you don't have to
               babysit any of it.
             </p>
@@ -264,7 +264,7 @@ const Index = () => {
                 <span className="h-2.5 w-2.5 rounded-full bg-white/20" />
                 <span className="h-2.5 w-2.5 rounded-full bg-white/20" />
                 <span className="h-2.5 w-2.5 rounded-full bg-white/20" />
-                <span className="ml-auto text-[10px] uppercase tracking-[0.18em] text-white/40">grinzo.live</span>
+                <span className="ml-auto text-[10px] uppercase tracking-[0.18em] text-white/40">organicsmm.live</span>
               </div>
               <div className="space-y-3">
                 {[
@@ -403,8 +403,8 @@ const Index = () => {
       <footer className="border-t border-white/5 py-10">
         <div className="max-w-6xl mx-auto px-5 sm:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-white/40">
           <div className="flex items-center gap-2.5">
-            <img src={logo} alt="Grinzo" className="h-6 w-6 rounded object-cover ring-1 ring-white/10" />
-            <span>© {new Date().getFullYear()} Grinzo. All rights reserved.</span>
+            <img src={logo} alt="OrganicSMM Pro" className="h-6 w-6 rounded object-cover ring-1 ring-white/10" />
+            <span>© {new Date().getFullYear()} OrganicSMM Pro. All rights reserved.</span>
           </div>
           <div className="flex items-center gap-6">
             <Link to="/legal/terms" className="hover:text-white/70">Terms</Link>
