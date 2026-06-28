@@ -57,8 +57,8 @@ export function MobileBottomNav() {
 
       {/* Bottom nav — all viewports */}
       <nav className="fixed bottom-0 left-0 right-0 z-40">
-        <div className="mx-auto max-w-2xl px-3 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2">
-          <div className="grid grid-cols-5 gap-1 rounded-2xl bg-[#070710]/95 backdrop-blur-xl border border-white/10 shadow-[0_10px_40px_rgba(0,0,0,0.6)] p-1.5">
+        <div className="w-full px-0 pb-[env(safe-area-inset-bottom)] pt-0">
+          <div className="grid grid-cols-5 gap-1 rounded-none bg-[#070710]/95 backdrop-blur-xl border-t border-white/10 shadow-[0_-10px_40px_rgba(0,0,0,0.6)] px-2 py-2">
             {primary.map((item) => {
               const active = isActive(item.path);
               return (
