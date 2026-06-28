@@ -34,13 +34,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         <div className="absolute bottom-[-20%] left-[-10%] w-[520px] h-[520px] bg-indigo-600/15 blur-[140px] rounded-full" />
       </div>
 
-      <aside className="fixed inset-y-0 left-0 z-40 w-[260px] hidden lg:block">
-        <Sidebar />
-      </aside>
       <MobileBottomNav />
-      <main className="lg:pl-[260px] w-full relative">
-        <div className="min-h-screen pt-16 lg:pt-0 px-3 sm:px-4 py-4 sm:py-5 lg:p-8">
-          <div className="max-w-7xl mx-auto w-full">{children}</div>
+      <main className="w-full relative">
+        <div className="min-h-screen pt-16 pb-28 px-3 sm:px-5 lg:px-8 py-4 sm:py-5">
+          <div className="max-w-6xl mx-auto w-full">{children}</div>
         </div>
       </main>
       <LiveChatWidget />
