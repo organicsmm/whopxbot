@@ -4,9 +4,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Grid3x3, ExternalLink, Rocket, PlayCircle, Image as ImageIcon, Layers, Instagram } from 'lucide-react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { useCurrency } from '@/hooks/useCurrency';
-import { QuickOrderSheet } from '@/components/instagram/QuickOrderSheet';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
@@ -37,9 +36,11 @@ export default function MyPosts() {
   const qc = useQueryClient();
   const { formatPrice } = useCurrency();
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const selectedAccountId = searchParams.get('account');
-  const [boostLink, setBoostLink] = useState<string | null>(null);
   const [manualLink, setManualLink] = useState('');
+
+  const goBoost = (url: string) => navigate(`/engagement-order?link=${encodeURIComponent(url)}`);
 
   const { data: rows = [], isLoading } = useQuery({
     queryKey: ['ig-posts-summary', user?.id, selectedAccountId],
@@ -134,7 +135,7 @@ export default function MyPosts() {
             className="bg-black/30 border-white/10 text-white"
           />
           <Button
-            onClick={() => { if (/instagram\.com\//i.test(manualLink)) setBoostLink(manualLink.trim()); }}
+            onClick={() => { if (/instagram\.com\//i.test(manualLink)) goBoost(manualLink.trim()); }}
             disabled={!/instagram\.com\//i.test(manualLink)}
             className="bg-gradient-to-b from-purple-500 to-fuchsia-600"
           >
@@ -197,7 +198,7 @@ export default function MyPosts() {
                   {r.total_spent > 0 && <span className="text-emerald-300/80 font-semibold">{formatPrice(Number(r.total_spent))}</span>}
                 </div>
                 <button
-                  onClick={() => setBoostLink(r.permalink)}
+                  onClick={() => goBoost(r.permalink)}
                   className="w-full h-9 rounded-lg text-[12px] font-semibold bg-gradient-to-b from-purple-500 to-fuchsia-600 text-white shadow-md shadow-purple-500/20 hover:shadow-purple-500/40 flex items-center justify-center gap-1.5"
                 >
                   <Rocket className="w-3.5 h-3.5" /> Boost
@@ -207,12 +208,6 @@ export default function MyPosts() {
           ))}
         </div>
       </div>
-      <QuickOrderSheet
-        open={!!boostLink}
-        onOpenChange={(v) => { if (!v) setBoostLink(null); }}
-        link={boostLink ?? ''}
-        onPlaced={() => { setManualLink(''); qc.invalidateQueries({ queryKey: ['ig-posts-summary'] }); }}
-      />
     </DashboardLayout>
 
   );
