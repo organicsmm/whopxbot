@@ -1,11 +1,14 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Grid3x3, ExternalLink, Rocket, PlayCircle, Image as ImageIcon, Layers, Instagram } from 'lucide-react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useCurrency } from '@/hooks/useCurrency';
+import { QuickOrderSheet } from '@/components/instagram/QuickOrderSheet';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 type Row = {
   media_id: string;
@@ -32,10 +35,11 @@ function TypeIcon({ t }: { t: string | null }) {
 export default function MyPosts() {
   const { user } = useAuth();
   const qc = useQueryClient();
-  const navigate = useNavigate();
   const { formatPrice } = useCurrency();
   const [searchParams] = useSearchParams();
   const selectedAccountId = searchParams.get('account');
+  const [boostLink, setBoostLink] = useState<string | null>(null);
+  const [manualLink, setManualLink] = useState('');
 
   const { data: rows = [], isLoading } = useQuery({
     queryKey: ['ig-posts-summary', user?.id, selectedAccountId],
@@ -122,6 +126,23 @@ export default function MyPosts() {
           </Link>
         </div>
 
+        <div className="rounded-2xl border border-white/10 bg-white/5 p-3 flex flex-col sm:flex-row gap-2">
+          <Input
+            placeholder="Paste any Instagram reel/post link…"
+            value={manualLink}
+            onChange={(e) => setManualLink(e.target.value)}
+            className="bg-black/30 border-white/10 text-white"
+          />
+          <Button
+            onClick={() => { if (/instagram\.com\//i.test(manualLink)) setBoostLink(manualLink.trim()); }}
+            disabled={!/instagram\.com\//i.test(manualLink)}
+            className="bg-gradient-to-b from-purple-500 to-fuchsia-600"
+          >
+            <Rocket className="w-4 h-4 mr-1" /> Boost Link
+          </Button>
+        </div>
+
+
         {isLoading && (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
             {Array.from({ length: 8 }).map((_, i) => (
@@ -176,7 +197,7 @@ export default function MyPosts() {
                   {r.total_spent > 0 && <span className="text-emerald-300/80 font-semibold">{formatPrice(Number(r.total_spent))}</span>}
                 </div>
                 <button
-                  onClick={() => navigate(`/engagement-order?link=${encodeURIComponent(r.permalink)}`)}
+                  onClick={() => setBoostLink(r.permalink)}
                   className="w-full h-9 rounded-lg text-[12px] font-semibold bg-gradient-to-b from-purple-500 to-fuchsia-600 text-white shadow-md shadow-purple-500/20 hover:shadow-purple-500/40 flex items-center justify-center gap-1.5"
                 >
                   <Rocket className="w-3.5 h-3.5" /> Boost
@@ -186,6 +207,13 @@ export default function MyPosts() {
           ))}
         </div>
       </div>
+      <QuickOrderSheet
+        open={!!boostLink}
+        onOpenChange={(v) => { if (!v) setBoostLink(null); }}
+        link={boostLink ?? ''}
+        onPlaced={() => { setManualLink(''); qc.invalidateQueries({ queryKey: ['ig-posts-summary'] }); }}
+      />
     </DashboardLayout>
+
   );
 }
