@@ -237,7 +237,7 @@ export function MergedTimeline({ runs, onEditRun, nextRun, onRefresh, typeTarget
               icon: Eye,
               label: run.engagement_type || "items",
               emoji: "📦",
-              color: "text-gray-400",
+              color: "text-gray-200",
               bg: "bg-gray-500/20",
               border: "border-gray-500/40"
             };

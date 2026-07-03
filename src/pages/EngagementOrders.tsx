@@ -166,7 +166,7 @@ export default function EngagementOrders() {
           </Card>
         ) : filteredOrders?.length === 0 ? (
           <Card className="p-12 text-center">
-            <Search className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
+            <Search className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
             <p className="text-muted-foreground mb-2">No orders found for "{searchQuery}"</p>
             <p className="text-sm text-muted-foreground mb-4">Try searching with order number or video link</p>
             <Button variant="outline" onClick={() => setSearchQuery("")}>

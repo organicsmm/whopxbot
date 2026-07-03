@@ -45,7 +45,7 @@ export function QuickOrderSheet({ open, onOpenChange, link, onPlaced }: QuickOrd
       <SheetContent side="bottom" className="rounded-t-3xl bg-[#0a0a14] border-white/10 max-h-[85vh] overflow-y-auto">
         <SheetHeader>
           <SheetTitle className="text-white flex items-center gap-2"><Rocket className="w-5 h-5 text-fuchsia-400" /> Boost this post</SheetTitle>
-          <SheetDescription className="text-white/50 text-xs break-all">{link}</SheetDescription>
+          <SheetDescription className="text-white/80 text-xs break-all">{link}</SheetDescription>
         </SheetHeader>
         <div className="grid gap-4 mt-4">
           <div>

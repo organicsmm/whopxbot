@@ -207,7 +207,7 @@ export function TypeHistoryCard({
       <div className="p-4 border-b border-border">
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div className="flex items-start gap-3">
-            <div className={`flex items-center justify-center w-12 h-12 rounded-lg font-bold text-lg ${isPaused ? 'bg-amber-500/20 text-amber-500 border border-amber-500/30' : isCancelled ? 'bg-white/5 text-white/20 border border-white/10' : 'bg-primary/20 text-primary border border-primary/30'
+            <div className={`flex items-center justify-center w-12 h-12 rounded-lg font-bold text-lg ${isPaused ? 'bg-amber-500/20 text-amber-500 border border-amber-500/30' : isCancelled ? 'bg-white/5 text-white/80 border border-white/10' : 'bg-primary/20 text-primary border border-primary/30'
               }`}>
               <Icon className="h-6 w-6 fill-current opacity-60" />
             </div>
@@ -223,7 +223,7 @@ export function TypeHistoryCard({
               </div>
               <a
                 href="#"
-                className="text-sm text-white/30 hover:text-white/50 flex items-center gap-1 mt-0.5"
+                className="text-sm text-white/65 hover:text-white/80 flex items-center gap-1 mt-0.5"
               >
                 https://www.instagram.com/reel/...
                 <ExternalLink className="h-3 w-3" />
@@ -298,7 +298,7 @@ export function TypeHistoryCard({
           <span className="relative flex h-2 w-2">
             <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500/60"></span>
           </span>
-          <Zap className="h-4 w-4 text-white/40" />
+          <Zap className="h-4 w-4 text-white/75" />
           <span className="font-semibold text-sm uppercase tracking-wider">LIVE DELIVERY TRACKING</span>
         </div>
         <div className="flex items-center gap-3 text-xs text-muted-foreground">
@@ -323,19 +323,19 @@ export function TypeHistoryCard({
         </div>
         <div className="p-4 text-center">
           <p className="text-2xl font-black text-emerald-500/40">{completedCount}</p>
-          <p className="text-[10px] font-black text-white/10 uppercase tracking-[0.2em]">Completed</p>
+          <p className="text-[10px] font-black text-white/75 uppercase tracking-[0.2em]">Completed</p>
         </div>
         <div className="p-4 text-center">
           <p className="text-2xl font-black text-primary/40">{activeCount}</p>
-          <p className="text-[10px] font-black text-white/10 uppercase tracking-[0.2em]">Processing</p>
+          <p className="text-[10px] font-black text-white/75 uppercase tracking-[0.2em]">Processing</p>
         </div>
         <div className="p-4 text-center">
-          <p className="text-2xl font-black text-white/50">{pendingCount}</p>
-          <p className="text-[10px] font-black text-white/10 uppercase tracking-[0.2em]">Pending</p>
+          <p className="text-2xl font-black text-white/80">{pendingCount}</p>
+          <p className="text-[10px] font-black text-white/75 uppercase tracking-[0.2em]">Pending</p>
         </div>
         <div className="p-4 text-center">
           <p className="text-2xl font-black text-emerald-500/60">{totalDelivered.toLocaleString()}</p>
-          <p className="text-[10px] font-black text-white/10 uppercase tracking-[0.2em]">Delivered</p>
+          <p className="text-[10px] font-black text-white/75 uppercase tracking-[0.2em]">Delivered</p>
         </div>
       </div>
 

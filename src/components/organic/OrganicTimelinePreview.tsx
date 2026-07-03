@@ -139,8 +139,8 @@ export const OrganicTimelinePreview = forwardRef<HTMLDivElement, OrganicTimeline
     if (score >= 75) return { label: 'Very Low', color: 'text-foreground', bg: 'bg-foreground' };
     if (score >= 60) return { label: 'Low', color: 'text-foreground/80', bg: 'bg-foreground/80' };
     if (score >= 45) return { label: 'Medium', color: 'text-muted-foreground', bg: 'bg-muted-foreground' };
-    if (score >= 30) return { label: 'High', color: 'text-muted-foreground/70', bg: 'bg-muted-foreground/70' };
-    return { label: 'Very High', color: 'text-muted-foreground/50', bg: 'bg-muted-foreground/50' };
+    if (score >= 30) return { label: 'High', color: 'text-muted-foreground', bg: 'bg-muted-foreground/70' };
+    return { label: 'Very High', color: 'text-muted-foreground', bg: 'bg-muted-foreground/50' };
   };
 
   const detectionRisk = getDetectionRisk(computedHumanScore);

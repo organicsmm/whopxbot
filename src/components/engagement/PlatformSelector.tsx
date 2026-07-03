@@ -44,10 +44,10 @@ export function PlatformSelector({ selected, onSelect, availablePlatforms }: Pla
               "flex items-center gap-2 px-5 py-3 rounded-2xl font-black text-xs uppercase tracking-widest",
               isSelected
                 ? `bg-gradient-to-r ${config.color} text-white border-2 border-white/20 shadow-[0_10px_30px_rgba(0,0,0,0.5)] scale-[1.05]`
-                : "bg-white/[0.03] text-white/30 border border-white/5 hover:bg-white/5 hover:text-white/50"
+                : "bg-white/[0.03] text-white/65 border border-white/5 hover:bg-white/5 hover:text-white/80"
             )}
           >
-            <Icon className={cn("h-4 w-4", isSelected ? "text-white" : "text-white/20")} />
+            <Icon className={cn("h-4 w-4", isSelected ? "text-white" : "text-white/80")} />
             <span>{config.label}</span>
           </button>
         );

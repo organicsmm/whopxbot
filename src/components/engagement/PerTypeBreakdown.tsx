@@ -31,7 +31,7 @@ const getEngagementConfig = (type: string) => {
     icon: Eye,
     label: type?.charAt(0).toUpperCase() + type?.slice(1) || "Items",
     emoji: "📦",
-    color: "text-gray-400",
+    color: "text-gray-200",
     bg: "bg-gray-500/20",
     border: "border-gray-500/40"
   };

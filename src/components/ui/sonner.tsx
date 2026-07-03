@@ -23,7 +23,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
           title: "group-[.toast]:text-[13px] group-[.toast]:font-medium group-[.toast]:tracking-tight group-[.toast]:text-white/90",
           description: "group-[.toast]:text-[12px] group-[.toast]:text-zinc-500 group-[.toast]:mt-0.5 group-[.toast]:leading-snug",
           actionButton: "group-[.toast]:bg-white group-[.toast]:text-black group-[.toast]:rounded-full group-[.toast]:font-medium group-[.toast]:text-xs group-[.toast]:px-4 group-[.toast]:py-1.5 group-[.toast]:transition-all group-[.toast]:hover:scale-105",
-          cancelButton: "group-[.toast]:bg-zinc-800 group-[.toast]:text-zinc-400 group-[.toast]:rounded-full group-[.toast]:text-xs group-[.toast]:transition-all group-[.toast]:hover:bg-zinc-700",
+          cancelButton: "group-[.toast]:bg-zinc-800 group-[.toast]:text-zinc-200 group-[.toast]:rounded-full group-[.toast]:text-xs group-[.toast]:transition-all group-[.toast]:hover:bg-zinc-700",
           closeButton: "group-[.toast]:bg-transparent group-[.toast]:border-0 group-[.toast]:text-zinc-600 group-[.toast]:transition-all hover:group-[.toast]:text-white",
           success: "",
           error: "",

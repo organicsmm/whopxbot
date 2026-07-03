@@ -89,7 +89,7 @@ export default function Auth() {
     } finally { setIsSubmitting(false); }
   };
 
-  const inputClass = "h-12 rounded-xl bg-white/[0.04] border border-white/10 focus:border-purple-400/60 focus:ring-1 focus:ring-purple-400/40 !text-white font-medium px-4 placeholder:text-white/30 transition-all";
+  const inputClass = "h-12 rounded-xl bg-white/[0.04] border border-white/10 focus:border-purple-400/60 focus:ring-1 focus:ring-purple-400/40 !text-white font-medium px-4 placeholder:text-white/65 transition-all";
 
   return (
     <div className="min-h-screen w-full bg-[#030303] text-white overflow-x-hidden selection:bg-purple-500/30 antialiased relative flex items-center justify-center px-5 py-12">
@@ -117,7 +117,7 @@ export default function Auth() {
       </div>
 
       <div className="w-full max-w-[420px] relative">
-        <Link to="/" className="inline-flex items-center gap-1.5 text-[12px] font-medium mb-8 text-white/50 hover:text-white transition-colors">
+        <Link to="/" className="inline-flex items-center gap-1.5 text-[12px] font-medium mb-8 text-white/80 hover:text-white transition-colors">
           <ArrowLeft className="w-3.5 h-3.5" /> Back to home
         </Link>
 
@@ -143,7 +143,7 @@ export default function Auth() {
               <>Create <span className="italic text-purple-300" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>account</span></>
             )}
           </h1>
-          <p className="text-[13px] mb-7 text-white/50">
+          <p className="text-[13px] mb-7 text-white/80">
             {isForgotPassword ? 'Enter your email to receive a reset link.' : isLogin ? 'Sign in to your dashboard.' : 'Get started in seconds.'}
           </p>
 
@@ -153,7 +153,7 @@ export default function Auth() {
                 <Mail className="w-7 h-7 text-purple-300" />
               </div>
               <h3 className="text-xl font-bold mb-2 !text-white">Check your inbox</h3>
-              <p className="text-[13px] mb-2 text-white/50">Verification link sent to:</p>
+              <p className="text-[13px] mb-2 text-white/80">Verification link sent to:</p>
               <p className="text-[13px] font-semibold mb-6 !text-white">{email}</p>
               <button onClick={() => { setShowVerifyEmail(false); setIsLogin(true); }} className="text-[13px] font-semibold text-purple-300 hover:text-purple-200">
                 ← Back to login
@@ -172,7 +172,7 @@ export default function Auth() {
                   <button type="submit" disabled={isSubmitting} className="w-full h-11 rounded-xl text-[13px] font-semibold text-black bg-white hover:bg-purple-50 transition-all shadow-[0_0_24px_rgba(255,255,255,0.15)] active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-70">
                     {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <>Send reset link <ArrowRight className="w-3.5 h-3.5" /></>}
                   </button>
-                  <button type="button" onClick={() => setIsForgotPassword(false)} className="w-full text-center text-[13px] font-medium text-white/50 hover:text-white">
+                  <button type="button" onClick={() => setIsForgotPassword(false)} className="w-full text-center text-[13px] font-medium text-white/80 hover:text-white">
                     Back to login
                   </button>
                 </div>
@@ -199,7 +199,7 @@ export default function Auth() {
                     </div>
                     <div className="relative">
                       <Input type={showPassword ? 'text' : 'password'} placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} className={`${inputClass} pr-11`} />
-                      <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/40 hover:text-white">
+                      <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/75 hover:text-white">
                         {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
                     </div>
@@ -212,7 +212,7 @@ export default function Auth() {
                     {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <>{isLogin ? 'Sign in' : 'Create account'} <ArrowRight className="w-3.5 h-3.5" /></>}
                   </button>
 
-                  <p className="text-center text-[13px] text-white/50">
+                  <p className="text-center text-[13px] text-white/80">
                     {isLogin ? "Don't have an account? " : 'Already have an account? '}
                     <button type="button" onClick={() => { setIsLogin(!isLogin); setError(''); setSuccessMessage(''); }} className="font-semibold text-purple-300 hover:text-purple-200">
                       {isLogin ? 'Sign up' : 'Sign in'}
@@ -231,7 +231,7 @@ export default function Auth() {
           </div>
           <div>
             <p className="text-[12px] font-semibold !text-white">Join our Telegram</p>
-            <p className="text-[11px] text-white/50">Updates & support</p>
+            <p className="text-[11px] text-white/80">Updates & support</p>
           </div>
         </a>
       </div>

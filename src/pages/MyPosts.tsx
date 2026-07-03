@@ -132,7 +132,7 @@ export default function MyPosts() {
           </div>
           <div className="flex-1 min-w-0">
             <h1 className="text-xl md:text-2xl font-bold !text-white">{selectedAccount ? `@${selectedAccount.username} Posts` : 'Post Command Center'}</h1>
-            <p className="text-[13px] text-white/60">{selectedAccount ? 'Only this account posts are showing.' : 'Boost engagement on any of your Instagram posts.'}</p>
+            <p className="text-[13px] text-white/85">{selectedAccount ? 'Only this account posts are showing.' : 'Boost engagement on any of your Instagram posts.'}</p>
           </div>
           <Link to="/instagram" className="h-10 px-4 rounded-xl font-semibold text-[13px] bg-white/5 hover:bg-white/10 border border-white/10 text-white/80 flex items-center shrink-0">
             Accounts
@@ -184,8 +184,8 @@ export default function MyPosts() {
 
         {!isLoading && rows.length === 0 && (
           <div className="text-center py-14 rounded-2xl border border-dashed border-white/10 space-y-3">
-            <Instagram className="w-10 h-10 text-white/30 mx-auto" />
-            <p className="text-white/50 text-sm">No posts found for this account yet.</p>
+            <Instagram className="w-10 h-10 text-white/65 mx-auto" />
+            <p className="text-white/80 text-sm">No posts found for this account yet.</p>
             <Link to="/instagram" className="inline-flex items-center gap-2 px-4 h-10 rounded-xl bg-gradient-to-b from-purple-500 to-fuchsia-600 text-white text-sm font-semibold">
               Back to Instagram Accounts
             </Link>
@@ -199,7 +199,7 @@ export default function MyPosts() {
                 {r.thumbnail_url ? (
                   <img src={`https://lvrbhgulxqdsamhdjzkw.supabase.co/functions/v1/ig-image-proxy?url=${encodeURIComponent(r.thumbnail_url)}`} alt="" loading="lazy" referrerPolicy="no-referrer" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.opacity = '0.2'; }} />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-white/20"><ImageIcon className="w-10 h-10" /></div>
+                  <div className="w-full h-full flex items-center justify-center text-white/80"><ImageIcon className="w-10 h-10" /></div>
                 )}
                 <div className="absolute top-2 left-2 flex items-center gap-1 px-2 h-6 rounded-full bg-black/70 backdrop-blur text-[10px] font-semibold text-white/90 uppercase">
                   <TypeIcon t={r.media_type} /> {r.media_type ?? 'post'}
@@ -222,8 +222,8 @@ export default function MyPosts() {
                 </div>
               </div>
               <div className="p-3 space-y-2">
-                <p className="text-[11px] text-white/50 line-clamp-2 min-h-[2.4em]">{r.caption || '—'}</p>
-                <div className="flex items-center justify-between text-[10px] text-white/40">
+                <p className="text-[11px] text-white/80 line-clamp-2 min-h-[2.4em]">{r.caption || '—'}</p>
+                <div className="flex items-center justify-between text-[10px] text-white/75">
                   <span>@{r.account_username}</span>
                   {r.total_spent > 0 && <span className="text-emerald-300/80 font-semibold">{formatPrice(Number(r.total_spent))}</span>}
                 </div>

@@ -486,7 +486,7 @@ export default function Settings() {
                       <div className="px-1">
                         <Slider value={[value]} onValueChange={([val]) => updateRatio(key as any, val)} max={100} step={1} className="py-4" />
                       </div>
-                      <div className="flex justify-between text-[10px] text-muted-foreground/60"><span>0%</span><span>50%</span><span>100%</span></div>
+                      <div className="flex justify-between text-[10px] text-muted-foreground"><span>0%</span><span>50%</span><span>100%</span></div>
                     </div>
                   );
                 })}
@@ -513,7 +513,7 @@ export default function Settings() {
                       <div className="px-1">
                         <Slider value={[value]} onValueChange={([val]) => updateRatio(key as any, val)} max={100} step={1} className="py-4" />
                       </div>
-                      <div className="flex justify-between text-[10px] text-muted-foreground/60"><span>0%</span><span>50%</span><span>100%</span></div>
+                      <div className="flex justify-between text-[10px] text-muted-foreground"><span>0%</span><span>50%</span><span>100%</span></div>
                     </div>
                   );
                 })}
@@ -540,7 +540,7 @@ export default function Settings() {
                       <div className="px-1">
                         <Slider value={[value]} onValueChange={([val]) => updateRatio(key as any, val)} max={100} step={1} className="py-4" />
                       </div>
-                      <div className="flex justify-between text-[10px] text-muted-foreground/60"><span>0%</span><span>50%</span><span>100%</span></div>
+                      <div className="flex justify-between text-[10px] text-muted-foreground"><span>0%</span><span>50%</span><span>100%</span></div>
                     </div>
                   );
                 })}
@@ -567,7 +567,7 @@ export default function Settings() {
                       <div className="px-1">
                         <Slider value={[value]} onValueChange={([val]) => updateRatio(key as any, val)} max={100} step={1} className="py-4" />
                       </div>
-                      <div className="flex justify-between text-[10px] text-muted-foreground/60"><span>0%</span><span>50%</span><span>100%</span></div>
+                      <div className="flex justify-between text-[10px] text-muted-foreground"><span>0%</span><span>50%</span><span>100%</span></div>
                     </div>
                   );
                 })}

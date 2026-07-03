@@ -197,7 +197,7 @@ export default function Wallet() {
               </div>
 
               <div className="text-right">
-                <p className="text-[9px] font-semibold tracking-[0.2em] text-white/60">CURRENCY</p>
+                <p className="text-[9px] font-semibold tracking-[0.2em] text-white/85">CURRENCY</p>
                 <p className="text-base font-extrabold italic tracking-wide">INR</p>
               </div>
             </div>

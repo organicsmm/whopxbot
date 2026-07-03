@@ -49,10 +49,10 @@ const Index = () => {
           <Link to="/" className="flex items-center gap-2.5">
             <img src={logo} alt="OrganicSMM Pro" className="h-8 w-8 rounded-md object-cover ring-1 ring-white/10" />
             <span className="text-[15px] font-semibold tracking-tight">OrganicSMM Pro</span>
-            <span className="hidden sm:inline text-[10px] uppercase tracking-[0.18em] text-white/40 ml-2 px-1.5 py-0.5 rounded border border-white/10">v2</span>
+            <span className="hidden sm:inline text-[10px] uppercase tracking-[0.18em] text-white/75 ml-2 px-1.5 py-0.5 rounded border border-white/10">v2</span>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-8 text-sm text-white/60">
+          <nav className="hidden md:flex items-center gap-8 text-sm text-white/85">
             <a href="#features" className="hover:text-white transition-colors">Features</a>
             <a href="#platforms" className="hover:text-white transition-colors">Platforms</a>
             <a href="#pricing" className="hover:text-white transition-colors">Pricing</a>
@@ -107,7 +107,7 @@ const Index = () => {
           </h1>
 
           {/* Sub */}
-          <p className="text-base sm:text-xl text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed">
+          <p className="text-base sm:text-xl text-slate-200 max-w-2xl mx-auto mb-10 leading-relaxed">
             Master Instagram, TikTok, and YouTube organic engagement through a
             precision-engineered platform. No bots — just high-performance
             software with multi-provider failover, wallet, and a live dashboard.
@@ -131,10 +131,10 @@ const Index = () => {
 
           {/* Platforms strip */}
           <div className="mt-20 pt-8 border-t border-white/5">
-            <p className="text-[10px] tracking-[0.24em] uppercase text-white/30 mb-5">
+            <p className="text-[10px] tracking-[0.24em] uppercase text-white/65 mb-5">
               Built for the platforms that matter
             </p>
-            <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4 text-white/50">
+            <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4 text-white/80">
               {[
                 { Icon: Instagram, label: 'INSTAGRAM' },
                 { Icon: Sparkles, label: 'TIKTOK' },
@@ -212,7 +212,7 @@ const Index = () => {
                   <Icon className="h-5 w-5 text-purple-300" />
                 </div>
                 <h3 className="text-base font-semibold mb-2">{title}</h3>
-                <p className="text-sm text-slate-400 leading-relaxed">{body}</p>
+                <p className="text-sm text-slate-200 leading-relaxed">{body}</p>
               </div>
             ))}
           </div>
@@ -235,7 +235,7 @@ const Index = () => {
                 every channel.
               </span>
             </h2>
-            <p className="text-slate-400 leading-relaxed mb-8 max-w-lg">
+            <p className="text-slate-200 leading-relaxed mb-8 max-w-lg">
               Plug in a URL, pick a bundle, hit launch. OrganicSMM Pro handles the
               routing, the dispatch, and the retries — so you don't have to
               babysit any of it.
@@ -247,7 +247,7 @@ const Index = () => {
                 'YouTube views, subs & engagement',
                 'Telegram, Facebook, X — all routed',
               ].map((t) => (
-                <li key={t} className="flex items-center gap-3 text-sm text-slate-300">
+                <li key={t} className="flex items-center gap-3 text-sm text-slate-100">
                   <span className="h-5 w-5 rounded-full bg-purple-500/15 border border-purple-400/30 flex items-center justify-center shrink-0">
                     <Check className="h-3 w-3 text-purple-300" />
                   </span>
@@ -264,7 +264,7 @@ const Index = () => {
                 <span className="h-2.5 w-2.5 rounded-full bg-white/20" />
                 <span className="h-2.5 w-2.5 rounded-full bg-white/20" />
                 <span className="h-2.5 w-2.5 rounded-full bg-white/20" />
-                <span className="ml-auto text-[10px] uppercase tracking-[0.18em] text-white/40">organicsmm.live</span>
+                <span className="ml-auto text-[10px] uppercase tracking-[0.18em] text-white/75">organicsmm.live</span>
               </div>
               <div className="space-y-3">
                 {[
@@ -275,7 +275,7 @@ const Index = () => {
                 ].map((r, i) => (
                   <div key={i} className="flex items-center justify-between rounded-lg border border-white/5 bg-white/[0.03] px-3.5 py-3">
                     <div>
-                      <div className="text-[10px] uppercase tracking-widest text-white/40 mb-0.5">{r.p}</div>
+                      <div className="text-[10px] uppercase tracking-widest text-white/75 mb-0.5">{r.p}</div>
                       <div className="text-sm font-medium">{r.t}</div>
                     </div>
                     <div className="text-right">
@@ -315,20 +315,20 @@ const Index = () => {
             <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-7 backdrop-blur-sm">
               <div className="flex items-baseline justify-between mb-1">
                 <h3 className="text-lg font-semibold">Monthly</h3>
-                <span className="text-[10px] uppercase tracking-[0.18em] text-white/40">Most flexible</span>
+                <span className="text-[10px] uppercase tracking-[0.18em] text-white/75">Most flexible</span>
               </div>
               <div className="mt-3 mb-5">
                 <span className="text-5xl font-bold tracking-tight">₹999</span>
-                <span className="text-white/40 ml-2 text-sm">/ month</span>
+                <span className="text-white/75 ml-2 text-sm">/ month</span>
               </div>
-              <p className="text-sm text-slate-400 mb-6">Full access. Cancel anytime.</p>
+              <p className="text-sm text-slate-200 mb-6">Full access. Cancel anytime.</p>
               <Link
                 to="/auth"
                 className="inline-flex w-full items-center justify-center px-5 py-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-white font-semibold transition-all"
               >
                 Start monthly
               </Link>
-              <ul className="mt-6 space-y-2.5 text-sm text-slate-300">
+              <ul className="mt-6 space-y-2.5 text-sm text-slate-100">
                 {['Unlimited orders', 'All platforms', 'Multi-provider failover', 'Live dashboard'].map((t) => (
                   <li key={t} className="flex items-center gap-2.5">
                     <Check className="h-4 w-4 text-purple-300" /> {t}
@@ -348,9 +348,9 @@ const Index = () => {
               </div>
               <div className="mt-3 mb-5">
                 <span className="text-5xl font-bold tracking-tight">₹8,250</span>
-                <span className="text-white/40 ml-2 text-sm line-through">₹19,920</span>
+                <span className="text-white/75 ml-2 text-sm line-through">₹19,920</span>
               </div>
-              <p className="text-sm text-slate-400 mb-6">One payment. Yours forever.</p>
+              <p className="text-sm text-slate-200 mb-6">One payment. Yours forever.</p>
               <Link
                 to="/auth"
                 className="inline-flex w-full items-center justify-center px-5 py-3 rounded-xl bg-white text-black font-semibold hover:bg-purple-50 transition-all shadow-[0_0_24px_rgba(255,255,255,0.15)] active:scale-[0.98]"
@@ -386,7 +386,7 @@ const Index = () => {
               real growth?
             </span>
           </h2>
-          <p className="text-slate-400 max-w-xl mx-auto mb-8">
+          <p className="text-slate-200 max-w-xl mx-auto mb-8">
             Skip the panel templates. Run growth like software.
           </p>
           <Link
@@ -401,7 +401,7 @@ const Index = () => {
 
       {/* Footer */}
       <footer className="border-t border-white/5 py-10">
-        <div className="max-w-6xl mx-auto px-5 sm:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-white/40">
+        <div className="max-w-6xl mx-auto px-5 sm:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-white/75">
           <div className="flex items-center gap-2.5">
             <img src={logo} alt="OrganicSMM Pro" className="h-6 w-6 rounded object-cover ring-1 ring-white/10" />
             <span>© {new Date().getFullYear()} OrganicSMM Pro. All rights reserved.</span>
