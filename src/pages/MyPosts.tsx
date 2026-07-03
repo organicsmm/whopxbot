@@ -35,10 +35,11 @@ function TypeIcon({ t }: { t: string | null }) {
 export default function MyPosts() {
   const { user } = useAuth();
   const qc = useQueryClient();
-  const navigate = useNavigate();
   const { formatPrice } = useCurrency();
   const [searchParams] = useSearchParams();
   const selectedAccountId = searchParams.get('account');
+  const [boostLink, setBoostLink] = useState<string | null>(null);
+  const [manualLink, setManualLink] = useState('');
 
   const { data: rows = [], isLoading } = useQuery({
     queryKey: ['ig-posts-summary', user?.id, selectedAccountId],
