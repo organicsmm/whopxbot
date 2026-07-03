@@ -180,7 +180,7 @@ export default function MyPosts() {
                   {r.total_spent > 0 && <span className="text-emerald-300/80 font-semibold">{formatPrice(Number(r.total_spent))}</span>}
                 </div>
                 <button
-                  onClick={() => navigate(`/engagement-order?link=${encodeURIComponent(r.permalink)}`)}
+                  onClick={() => setBoostLink(r.permalink)}
                   className="w-full h-9 rounded-lg text-[12px] font-semibold bg-gradient-to-b from-purple-500 to-fuchsia-600 text-white shadow-md shadow-purple-500/20 hover:shadow-purple-500/40 flex items-center justify-center gap-1.5"
                 >
                   <Rocket className="w-3.5 h-3.5" /> Boost
