@@ -3,7 +3,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Copy, RefreshCw, Send, ShieldCheck } from "lucide-react";
+import { Copy, RefreshCw, Send, ShieldCheck, ArrowLeft } from "lucide-react";
+import { Link } from "react-router-dom";
+
 import { useAuth } from "@/hooks/useAuth";
 
 export default function TelegramBot() {
