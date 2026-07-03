@@ -780,7 +780,19 @@ async function updateEngagementOrderStatus(supabase: any, engagementOrderId: str
     orderStatus = 'paused'
   }
 
+  const _prev = parentOrder?.status
   await supabase.from('engagement_orders').update({ status: orderStatus }).eq('id', engagementOrderId).neq('status', 'cancelled')
+  if (_prev && _prev !== orderStatus && _prev !== 'cancelled' &&
+      ['completed', 'partial', 'failed', 'processing'].includes(orderStatus)) {
+    try {
+      const { data: o } = await supabase.from('engagement_orders').select('user_id, order_number, link').eq('id', engagementOrderId).maybeSingle()
+      if (o?.user_id) {
+        const label: Record<string, string> = { processing: 'Processing started', completed: 'Delivered ✅', partial: 'Partially delivered', failed: 'Failed' }
+        await notifyUserTelegram(supabase, o.user_id,
+          `${statusEmoji(orderStatus)} <b>Order #${o.order_number}</b>\n${label[orderStatus] ?? orderStatus}\nLink: <code>${o.link ?? ''}</code>`)
+      }
+    } catch (e) { console.error('notify failed', e) }
+  }
 }
 
 // Helper function to update legacy order status
