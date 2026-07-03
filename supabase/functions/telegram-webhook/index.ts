@@ -116,6 +116,13 @@ async function handleCommand(chatId: number, username: string | null, text: stri
   const userId = await getLinkedUser(chatId);
   if (!userId) return reply(chatId, "🔒 Not linked. App → More → Telegram Bot → copy code → <code>/link CODE</code>.");
 
+  if (cmd === "/wallet") {
+    const { data: w } = await supabase.from("wallets").select("balance,total_spent").eq("user_id", userId).maybeSingle();
+    const inr = (v: number) => `₹${(v * 83.5).toFixed(2)}`;
+    return reply(chatId, `💰 <b>Wallet</b>\nBalance: ${inr(Number(w?.balance ?? 0))}\nTotal Spent: ${inr(Number(w?.total_spent ?? 0))}`);
+  }
+
+
   // shared: parse V/L/C/SV/SH/RP/DRIP from either flag (k=v) or positional
   const KEY_ALIAS: Record<string, keyof QtyMap | "drip"> = {
     v: "views", views: "views",
