@@ -35,6 +35,9 @@ Deno.serve(async (req) => {
     const views = Math.max(0, Math.floor(Number(body.views ?? 0)));
     const likes = Math.max(0, Math.floor(Number(body.likes ?? 0)));
     const comments = Math.max(0, Math.floor(Number(body.comments ?? 0)));
+    const saves = Math.max(0, Math.floor(Number(body.saves ?? 0)));
+    const shares = Math.max(0, Math.floor(Number(body.shares ?? 0)));
+    const reposts = Math.max(0, Math.floor(Number(body.reposts ?? 0)));
     const drip_minutes = Math.max(0, Math.floor(Number(body.drip_minutes ?? 0)));
     const source = String(body.source ?? "web");
 
@@ -43,8 +46,9 @@ Deno.serve(async (req) => {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    if (views + likes + comments === 0) {
-      return new Response(JSON.stringify({ error: "At least one of views/likes/comments must be > 0" }), {
+    const totalReq = views + likes + comments + saves + shares + reposts;
+    if (totalReq === 0) {
+      return new Response(JSON.stringify({ error: "At least one engagement type must be > 0" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
