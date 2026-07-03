@@ -116,11 +116,15 @@ export default function TelegramBot() {
         <CardHeader><CardTitle>Available commands</CardTitle></CardHeader>
         <CardContent className="text-sm space-y-1 font-mono">
           <div>/wallet — balance</div>
-          <div>/posts — recent Instagram posts</div>
+          <div>/posts — recent Instagram posts (inline Boost buttons)</div>
           <div>/orders — recent engagement orders</div>
+          <div>/order &lt;instagram-link&gt; [views] [likes] [comments] — place order</div>
+          <div>/setdefault VIEWS LIKES COMMENTS [DRIP_MIN] — set preset</div>
+          <div>/mode auto|manual — auto-order on new posts</div>
           <div>/cancel ORDER_ID — cancel pending order</div>
           <div>/help — show commands</div>
         </CardContent>
+
       </Card>
 
       {isAdmin && (
