@@ -837,6 +837,7 @@ export default function EngagementOrderDetail() {
           onPauseType={(itemId) => pauseItemMutation.mutate(itemId)}
           onResumeType={(itemId) => resumeItemMutation.mutate(itemId)}
           onCancelType={(itemId) => cancelItemMutation.mutate(itemId)}
+          refillLink={order.link}
         />
 
         {/* SECTION 1: Merged Organic Timeline */}

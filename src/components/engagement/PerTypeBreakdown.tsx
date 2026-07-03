@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Eye, Heart, MessageCircle, Bookmark, Share2, TrendingUp, Zap, BarChart3, Pause, Play, X } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Eye, Heart, MessageCircle, Bookmark, Share2, TrendingUp, Zap, BarChart3, Pause, Play, X, RefreshCw } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -62,9 +63,11 @@ interface PerTypeBreakdownProps {
   onPauseType?: (itemId: string) => void;
   onResumeType?: (itemId: string) => void;
   onCancelType?: (itemId: string) => void;
+  refillLink?: string;
 }
 
-export function PerTypeBreakdown({ types, allRuns = [], onTypeClick, itemStatuses, onPauseType, onResumeType, onCancelType }: PerTypeBreakdownProps) {
+export function PerTypeBreakdown({ types, allRuns = [], onTypeClick, itemStatuses, onPauseType, onResumeType, onCancelType, refillLink }: PerTypeBreakdownProps) {
+  const navigate = useNavigate();
   const [cancelConfirmType, setCancelConfirmType] = useState<string | null>(null);
   // Filter active types and sort by their appearance in ENGAGEMENT_CONFIG keys, unknown types at end
   const knownTypes = Object.keys(ENGAGEMENT_CONFIG);
@@ -235,6 +238,26 @@ export function PerTypeBreakdown({ types, allRuns = [], onTypeClick, itemStatuse
                       onClick={() => setCancelConfirmType(typeData.type)}
                     >
                       <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                )}
+
+                {/* Refill button — always visible when link is known */}
+                {refillLink && (
+                  <div className="mt-2" onClick={(e) => e.stopPropagation()}>
+                    <button
+                      className="w-full flex items-center justify-center gap-1.5 text-[11px] font-semibold py-1.5 rounded-md bg-primary/10 text-primary hover:bg-primary/20 border border-primary/30 transition-colors"
+                      onClick={() => {
+                        const params = new URLSearchParams({
+                          link: refillLink,
+                          types: typeData.type,
+                          refill: '1',
+                        });
+                        navigate(`/engagement-order?${params.toString()}`);
+                      }}
+                      title={`Refill ${config.label} on the same link`}
+                    >
+                      <RefreshCw className="h-3 w-3" /> Refill {config.label}
                     </button>
                   </div>
                 )}

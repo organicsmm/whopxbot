@@ -79,7 +79,7 @@ export default function EngagementOrder() {
   const [platform, setPlatform] = useState('instagram');
   const [link, setLink] = useState(searchParams.get('link') ?? '');
 
-  // Sync link + platform when arriving via ?link=
+  // Sync link + platform when arriving via ?link=  (and handle ?types= refill)
   useEffect(() => {
     const initial = searchParams.get('link');
     if (initial) {
@@ -88,6 +88,11 @@ export default function EngagementOrder() {
       if (lower.includes('instagram.com')) setPlatform('instagram');
       else if (lower.includes('tiktok.com')) setPlatform('tiktok');
       else if (lower.includes('youtube.com') || lower.includes('youtu.be')) setPlatform('youtube');
+    }
+    // Refill mode: force manual ratios so only the selected type stays enabled
+    const rawTypes = searchParams.get('types');
+    if (rawTypes || searchParams.get('refill')) {
+      setIsAutoRatios(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -393,6 +398,26 @@ export default function EngagementOrder() {
       return updated;
     });
   }, [debouncedBaseQuantity, bundles, servicePrices, userSavedRatios, isAutoRatios]);
+
+  // Refill mode: after engagements populate, enable only the requested type(s)
+  const [refillApplied, setRefillApplied] = useState(false);
+  useEffect(() => {
+    if (refillApplied) return;
+    const rawTypes = searchParams.get('types');
+    if (!rawTypes) return;
+    const wanted = rawTypes.split(',').map(t => t.trim().toLowerCase()).filter(Boolean);
+    if (!wanted.length) return;
+    if (!engagements || Object.keys(engagements).length === 0) return;
+    setEngagements(prev => {
+      const next: EngagementConfigs = {};
+      Object.entries(prev).forEach(([k, cfg]) => {
+        next[k] = { ...cfg, enabled: wanted.includes(k.toLowerCase()) };
+      });
+      return next;
+    });
+    setRefillApplied(true);
+  }, [engagements, searchParams, refillApplied]);
+
 
   const handleEngagementChange = useCallback((type: EngagementType, config: EngagementConfig) => {
     setEngagements(prev => ({ ...prev, [type]: config }));
