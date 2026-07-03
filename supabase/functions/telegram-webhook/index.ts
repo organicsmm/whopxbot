@@ -82,20 +82,49 @@ async function handleCommand(chatId: number, username: string | null, text: stri
 
   if (cmd === "/order") {
     const link = args[0];
-    if (!link || !/instagram\.com\//i.test(link)) return reply(chatId, "Usage: <code>/order https://instagram.com/reel/XYZ [VIEWS] [LIKES] [COMMENTS]</code>");
-    let v = Number(args[1]);
-    let l = Number(args[2]);
-    let c = Number(args[3]);
-    if ([v, l, c].every((x) => !Number.isFinite(x))) {
-      const { data: p } = await supabase.from("engagement_presets").select("*").eq("user_id", userId).maybeSingle();
-      if (!p) return reply(chatId, "No quantities and no preset. Set one with /setdefault.");
-      v = p.views; l = p.likes; c = p.comments;
+    const usage = "Usage: <code>/order &lt;instagram-link&gt; [VIEWS] [LIKES] [COMMENTS]</code>\nExample: <code>/order https://instagram.com/reel/XYZ 5000 500 50</code>";
+
+    // 1. Link validation
+    if (!link) return reply(chatId, `❌ Missing Instagram link.\n${usage}`);
+    if (!/^https?:\/\/(www\.)?instagram\.com\/(p|reel|tv)\/[A-Za-z0-9_-]+/i.test(link)) {
+      return reply(chatId, `❌ Invalid link. Must be an Instagram post/reel URL like <code>https://instagram.com/reel/XYZ</code>.`);
     }
-    v = Math.max(0, Math.floor(v || 0)); l = Math.max(0, Math.floor(l || 0)); c = Math.max(0, Math.floor(c || 0));
+    if (link.length > 300) return reply(chatId, "❌ Link too long (max 300 chars).");
+
+    // 2. Quantity parsing + validation
+    const raw = [args[1], args[2], args[3]];
+    const provided = raw.some((x) => x !== undefined);
+    const parseQty = (label: string, s: string | undefined): { val: number; err?: string } => {
+      if (s === undefined || s === "") return { val: 0 };
+      if (!/^\d+$/.test(s)) return { val: 0, err: `❌ ${label} must be a whole number (got "<code>${s}</code>").` };
+      const n = Number(s);
+      if (!Number.isFinite(n) || n < 0) return { val: 0, err: `❌ ${label} must be 0 or more.` };
+      if (n > 1_000_000) return { val: 0, err: `❌ ${label} too high (max 1,000,000).` };
+      return { val: n };
+    };
+    let v = 0, l = 0, c = 0;
+    if (provided) {
+      const pv = parseQty("Views", raw[0]);
+      const pl = parseQty("Likes", raw[1]);
+      const pc = parseQty("Comments", raw[2]);
+      const err = pv.err || pl.err || pc.err;
+      if (err) return reply(chatId, `${err}\n${usage}`);
+      v = pv.val; l = pl.val; c = pc.val;
+      if (v + l + c === 0) return reply(chatId, "❌ At least one of VIEWS / LIKES / COMMENTS must be greater than 0.");
+    } else {
+      const { data: p } = await supabase.from("engagement_presets").select("*").eq("user_id", userId).maybeSingle();
+      if (!p) return reply(chatId, "❌ No quantities given and no preset saved.\nSet one with <code>/setdefault VIEWS LIKES COMMENTS</code> or pass quantities inline.");
+      v = Math.max(0, Math.floor(Number(p.views) || 0));
+      l = Math.max(0, Math.floor(Number(p.likes) || 0));
+      c = Math.max(0, Math.floor(Number(p.comments) || 0));
+      if (v + l + c === 0) return reply(chatId, "❌ Your preset has all zero quantities. Update it with <code>/setdefault VIEWS LIKES COMMENTS</code>.");
+    }
+
     const r = await placeEngagement(userId, link, v, l, c);
     if (!r.ok) return reply(chatId, `❌ ${r.error ?? "Order failed"}`);
     return reply(chatId, `✅ Order <code>#${r.order_number}</code> placed\nViews:${v} Likes:${l} Comments:${c}\nCharged: ₹${r.charged_inr}`);
   }
+
 
   if (cmd === "/posts") {
     const { data: posts } = await supabase.rpc("get_posts_with_order_summary", { _user_id: userId });
