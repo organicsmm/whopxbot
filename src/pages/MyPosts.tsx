@@ -135,7 +135,7 @@ export default function MyPosts() {
             className="bg-black/30 border-white/10 text-white"
           />
           <Button
-            onClick={() => { if (/instagram\.com\//i.test(manualLink)) setBoostLink(manualLink.trim()); }}
+            onClick={() => { if (/instagram\.com\//i.test(manualLink)) goBoost(manualLink.trim()); }}
             disabled={!/instagram\.com\//i.test(manualLink)}
             className="bg-gradient-to-b from-purple-500 to-fuchsia-600"
           >
