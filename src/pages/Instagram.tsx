@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { Instagram, Loader2, Plus, RefreshCw, Trash2, CheckCircle2, ShieldAlert } from 'lucide-react';
+import { Instagram, Loader2, Plus, Trash2, CheckCircle2, ShieldAlert } from 'lucide-react';
 import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
 
@@ -36,23 +36,6 @@ export default function InstagramPage() {
       setUsername('');
       qc.invalidateQueries({ queryKey: ['ig-accounts'] });
       qc.invalidateQueries({ queryKey: ['ig-posts-summary'] });
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
-  const refreshMut = useMutation({
-    mutationFn: async (accountId: string) => {
-      const { data, error } = await supabase.functions.invoke('instagram-refresh-media', {
-        body: { account_id: accountId, results_limit: 100 },
-      });
-      if (error) throw new Error(error.message);
-      if (data?.error) throw new Error(data.error);
-      return data;
-    },
-    onSuccess: (d) => {
-      toast.success(`Refreshed · ${d.imported} new, ${d.updated} updated`);
-      qc.invalidateQueries({ queryKey: ['ig-posts-summary'] });
-      qc.invalidateQueries({ queryKey: ['ig-accounts'] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -141,14 +124,6 @@ export default function InstagramPage() {
                 <Link to={`/my-posts?account=${encodeURIComponent(a.id)}`} className="px-3 h-9 rounded-lg text-[12px] font-semibold bg-white/5 hover:bg-white/10 border border-white/10 text-white/80 flex items-center">
                   View Posts
                 </Link>
-                <button
-                  onClick={() => refreshMut.mutate(a.id)}
-                  disabled={refreshMut.isPending}
-                  className="w-9 h-9 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-white/70 flex items-center justify-center disabled:opacity-50"
-                  title="Refresh posts"
-                >
-                  {refreshMut.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
-                </button>
                 <button
                   onClick={() => confirm(`Remove @${a.username}?`) && removeMut.mutate(a.id)}
                   className="w-9 h-9 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-400/20 text-red-300 flex items-center justify-center"
