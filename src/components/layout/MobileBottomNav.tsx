@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, Rocket, Droplets, Sparkles, Wallet, Code2,
   LifeBuoy, Settings, Shield, LogOut, MoreHorizontal, X, History,
-  Instagram, Grid3x3
+  Instagram, Grid3x3, Send
 } from 'lucide-react';
 import logo from '@/assets/logo.jpg';
 import { useAuth } from '@/hooks/useAuth';
@@ -19,6 +19,7 @@ const primary = [
 
 const more = [
   { icon: Instagram, label: 'Instagram', path: '/instagram' },
+  { icon: Send, label: 'Telegram Bot', path: '/telegram-bot' },
   { icon: Droplets, label: 'Mass Order', path: '/mass-order' },
   { icon: History, label: 'Order History', path: '/orders' },
   { icon: Sparkles, label: 'Engagement Orders', path: '/engagement-orders' },
