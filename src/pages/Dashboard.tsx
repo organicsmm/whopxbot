@@ -58,7 +58,12 @@ export default function Dashboard() {
 
   const typeIcon: Record<string, any> = { views: Eye, likes: Heart, comments: MessageCircle };
 
-  const cardStyle = { background: 'white', border: '1px solid rgba(0,0,0,.06)', boxShadow: '0 2px 12px rgba(0,0,0,.03)' };
+  const cardStyle = { background: '#1a1614', border: '1px solid rgba(255,255,255,.06)', boxShadow: '0 2px 12px rgba(0,0,0,.25)' };
+  const TEXT = '#f5f2ee';
+  const MUTED = '#8a8078';
+  const FAINT = '#5a534d';
+  const DIVIDER = '1px solid rgba(255,255,255,.05)';
+  const HOVER = 'hover:bg-white/[.03]';
 
   return (
     <DashboardLayout>
