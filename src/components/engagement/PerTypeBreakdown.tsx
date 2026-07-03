@@ -241,6 +241,26 @@ export function PerTypeBreakdown({ types, allRuns = [], onTypeClick, itemStatuse
                     </button>
                   </div>
                 )}
+
+                {/* Refill button — always visible when link is known */}
+                {refillLink && (
+                  <div className="mt-2" onClick={(e) => e.stopPropagation()}>
+                    <button
+                      className="w-full flex items-center justify-center gap-1.5 text-[11px] font-semibold py-1.5 rounded-md bg-primary/10 text-primary hover:bg-primary/20 border border-primary/30 transition-colors"
+                      onClick={() => {
+                        const params = new URLSearchParams({
+                          link: refillLink,
+                          types: typeData.type,
+                          refill: '1',
+                        });
+                        navigate(`/engagement-order?${params.toString()}`);
+                      }}
+                      title={`Refill ${config.label} on the same link`}
+                    >
+                      <RefreshCw className="h-3 w-3" /> Refill {config.label}
+                    </button>
+                  </div>
+                )}
               </div>
             );
           })}
