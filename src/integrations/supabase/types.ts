@@ -539,6 +539,7 @@ export type Database = {
         Row: {
           comments: number
           created_at: string
+          default_link: string | null
           drip_minutes: number
           likes: number
           mode: string
@@ -549,6 +550,7 @@ export type Database = {
         Insert: {
           comments?: number
           created_at?: string
+          default_link?: string | null
           drip_minutes?: number
           likes?: number
           mode?: string
@@ -559,6 +561,7 @@ export type Database = {
         Update: {
           comments?: number
           created_at?: string
+          default_link?: string | null
           drip_minutes?: number
           likes?: number
           mode?: string
