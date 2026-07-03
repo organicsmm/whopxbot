@@ -69,7 +69,32 @@ async function handleCommand(chatId: number, username: string | null, text: stri
       user_id: userId, views: v, likes: l, comments: c, drip_minutes: d || 0,
     });
     if (error) return reply(chatId, `❌ ${error.message}`);
-    return reply(chatId, `✅ Preset saved.\nViews: ${v} · Likes: ${l} · Comments: ${c} · Drip: ${d || 0}m`);
+    return reply(chatId, `✅ Default quantities saved.\nViews: ${v} · Likes: ${l} · Comments: ${c} · Drip: ${d || 0}m\n\nAb <code>/order</code> chalao — quantity auto-apply hogi.`);
+  }
+
+  if (cmd === "/setlink") {
+    const link = args[0];
+    if (!link) return reply(chatId, "Usage: <code>/setlink &lt;instagram-link&gt;</code>");
+    if (!/^https?:\/\/(www\.)?instagram\.com\/(p|reel|tv)\/[A-Za-z0-9_-]+/i.test(link)) {
+      return reply(chatId, "❌ Invalid link. Must be an Instagram post/reel URL.");
+    }
+    if (link.length > 300) return reply(chatId, "❌ Link too long (max 300 chars).");
+    const { error } = await supabase.from("engagement_presets").upsert({ user_id: userId, default_link: link });
+    if (error) return reply(chatId, `❌ ${error.message}`);
+    return reply(chatId, `✅ Default link saved.\n<code>${link}</code>\n\nAb <code>/order</code> sirf likhne se hi order lag jayega.`);
+  }
+
+  if (cmd === "/cleardefaults") {
+    const { error } = await supabase.from("engagement_presets").upsert({ user_id: userId, default_link: null });
+    if (error) return reply(chatId, `❌ ${error.message}`);
+    return reply(chatId, "✅ Default link cleared. Quantities aur mode intact hain.");
+  }
+
+  if (cmd === "/mydefaults") {
+    const { data: p } = await supabase.from("engagement_presets").select("*").eq("user_id", userId).maybeSingle();
+    if (!p) return reply(chatId, "No defaults saved yet.\nUse <code>/setdefault</code>, <code>/setlink</code>, <code>/mode</code>.");
+    return reply(chatId,
+      `<b>Your defaults</b>\nMode: <code>${p.mode ?? "manual"}</code>\nLink: ${p.default_link ? `<code>${p.default_link}</code>` : "<i>(not set)</i>"}\nViews: ${p.views ?? 0} · Likes: ${p.likes ?? 0} · Comments: ${p.comments ?? 0}\nDrip: ${p.drip_minutes ?? 0}m`);
   }
 
   if (cmd === "/mode") {
@@ -81,17 +106,25 @@ async function handleCommand(chatId: number, username: string | null, text: stri
   }
 
   if (cmd === "/order") {
-    const link = args[0];
-    const usage = "Usage: <code>/order &lt;instagram-link&gt; [VIEWS] [LIKES] [COMMENTS]</code>\nExample: <code>/order https://instagram.com/reel/XYZ 5000 500 50</code>";
+    const usage = "Usage: <code>/order</code> (uses saved defaults)\n<code>/order &lt;link&gt;</code>\n<code>/order &lt;link&gt; VIEWS LIKES COMMENTS</code>\n\nSet defaults: <code>/setlink</code>, <code>/setdefault</code>";
 
-    // 1. Link validation
-    if (!link) return reply(chatId, `❌ Missing Instagram link.\n${usage}`);
+    // Load preset once — used for defaults on link + quantities
+    const { data: preset } = await supabase.from("engagement_presets").select("*").eq("user_id", userId).maybeSingle();
+
+    // 1. Resolve link (arg or preset.default_link)
+    let link = args[0];
+    if (!link) {
+      if (!preset?.default_link) {
+        return reply(chatId, `❌ No link given and no default link saved.\nSet one with <code>/setlink &lt;instagram-link&gt;</code>.\n\n${usage}`);
+      }
+      link = preset.default_link as string;
+    }
     if (!/^https?:\/\/(www\.)?instagram\.com\/(p|reel|tv)\/[A-Za-z0-9_-]+/i.test(link)) {
-      return reply(chatId, `❌ Invalid link. Must be an Instagram post/reel URL like <code>https://instagram.com/reel/XYZ</code>.`);
+      return reply(chatId, `❌ Invalid link. Must be an Instagram post/reel URL.`);
     }
     if (link.length > 300) return reply(chatId, "❌ Link too long (max 300 chars).");
 
-    // 2. Quantity parsing + validation
+    // 2. Quantities — inline overrides preset
     const raw = [args[1], args[2], args[3]];
     const provided = raw.some((x) => x !== undefined);
     const parseQty = (label: string, s: string | undefined): { val: number; err?: string } => {
@@ -112,18 +145,19 @@ async function handleCommand(chatId: number, username: string | null, text: stri
       v = pv.val; l = pl.val; c = pc.val;
       if (v + l + c === 0) return reply(chatId, "❌ At least one of VIEWS / LIKES / COMMENTS must be greater than 0.");
     } else {
-      const { data: p } = await supabase.from("engagement_presets").select("*").eq("user_id", userId).maybeSingle();
-      if (!p) return reply(chatId, "❌ No quantities given and no preset saved.\nSet one with <code>/setdefault VIEWS LIKES COMMENTS</code> or pass quantities inline.");
-      v = Math.max(0, Math.floor(Number(p.views) || 0));
-      l = Math.max(0, Math.floor(Number(p.likes) || 0));
-      c = Math.max(0, Math.floor(Number(p.comments) || 0));
+      if (!preset) return reply(chatId, "❌ No quantities given and no preset saved.\nSet one with <code>/setdefault VIEWS LIKES COMMENTS</code>.");
+      v = Math.max(0, Math.floor(Number(preset.views) || 0));
+      l = Math.max(0, Math.floor(Number(preset.likes) || 0));
+      c = Math.max(0, Math.floor(Number(preset.comments) || 0));
       if (v + l + c === 0) return reply(chatId, "❌ Your preset has all zero quantities. Update it with <code>/setdefault VIEWS LIKES COMMENTS</code>.");
     }
 
-    const r = await placeEngagement(userId, link, v, l, c);
+    const drip = Math.max(0, Math.floor(Number(preset?.drip_minutes) || 0));
+    const r = await placeEngagement(userId, link, v, l, c, drip);
     if (!r.ok) return reply(chatId, `❌ ${r.error ?? "Order failed"}`);
-    return reply(chatId, `✅ Order <code>#${r.order_number}</code> placed\nViews:${v} Likes:${l} Comments:${c}\nCharged: ₹${r.charged_inr}`);
+    return reply(chatId, `✅ Order <code>#${r.order_number}</code> placed\nLink: <code>${link}</code>\nViews:${v} Likes:${l} Comments:${c}${drip ? ` · Drip:${drip}m` : ""}\nCharged: ₹${r.charged_inr}`);
   }
+
 
 
   if (cmd === "/posts") {
