@@ -1705,6 +1705,13 @@ async function processAllRuns(supabase: any, executionId: string, startTime: num
           continue
         }
 
+        // Notify order owner on first transition to processing
+        try {
+          const { data: eo } = await supabase.from('engagement_orders').select('status').eq('id', item.engagement_order_id).maybeSingle()
+          // notify helper is no-op if status already processing/notified state; we pass prev as 'pending' to force check
+          await notifyEngagementOrderStatus(supabase, item.engagement_order_id, 'pending', eo?.status === 'processing' ? 'processing' : (eo?.status ?? 'processing'))
+        } catch (_) {}
+
         if (!executionProviderMap.has(localExecutionKey)) {
           executionProviderMap.set(localExecutionKey, new Set())
         }
