@@ -21,9 +21,7 @@ const more = [
   { icon: Instagram, label: 'Instagram', path: '/instagram' },
   { icon: Send, label: 'Telegram Bot', path: '/telegram-bot' },
   { icon: Droplets, label: 'Mass Order', path: '/mass-order' },
-  { icon: History, label: 'Order History', path: '/orders' },
   { icon: Sparkles, label: 'Engagement Orders', path: '/engagement-orders' },
-  { icon: Code2, label: 'API Access', path: '/api-access' },
   { icon: LifeBuoy, label: 'Support', path: '/support' },
   { icon: Settings, label: 'Settings', path: '/settings' },
 ];

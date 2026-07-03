@@ -13,11 +13,8 @@ const userNavItems = [
   { icon: Droplets, label: 'Mass Order', path: '/mass-order', highlight: true },
   { icon: Sparkles, label: 'Engagement Orders', path: '/engagement-orders' },
   { icon: Instagram, label: 'Instagram Accounts', path: '/instagram' },
-  
-  { icon: History, label: 'Order History', path: '/orders' },
   { icon: Wallet, label: 'Wallet', path: '/wallet' },
   { icon: Send, label: 'Telegram Bot', path: '/telegram-bot' },
-  { icon: Code2, label: 'API Access', path: '/api-access' },
   { icon: LifeBuoy, label: 'Support', path: '/support' },
   { icon: Settings, label: 'Settings', path: '/settings' },
 ];
