@@ -18,6 +18,8 @@ const primary = [
 ];
 
 const more = [
+  { icon: Instagram, label: 'Instagram', path: '/instagram' },
+  { icon: Droplets, label: 'Mass Order', path: '/mass-order' },
   { icon: History, label: 'Order History', path: '/orders' },
   { icon: Sparkles, label: 'Engagement Orders', path: '/engagement-orders' },
   { icon: Code2, label: 'API Access', path: '/api-access' },
