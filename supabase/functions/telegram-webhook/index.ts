@@ -30,6 +30,33 @@ async function placeEngagement(user_id: string, link: string, views: number, lik
   return { ok: res.ok, ...(await res.json().catch(() => ({}))) };
 }
 
+type Limit = { min: number; max: number };
+async function getIgServiceLimits(): Promise<{ limits: Record<string, Limit>; err?: string }> {
+  const { data: bundle, error: bErr } = await supabase
+    .from("engagement_bundles")
+    .select("id,bundle_items(engagement_type,service_id)")
+    .eq("platform", "instagram").eq("is_active", true).maybeSingle();
+  if (bErr) return { limits: {}, err: `bundle load failed: ${bErr.message}` };
+  if (!bundle) return { limits: {}, err: "Instagram bundle not configured" };
+  const items = ((bundle as any).bundle_items ?? []) as Array<{ engagement_type: string; service_id: string }>;
+  const ids = items.map((i) => i.service_id).filter(Boolean);
+  if (!ids.length) return { limits: {}, err: "Instagram bundle has no services" };
+  const { data: svcs, error: sErr } = await supabase
+    .from("services").select("id,min_quantity,max_quantity").in("id", ids);
+  if (sErr) return { limits: {}, err: `service load failed: ${sErr.message}` };
+  const byId = new Map((svcs ?? []).map((s: any) => [s.id, s]));
+  const limits: Record<string, Limit> = {};
+  for (const it of items) {
+    const s: any = byId.get(it.service_id);
+    if (!s) continue;
+    limits[it.engagement_type] = {
+      min: Math.max(0, Number(s.min_quantity) || 0),
+      max: Math.max(1, Number(s.max_quantity) || 1_000_000),
+    };
+  }
+  return { limits };
+}
+
 async function findMediaByShortcode(userId: string, shortcode: string) {
   const { data } = await supabase.from("instagram_media").select("permalink,shortcode").eq("user_id", userId).eq("shortcode", shortcode).maybeSingle();
   return data;
@@ -243,7 +270,31 @@ async function handleCommand(chatId: number, username: string | null, text: stri
       if (drip > 1440) drip = 1440;
     }
 
-    // ---------- 4. Place order ----------
+    // ---------- 4. Service-wise min/max enforcement ----------
+    const { limits, err: limErr } = await getIgServiceLimits();
+    if (limErr) return reply(chatId, `❌ Cannot verify service limits: ${limErr}. Try again shortly.`);
+    const fmt = (n: number) => n.toLocaleString();
+    const checkQty = (type: string, qty: number, label: string): string | null => {
+      if (qty <= 0) return null; // 0 = skip that engagement type
+      const lim = limits[type];
+      if (!lim) return `❌ ${label} service not configured for Instagram right now. Try later or contact support.`;
+      if (qty < lim.min) return `❌ ${label} quantity ${fmt(qty)} is below minimum. Allowed range: <b>${fmt(lim.min)} – ${fmt(lim.max)}</b>. (Use 0 to skip ${label.toLowerCase()}.)`;
+      if (qty > lim.max) return `❌ ${label} quantity ${fmt(qty)} exceeds maximum. Allowed range: <b>${fmt(lim.min)} – ${fmt(lim.max)}</b>.`;
+      return null;
+    };
+    const limErrMsg =
+      checkQty("views", v, "Views") ||
+      checkQty("likes", l, "Likes") ||
+      checkQty("comments", c, "Comments");
+    if (limErrMsg) {
+      const summary = ["views", "likes", "comments"]
+        .filter((t) => limits[t])
+        .map((t) => `${t}: ${fmt(limits[t].min)}–${fmt(limits[t].max)}`)
+        .join(" · ");
+      return reply(chatId, `${limErrMsg}\n\n<b>Current service limits</b>\n${summary}`);
+    }
+
+    // ---------- 5. Place order ----------
     const r = await placeEngagement(userId, link, v, l, c, drip);
     if (!r.ok) {
       const raw = String(r.error ?? "Order failed");
