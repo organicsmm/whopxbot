@@ -177,6 +177,17 @@ Deno.serve(async (req) => {
       if (typeof EdgeRuntime !== "undefined" && EdgeRuntime.waitUntil) EdgeRuntime.waitUntil(bg);
     } catch (_) { /* noop */ }
 
+    // Send Telegram confirmation with order id (if user has linked)
+    try {
+      const inr = Number((totalUsd * 83.5).toFixed(2));
+      const parts = orderItems.map((it) => `${it.type}:${it.qty}`).join(" · ");
+      await notifyUserTelegram(
+        admin,
+        userId,
+        `✅ <b>Order placed</b>\nID: <code>#${order.order_number}</code>\nLink: <code>${link}</code>\n${parts}\nCharged: ₹${inr}\nStatus: ⏳ pending`,
+      );
+    } catch (_) { /* noop */ }
+
     return new Response(
       JSON.stringify({ order_id: order.id, order_number: order.order_number, charged_usd: totalUsd, charged_inr: Number((totalUsd * 83.5).toFixed(2)), items: orderItems }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
