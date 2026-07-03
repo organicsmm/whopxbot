@@ -21,7 +21,7 @@ import Wallet from "./pages/Wallet";
 // Lazy — landing, auth, secondary, legal, all admin pages
 const Index = lazy(() => import("./pages/Index"));
 const Auth = lazy(() => import("./pages/Auth"));
-const OAuthConsent = lazy(() => import("./pages/OAuthConsent"));
+
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Services = lazy(() => import("./pages/Services"));
 
@@ -112,7 +112,7 @@ const App = () => {
                     <Route path="/" element={<Index />} />
                     <Route path="*" element={<NotFound />} />
                     <Route path="/auth" element={<Auth />} />
-                    <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
+                    
                     <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="/services" element={<Services />} />
                     <Route path="/order" element={<Navigate to="/engagement-order" replace />} />
