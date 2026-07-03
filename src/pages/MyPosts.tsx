@@ -98,6 +98,17 @@ export default function MyPosts() {
     enabled: !!user?.id,
   });
 
+  // Auto-refresh selected account's media on mount so posts land quickly
+  useEffect(() => {
+    if (!selectedAccountId) return;
+    (async () => {
+      try {
+        await supabase.functions.invoke('instagram-refresh-media', { body: { account_id: selectedAccountId } });
+        qc.invalidateQueries({ queryKey: ['ig-posts-summary'] });
+      } catch { /* silent */ }
+    })();
+  }, [selectedAccountId, qc]);
+
   // realtime: any engagement order change → refetch
   useEffect(() => {
     if (!user?.id) return;
@@ -110,6 +121,7 @@ export default function MyPosts() {
   }, [user?.id, qc]);
 
   const selectedAccount = selectedAccountId ? accounts.find((a) => a.id === selectedAccountId) : null;
+
 
   return (
     <DashboardLayout>
