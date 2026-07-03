@@ -543,6 +543,9 @@ export type Database = {
           drip_minutes: number
           likes: number
           mode: string
+          reposts: number
+          saves: number
+          shares: number
           updated_at: string
           user_id: string
           views: number
@@ -554,6 +557,9 @@ export type Database = {
           drip_minutes?: number
           likes?: number
           mode?: string
+          reposts?: number
+          saves?: number
+          shares?: number
           updated_at?: string
           user_id: string
           views?: number
@@ -565,6 +571,9 @@ export type Database = {
           drip_minutes?: number
           likes?: number
           mode?: string
+          reposts?: number
+          saves?: number
+          shares?: number
           updated_at?: string
           user_id?: string
           views?: number
