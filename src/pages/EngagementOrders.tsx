@@ -54,7 +54,13 @@ export default function EngagementOrders() {
   const navigate = useNavigate();
   const { user, isLoading: authLoading } = useAuth();
   const { formatPrice } = useCurrency();
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchParams] = useSearchParams();
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("q") ?? "");
+  useEffect(() => {
+    const q = searchParams.get("q");
+    if (q !== null) setSearchQuery(q);
+  }, [searchParams]);
+
 
   // Instant load with cache + moderate refresh
   const { data: orders, refetch } = useQuery({
