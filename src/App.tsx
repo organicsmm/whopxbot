@@ -31,6 +31,7 @@ const EngagementOrderDetail = lazy(() => import("./pages/EngagementOrderDetail")
 const MassOrder = lazy(() => import("./pages/MassOrder"));
 const InstagramPage = lazy(() => import("./pages/Instagram"));
 const MyPosts = lazy(() => import("./pages/MyPosts"));
+const TelegramBot = lazy(() => import("./pages/TelegramBot"));
 
 const Admin = lazy(() => import("./pages/admin/Admin"));
 const AdminServices = lazy(() => import("./pages/admin/AdminServices"));
