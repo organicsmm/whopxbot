@@ -41,7 +41,7 @@ async function handleCommand(chatId: number, username: string | null, text: stri
 
   if (cmd === "/start" || cmd === "/help") {
     return reply(chatId,
-      `<b>OrganicSMM Pro Bot</b>\n\nCommands:\n<code>/link CODE</code> — pair account\n<code>/wallet</code> — balance\n<code>/posts</code> — recent IG posts\n<code>/orders</code> — recent orders\n<code>/cancel ID</code> — cancel pending\n\n<b>Preset</b>\n<code>/setdefault views likes comments drip_mins</code>\n<code>/mode auto|manual</code>\n\n<b>One-shot order</b>\n<code>/order &lt;instagram-link&gt; [views] [likes] [comments]</code>\n\nGet CODE from app → More → Telegram Bot.`);
+      `<b>OrganicSMM Pro Bot</b>\n\nCommands:\n<code>/link CODE</code> — pair account\n<code>/wallet</code> — balance\n<code>/posts</code> — recent IG posts\n<code>/orders</code> — recent orders\n<code>/cancel ID</code> — cancel pending\n\n<b>Defaults (auto-apply on /order)</b>\n<code>/setdefault VIEWS LIKES COMMENTS [DRIP_MIN]</code>\n<code>/setlink &lt;instagram-link&gt;</code>\n<code>/mode auto|manual</code>\n<code>/mydefaults</code> — show saved defaults\n<code>/cleardefaults</code> — remove saved link\n\n<b>Order</b>\n<code>/order</code> — use saved link + qty\n<code>/order &lt;link&gt;</code> — use saved qty\n<code>/order &lt;link&gt; V L C</code> — override\n\nGet CODE from app → More → Telegram Bot.`);
   }
 
   if (cmd === "/link") {
