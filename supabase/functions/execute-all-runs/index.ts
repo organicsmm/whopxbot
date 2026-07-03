@@ -555,7 +555,11 @@ async function updateEngagementOrderStatus(supabase: SupabaseClient, engagementO
   else if (activeItems === 0 && completedItems + partialItems + failedItems + cancelledItems === totalItems) orderStatus = completedItems > 0 ? 'partial' : failedItems > 0 ? 'failed' : 'cancelled'
   else if (parentOrder?.status === 'paused') orderStatus = 'paused'
 
+  const prevStatus = parentOrder?.status
   await supabase.from('engagement_orders').update({ status: orderStatus }).eq('id', engagementOrderId).neq('status', 'cancelled')
+  if (prevStatus !== 'cancelled') {
+    await notifyEngagementOrderStatus(supabase, engagementOrderId, prevStatus, orderStatus)
+  }
 }
 
 async function triggerContinuation(executionId: string, reason: string) {
