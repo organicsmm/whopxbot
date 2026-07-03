@@ -1,0 +1,107 @@
+import { createClient } from 'npm:@supabase/supabase-js@2';
+import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
+
+const APIFY_TOKEN = Deno.env.get('APIFY_API_TOKEN');
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
+const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+const ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
+
+Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
+  try {
+    if (!APIFY_TOKEN) throw new Error('APIFY_API_TOKEN not configured');
+
+    const authHeader = req.headers.get('Authorization') ?? '';
+    const token = authHeader.replace('Bearer ', '');
+    const userClient = createClient(SUPABASE_URL, ANON_KEY, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const { data: userRes, error: userErr } = await userClient.auth.getUser(token);
+    if (userErr || !userRes.user) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    const userId = userRes.user.id;
+
+    const body = await req.json().catch(() => ({}));
+    let username = String(body.username ?? '').trim().replace(/^@/, '').replace(/\/$/, '');
+    if (!username || !/^[A-Za-z0-9._]{1,30}$/.test(username)) {
+      return new Response(JSON.stringify({ error: 'Invalid username' }), {
+        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Apify: profile scraper (sync)
+    const apifyUrl = `https://api.apify.com/v2/acts/apify~instagram-profile-scraper/run-sync-get-dataset-items?token=${APIFY_TOKEN}&timeout=120`;
+    const apifyRes = await fetch(apifyUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ usernames: [username] }),
+    });
+    const apifyText = await apifyRes.text();
+    if (!apifyRes.ok) {
+      return new Response(JSON.stringify({ error: `Apify profile fetch failed [${apifyRes.status}]: ${apifyText.slice(0, 300)}` }), {
+        status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    let profileArr: any[] = [];
+    try { profileArr = JSON.parse(apifyText); } catch { profileArr = []; }
+    const profile = Array.isArray(profileArr) ? profileArr[0] : null;
+    if (!profile || profile.error || (!profile.username && !profile.id)) {
+      return new Response(JSON.stringify({ error: `Instagram profile not found for @${username}` }), {
+        status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const admin = createClient(SUPABASE_URL, SERVICE_KEY);
+    const upsertPayload = {
+      user_id: userId,
+      username: (profile.username || username).toLowerCase(),
+      ig_user_id: profile.id ? String(profile.id) : null,
+      full_name: profile.fullName ?? null,
+      avatar_url: profile.profilePicUrl ?? profile.profilePicUrlHD ?? null,
+      followers: profile.followersCount ?? 0,
+      following: profile.followsCount ?? 0,
+      posts_count: profile.postsCount ?? 0,
+      is_private: !!profile.private,
+      is_verified: !!profile.verified,
+      biography: profile.biography ?? null,
+      status: 'active',
+      last_scraped_at: new Date().toISOString(),
+    };
+    const { data: account, error: accErr } = await admin
+      .from('instagram_accounts')
+      .upsert(upsertPayload, { onConflict: 'user_id,username' })
+      .select()
+      .single();
+    if (accErr) throw accErr;
+
+    // Kick off initial media backfill (fire and forget, but await response for import count)
+    let imported = 0;
+    try {
+      const refreshRes = await fetch(`${SUPABASE_URL}/functions/v1/instagram-refresh-media`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${SERVICE_KEY}`,
+          'apikey': SERVICE_KEY,
+        },
+        body: JSON.stringify({ account_id: account.id, results_limit: 50 }),
+      });
+      const refreshJson = await refreshRes.json().catch(() => ({}));
+      imported = refreshJson?.imported ?? 0;
+    } catch (e) {
+      console.error('refresh-media invocation failed', e);
+    }
+
+    return new Response(JSON.stringify({ account, imported }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  } catch (e) {
+    console.error('instagram-link-account error', e);
+    return new Response(JSON.stringify({ error: (e as Error).message }), {
+      status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+});
