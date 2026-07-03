@@ -154,7 +154,7 @@ export function AIEngagementChat({ link, platform, engagements, totalQuantity }:
             {linkOk ? (
               <span className="text-muted-foreground truncate max-w-[260px]">{link}</span>
             ) : (
-              <span className="text-amber-600 flex items-center gap-1"><AlertTriangle className="w-3 h-3" />link paste karo</span>
+              <span className="text-amber-600 flex items-center gap-1"><AlertTriangle className="w-3 h-3" />paste a link</span>
             )}
           </div>
           {Object.keys(perType).length > 0 && (
