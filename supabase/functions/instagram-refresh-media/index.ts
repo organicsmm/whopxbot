@@ -117,9 +117,36 @@ Deno.serve(async (req) => {
       if (existing) updated++; else imported++;
     }
 
-    await admin.from('instagram_accounts')
-      .update({ last_scraped_at: new Date().toISOString(), posts_count: posts.length })
-      .eq('id', account.id);
+    // Refresh profile stats (followers + posts_count) so counters don't reset when a scrape returns 0
+    const acctUpdate: Record<string, any> = { last_scraped_at: new Date().toISOString() };
+    try {
+      const profUrl = `https://api.apify.com/v2/acts/apify~instagram-profile-scraper/run-sync-get-dataset-items?token=${APIFY_TOKEN}&timeout=90`;
+      const profRes = await fetch(profUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ usernames: [account.username] }),
+      });
+      if (profRes.ok) {
+        const profArr = await profRes.json().catch(() => []);
+        const prof = Array.isArray(profArr) ? profArr[0] : null;
+        if (prof && (prof.username || prof.id)) {
+          if (typeof prof.followersCount === 'number') acctUpdate.followers = prof.followersCount;
+          if (typeof prof.followsCount === 'number') acctUpdate.following = prof.followsCount;
+          if (typeof prof.postsCount === 'number') acctUpdate.posts_count = prof.postsCount;
+          if (prof.profilePicUrl || prof.profilePicUrlHD) acctUpdate.avatar_url = prof.profilePicUrlHD ?? prof.profilePicUrl;
+          if (prof.fullName) acctUpdate.full_name = prof.fullName;
+        }
+      }
+    } catch (e) {
+      console.warn('profile refresh failed', e);
+    }
+    // Fallback: only trust the media-scrape count when it actually returned posts
+    if (acctUpdate.posts_count === undefined && posts.length > 0) {
+      acctUpdate.posts_count = posts.length;
+    }
+
+    await admin.from('instagram_accounts').update(acctUpdate).eq('id', account.id);
+
 
     return new Response(JSON.stringify({ imported, updated, total: posts.length }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
