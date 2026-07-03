@@ -137,7 +137,7 @@ export default function MyPosts() {
             <div key={r.media_id} className="rounded-2xl overflow-hidden bg-[#0a0a14]/80 border border-white/10 hover:border-purple-400/30 transition-colors group">
               <div className="relative aspect-square bg-black">
                 {r.thumbnail_url ? (
-                  <img src={r.thumbnail_url} alt="" loading="lazy" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.opacity = '0.2'; }} />
+                  <img src={`https://lvrbhgulxqdsamhdjzkw.supabase.co/functions/v1/ig-image-proxy?url=${encodeURIComponent(r.thumbnail_url)}`} alt="" loading="lazy" referrerPolicy="no-referrer" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.opacity = '0.2'; }} />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-white/20"><ImageIcon className="w-10 h-10" /></div>
                 )}
