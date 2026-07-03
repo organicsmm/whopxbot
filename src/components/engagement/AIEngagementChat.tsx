@@ -79,14 +79,14 @@ export function AIEngagementChat({ link, platform, engagements, totalQuantity }:
   useEffect(() => {
     if (open && messages.length === 0) {
       const greet: string[] = [];
-      if (linkOk) greet.push(`Mil gaya — ${detectedPlatform} ${detectedPostType} detect ho gaya.`);
-      else greet.push("Pehle apna post link paste karo, fir main usko analyze karunga.");
+      if (linkOk) greet.push(`Got it — detected a ${detectedPlatform} ${detectedPostType}.`);
+      else greet.push("Please paste your post link first so I can analyze it.");
       if (Object.keys(perType).length) {
-        greet.push(`Aapne ${Object.entries(perType).map(([k, v]) => `${v.toLocaleString()} ${k}`).join(", ")} select kiye hain.`);
-        if (report.bottingPct >= 40) greet.push(`Botting risk: **${report.bottingPct}%** — mix thoda artificial lag rha hai.`);
-        else greet.push(`Botting risk abhi **${report.bottingPct}%** hai — kaafi natural hai.`);
+        greet.push(`You've selected ${Object.entries(perType).map(([k, v]) => `${v.toLocaleString()} ${k}`).join(", ")}.`);
+        if (report.bottingPct >= 40) greet.push(`Botting risk: **${report.bottingPct}%** — the mix looks a bit artificial.`);
+        else greet.push(`Botting risk is **${report.bottingPct}%** — looks quite natural.`);
       }
-      greet.push("Aap pooch sakte ho — 'kitne likes daalu?', 'safe hai ya nahi?', 'kitna time lagega?'");
+      greet.push("You can ask — 'How many likes should I add?', 'Is this safe?', 'How long will delivery take?'");
       setMessages([{ role: "assistant", content: greet.join(" ") }]);
     }
     if (open) setTimeout(() => inputRef.current?.focus(), 100);
