@@ -105,12 +105,13 @@ html {
 
   .glass-card {
     @apply relative overflow-hidden rounded-2xl border;
-    background: rgba(255,255,255,.03);
-    border-color: rgba(255,255,255,.10);
-    box-shadow: 0 8px 32px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.04);
+    background: rgba(255,255,255,.75);
+    border-color: rgba(15,15,30,.08);
+    box-shadow: 0 8px 32px rgba(15,15,30,.06), inset 0 1px 0 rgba(255,255,255,.6);
     backdrop-filter: blur(12px);
     color: hsl(var(--foreground));
   }
+
 
   .three-d-card { @apply glass-card; }
   .glass-premium { @apply glass-card; }
