@@ -11,7 +11,7 @@ import { Link } from 'react-router-dom';
 
 export default function InstagramPage() {
   const { user } = useAuth();
-  const { hasActiveSubscription, isLoading: subLoading } = useSubscription();
+  const { subscription, hasActiveSubscription, isLoading: subLoading } = useSubscription();
   const [showSubDialog, setShowSubDialog] = useState(false);
   const qc = useQueryClient();
   const [username, setUsername] = useState('');
