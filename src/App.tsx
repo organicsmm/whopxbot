@@ -23,7 +23,7 @@ const Index = lazy(() => import("./pages/Index"));
 const Auth = lazy(() => import("./pages/Auth"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Services = lazy(() => import("./pages/Services"));
-const Order = lazy(() => import("./pages/Order"));
+
 const Settings = lazy(() => import("./pages/Settings"));
 const Support = lazy(() => import("./pages/Support"));
 const ApiAccess = lazy(() => import("./pages/ApiAccess"));
