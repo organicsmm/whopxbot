@@ -283,6 +283,12 @@ export default function EngagementOrderDetail() {
     },
     onSuccess: () => {
       toast({ title: "🚫 Order Cancelled", description: "Order and all queued/active runs have been permanently cancelled." });
+      // Fire-and-forget Telegram notification to the order owner
+      try {
+        supabase.functions.invoke('notify-order-status', {
+          body: { engagement_order_id: order?.id, status: 'cancelled' },
+        }).catch(() => {});
+      } catch { /* noop */ }
       refetch();
     },
     onError: (error: Error) => {
