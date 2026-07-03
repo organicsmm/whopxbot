@@ -85,11 +85,14 @@ export default function InstagramPage() {
               />
             </div>
             <button
-              disabled={!username || linkMut.isPending}
-              onClick={() => linkMut.mutate(username)}
+              disabled={!username || linkMut.isPending || subLoading}
+              onClick={() => {
+                if (!hasActiveSubscription) { setShowSubDialog(true); return; }
+                linkMut.mutate(username);
+              }}
               className="h-11 px-5 rounded-xl font-semibold bg-gradient-to-b from-purple-500 to-fuchsia-600 text-white shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 transition-all disabled:opacity-50 flex items-center gap-2"
             >
-              {linkMut.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+              {linkMut.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : (hasActiveSubscription ? <Plus className="w-4 h-4" /> : <Lock className="w-4 h-4" />)}
               Link
             </button>
           </div>
