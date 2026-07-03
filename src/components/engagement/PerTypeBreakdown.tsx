@@ -63,9 +63,11 @@ interface PerTypeBreakdownProps {
   onPauseType?: (itemId: string) => void;
   onResumeType?: (itemId: string) => void;
   onCancelType?: (itemId: string) => void;
+  refillLink?: string;
 }
 
-export function PerTypeBreakdown({ types, allRuns = [], onTypeClick, itemStatuses, onPauseType, onResumeType, onCancelType }: PerTypeBreakdownProps) {
+export function PerTypeBreakdown({ types, allRuns = [], onTypeClick, itemStatuses, onPauseType, onResumeType, onCancelType, refillLink }: PerTypeBreakdownProps) {
+  const navigate = useNavigate();
   const [cancelConfirmType, setCancelConfirmType] = useState<string | null>(null);
   // Filter active types and sort by their appearance in ENGAGEMENT_CONFIG keys, unknown types at end
   const knownTypes = Object.keys(ENGAGEMENT_CONFIG);
