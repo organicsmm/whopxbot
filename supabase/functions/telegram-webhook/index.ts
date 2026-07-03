@@ -294,8 +294,36 @@ async function handleCommand(chatId: number, username: string | null, text: stri
       return reply(chatId, `${limErrMsg}\n\n<b>Current service limits</b>\n${summary}`);
     }
 
-    // ---------- 5. Place order ----------
-    const r = await placeEngagement(userId, link, v, l, c, drip);
+    // ---------- 5. Duplicate-submission guard ----------
+    // (a) In-flight lock (chat-scoped) — blocks accidental double-tap while first call is running
+    const lockKey = `tg:order:${chatId}:${link}`;
+    if ((globalThis as any).__tgOrderLocks instanceof Set === false) {
+      (globalThis as any).__tgOrderLocks = new Set<string>();
+    }
+    const locks: Set<string> = (globalThis as any).__tgOrderLocks;
+    if (locks.has(lockKey)) {
+      return reply(chatId, "⏳ Ek order already process ho raha hai is link ke liye. Please wait a few seconds before retrying.");
+    }
+    // (b) DB dedupe — same user + same link in last 90 seconds
+    const since = new Date(Date.now() - 90_000).toISOString();
+    const { data: dupes, error: dupeErr } = await supabase
+      .from("engagement_orders")
+      .select("id,order_number,status,created_at,total_price")
+      .eq("user_id", userId).eq("link", link).gte("created_at", since)
+      .order("created_at", { ascending: false }).limit(1);
+    if (dupeErr) return reply(chatId, `❌ Duplicate check failed: ${dupeErr.message}`);
+    if (dupes && dupes.length > 0) {
+      const d: any = dupes[0];
+      const ageSec = Math.max(1, Math.round((Date.now() - new Date(d.created_at).getTime()) / 1000));
+      return reply(
+        chatId,
+        `⚠️ Duplicate order blocked.\nAn identical order for this link was placed <b>${ageSec}s ago</b>.\n\n<b>Existing order:</b> <code>#${d.order_number}</code> · ${d.status}\nCheck with <code>/status ${d.order_number}</code>.\n\n<i>Retry after 90s if you really want a second order.</i>`,
+      );
+    }
+
+    // ---------- 6. Place order ----------
+    locks.add(lockKey);
+    const r = await placeEngagement(userId, link, v, l, c, drip).finally(() => locks.delete(lockKey));
     if (!r.ok) {
       const raw = String(r.error ?? "Order failed");
       let hint = "";
