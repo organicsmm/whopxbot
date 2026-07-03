@@ -19,47 +19,46 @@ input[type="number"] {
 
 @layer base {
   :root {
-    /* ════ VIOLET AURORA — Light Mode ════ */
-    --background: 0 0% 100%;
-    --foreground: 240 20% 10%;
+    /* ════ VIOLET AURORA — Dark SaaS ════ */
+    --background: 240 20% 2%;
+    --foreground: 0 0% 100%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 240 20% 10%;
+    --card: 240 20% 6%;
+    --card-foreground: 0 0% 100%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 20% 10%;
+    --popover: 240 20% 5%;
+    --popover-foreground: 0 0% 100%;
 
-    --primary: 270 90% 55%;
+    --primary: 270 95% 65%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 240 20% 96%;
-    --secondary-foreground: 240 20% 15%;
+    --secondary: 240 15% 12%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 240 20% 96%;
-    --muted-foreground: 240 8% 40%;
+    --muted: 240 12% 14%;
+    --muted-foreground: 240 5% 65%;
 
-    --accent: 280 85% 60%;
+    --accent: 280 90% 70%;
     --accent-foreground: 0 0% 100%;
 
-    --success: 160 70% 40%;
+    --success: 160 70% 45%;
     --success-foreground: 0 0% 100%;
 
-    --warning: 38 92% 50%;
+    --warning: 38 92% 60%;
     --warning-foreground: 0 0% 100%;
 
-    --destructive: 0 75% 55%;
+    --destructive: 0 75% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 240 15% 90%;
-    --input: 240 15% 92%;
-    --ring: 270 90% 55%;
+    --border: 240 15% 16%;
+    --input: 240 15% 14%;
+    --ring: 270 95% 65%;
 
     --radius: 1rem;
 
-    --shadow-soft: 0 4px 20px rgba(15, 15, 30, .08);
-    --shadow-glow: 0 0 30px rgba(168,85,247,.18);
+    --shadow-soft: 0 4px 20px rgba(0,0,0,.4);
+    --shadow-glow: 0 0 30px rgba(168,85,247,.25);
   }
-
 }
 
 html {
@@ -105,13 +104,12 @@ html {
 
   .glass-card {
     @apply relative overflow-hidden rounded-2xl border;
-    background: rgba(255,255,255,.75);
-    border-color: rgba(15,15,30,.08);
-    box-shadow: 0 8px 32px rgba(15,15,30,.06), inset 0 1px 0 rgba(255,255,255,.6);
+    background: rgba(255,255,255,.03);
+    border-color: rgba(255,255,255,.10);
+    box-shadow: 0 8px 32px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.04);
     backdrop-filter: blur(12px);
     color: hsl(var(--foreground));
   }
-
 
   .three-d-card { @apply glass-card; }
   .glass-premium { @apply glass-card; }
@@ -171,19 +169,112 @@ html {
     box-shadow: 0 0 16px rgba(168,85,247, 0.25);
   }
 
-  /* Chrome autofill fix — light */
+  /* Chrome autofill fix — dark */
   input:-webkit-autofill,
   input:-webkit-autofill:hover,
   input:-webkit-autofill:focus,
   input:-webkit-autofill:active {
-    -webkit-box-shadow: 0 0 0 100px hsl(0 0% 100%) inset !important;
-    -webkit-text-fill-color: hsl(240 20% 10%) !important;
-    caret-color: hsl(240 20% 10%) !important;
+    -webkit-box-shadow: 0 0 0 100px hsl(240 15% 12%) inset !important;
+    -webkit-text-fill-color: hsl(0 0% 100%) !important;
+    caret-color: white !important;
     transition: background-color 5000s ease-in-out 0s;
   }
 
-  /* Light-mode: let hardcoded Tailwind light utilities render as-is (no overrides). */
+  /* ════ GLOBAL DARK OVERRIDES for inner dashboard pages ════
+     Many inner pages use hardcoded light Tailwind classes. Remap them
+     inside <main> (dashboard scope) to glass-dark equivalents. */
+  main .bg-white,
+  main .bg-stone-50,
+  main .bg-stone-100,
+  main .bg-neutral-50,
+  main .bg-neutral-100,
+  main .bg-gray-50,
+  main .bg-gray-100,
+  main .bg-slate-50,
+  main .bg-slate-100,
+  main .bg-zinc-50,
+  main .bg-zinc-100 {
+    background-color: rgba(255,255,255,0.035) !important;
+    backdrop-filter: blur(10px);
+  }
 
+  main .text-black,
+  main .text-stone-900,
+  main .text-neutral-900,
+  main .text-gray-900,
+  main .text-slate-900,
+  main .text-zinc-900 {
+    color: rgba(255,255,255,0.95) !important;
+  }
+  main .text-stone-800, main .text-neutral-800, main .text-gray-800, main .text-slate-800, main .text-zinc-800 { color: rgba(255,255,255,0.88) !important; }
+  main .text-stone-700, main .text-neutral-700, main .text-gray-700, main .text-slate-700, main .text-zinc-700 { color: rgba(255,255,255,0.78) !important; }
+  main .text-stone-600, main .text-neutral-600, main .text-gray-600, main .text-slate-600, main .text-zinc-600 { color: rgba(255,255,255,0.65) !important; }
+  main .text-stone-500, main .text-neutral-500, main .text-gray-500, main .text-slate-500, main .text-zinc-500 { color: rgba(255,255,255,0.55) !important; }
+  main .text-stone-400, main .text-neutral-400, main .text-gray-400, main .text-slate-400, main .text-zinc-400 { color: rgba(255,255,255,0.45) !important; }
+
+  main .border-stone-200, main .border-neutral-200, main .border-gray-200, main .border-slate-200, main .border-zinc-200,
+  main .border-stone-100, main .border-neutral-100, main .border-gray-100, main .border-slate-100, main .border-zinc-100 {
+    border-color: rgba(255,255,255,0.10) !important;
+  }
+  main .border-stone-300, main .border-neutral-300, main .border-gray-300, main .border-slate-300, main .border-zinc-300 {
+    border-color: rgba(255,255,255,0.14) !important;
+  }
+
+  /* Inputs/textareas/selects inside dashboard */
+  main input:not([type='checkbox']):not([type='radio']):not([type='range']),
+  main textarea,
+  main select {
+    background-color: rgba(255,255,255,0.04) !important;
+    color: white !important;
+    border-color: rgba(255,255,255,0.12) !important;
+  }
+  main input::placeholder,
+  main textarea::placeholder { color: rgba(255,255,255,0.35) !important; }
+
+  /* Common subtle backgrounds */
+  main .bg-amber-50, main .bg-yellow-50 { background-color: rgba(251,191,36,0.10) !important; }
+  main .bg-red-50, main .bg-rose-50 { background-color: rgba(248,113,113,0.10) !important; }
+  main .bg-green-50, main .bg-emerald-50 { background-color: rgba(52,211,153,0.10) !important; }
+  main .bg-blue-50, main .bg-sky-50, main .bg-indigo-50 { background-color: rgba(96,165,250,0.10) !important; }
+  main .bg-purple-50, main .bg-violet-50, main .bg-fuchsia-50 { background-color: rgba(168,85,247,0.12) !important; }
+  main .bg-orange-50 { background-color: rgba(251,146,60,0.10) !important; }
+  main .bg-emerald-100, main .bg-green-100 { background-color: rgba(52,211,153,0.18) !important; }
+  main .bg-amber-100, main .bg-yellow-100 { background-color: rgba(251,191,36,0.18) !important; }
+  main .bg-red-100, main .bg-rose-100 { background-color: rgba(248,113,113,0.18) !important; }
+  main .bg-blue-100, main .bg-sky-100, main .bg-indigo-100 { background-color: rgba(96,165,250,0.18) !important; }
+  main .bg-purple-100, main .bg-violet-100, main .bg-fuchsia-100 { background-color: rgba(168,85,247,0.20) !important; }
+  main .bg-orange-100 { background-color: rgba(251,146,60,0.18) !important; }
+
+  /* Brighten dark colored text on dark backgrounds */
+  main .text-emerald-900, main .text-green-900,
+  main .text-emerald-800, main .text-green-800,
+  main .text-emerald-700, main .text-green-700 { color: rgb(110,231,183) !important; }
+  main .text-amber-900, main .text-yellow-900,
+  main .text-amber-800, main .text-yellow-800,
+  main .text-amber-700, main .text-yellow-700 { color: rgb(252,211,77) !important; }
+  main .text-red-900, main .text-rose-900,
+  main .text-red-800, main .text-rose-800,
+  main .text-red-700, main .text-rose-700 { color: rgb(252,165,165) !important; }
+  main .text-blue-900, main .text-sky-900, main .text-indigo-900,
+  main .text-blue-800, main .text-sky-800, main .text-indigo-800,
+  main .text-blue-700, main .text-sky-700, main .text-indigo-700 { color: rgb(147,197,253) !important; }
+  main .text-purple-900, main .text-violet-900, main .text-fuchsia-900,
+  main .text-purple-800, main .text-violet-800, main .text-fuchsia-800,
+  main .text-purple-700, main .text-violet-700, main .text-fuchsia-700 { color: rgb(216,180,254) !important; }
+  main .text-orange-900, main .text-orange-800, main .text-orange-700 { color: rgb(253,186,116) !important; }
+
+  /* Colored borders that disappear on dark */
+  main .border-emerald-200, main .border-green-200,
+  main .border-emerald-300, main .border-green-300 { border-color: rgba(52,211,153,0.35) !important; }
+  main .border-amber-200, main .border-yellow-200,
+  main .border-amber-300, main .border-yellow-300 { border-color: rgba(251,191,36,0.35) !important; }
+  main .border-red-200, main .border-rose-200,
+  main .border-red-300, main .border-rose-300 { border-color: rgba(248,113,113,0.35) !important; }
+  main .border-blue-200, main .border-sky-200, main .border-indigo-200,
+  main .border-blue-300, main .border-sky-300, main .border-indigo-300 { border-color: rgba(96,165,250,0.35) !important; }
+  main .border-purple-200, main .border-violet-200, main .border-fuchsia-200,
+  main .border-purple-300, main .border-violet-300, main .border-fuchsia-300 { border-color: rgba(168,85,247,0.40) !important; }
+  main .border-orange-200, main .border-orange-300 { border-color: rgba(251,146,60,0.35) !important; }
 }
 
 
