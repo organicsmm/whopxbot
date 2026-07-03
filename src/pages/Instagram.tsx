@@ -138,7 +138,7 @@ export default function InstagramPage() {
                 </p>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <Link to="/my-posts" className="px-3 h-9 rounded-lg text-[12px] font-semibold bg-white/5 hover:bg-white/10 border border-white/10 text-white/80 flex items-center">
+                <Link to={`/my-posts?account=${encodeURIComponent(a.id)}`} className="px-3 h-9 rounded-lg text-[12px] font-semibold bg-white/5 hover:bg-white/10 border border-white/10 text-white/80 flex items-center">
                   View Posts
                 </Link>
                 <button
