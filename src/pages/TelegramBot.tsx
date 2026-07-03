@@ -3,7 +3,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Copy, RefreshCw, Send, ShieldCheck } from "lucide-react";
+import { Copy, RefreshCw, Send, ShieldCheck, ArrowLeft } from "lucide-react";
+import { Link } from "react-router-dom";
+
 import { useAuth } from "@/hooks/useAuth";
 
 export default function TelegramBot() {
@@ -65,10 +67,16 @@ export default function TelegramBot() {
 
   return (
     <div className="mx-auto max-w-2xl p-4 space-y-4 pb-24">
-      <div>
-        <h1 className="text-2xl font-bold">Telegram Bot</h1>
-        <p className="text-muted-foreground text-sm">Manage orders & posts from Telegram.</p>
+      <div className="flex items-center justify-between gap-2">
+        <div>
+          <h1 className="text-2xl font-bold">Telegram Bot</h1>
+          <p className="text-muted-foreground text-sm">Manage orders & posts from Telegram.</p>
+        </div>
+        <Button asChild variant="outline" size="sm">
+          <Link to="/dashboard"><ArrowLeft className="w-4 h-4 mr-1" /> Home</Link>
+        </Button>
       </div>
+
 
       <Card>
         <CardHeader><CardTitle className="flex items-center gap-2"><Send className="w-4 h-4" /> Pair your chat</CardTitle></CardHeader>
