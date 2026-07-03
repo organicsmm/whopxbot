@@ -185,14 +185,14 @@ export default function Dashboard() {
             { icon: Package, label: 'All Services', desc: 'Browse catalog', path: '/services', accent: '#3b82f6' },
           ].map((a, i) => (
             <Link key={i} to={a.path} className="group flex items-center gap-3.5 p-4 rounded-xl transition-all hover:-translate-y-0.5" style={cardStyle}>
-              <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0" style={{ background: a.accent + '12', color: a.accent }}>
+              <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0" style={{ background: a.accent + '1f', color: a.accent }}>
                 <a.icon className="w-4.5 h-4.5" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[13px] font-semibold" style={{ color: '#2a2418' }}>{a.label}</p>
-                <p className="text-[11px]" style={{ color: '#999' }}>{a.desc}</p>
+                <p className="text-[13px] font-semibold" style={{ color: TEXT }}>{a.label}</p>
+                <p className="text-[11px]" style={{ color: MUTED }}>{a.desc}</p>
               </div>
-              <ArrowUpRight className="w-4 h-4 shrink-0" style={{ color: '#ccc' }} />
+              <ArrowUpRight className="w-4 h-4 shrink-0" style={{ color: FAINT }} />
             </Link>
           ))}
         </div>
