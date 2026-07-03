@@ -47,7 +47,7 @@ const Index = () => {
       <header className="sticky top-0 z-40 backdrop-blur-md bg-[#030303]/60 border-b border-white/5">
         <div className="max-w-6xl mx-auto px-5 sm:px-8 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2.5">
-            <img src={logo} alt="OrganicSMM Pro" className="h-8 w-8 rounded-md object-cover ring-1 ring-white/10" />
+            <img src={logo} alt="OrganicSMM Pro" width={32} height={32} fetchPriority="high" decoding="async" className="h-8 w-8 rounded-md object-cover ring-1 ring-white/10" />
             <span className="text-[15px] font-semibold tracking-tight">OrganicSMM Pro</span>
             <span className="hidden sm:inline text-[10px] uppercase tracking-[0.18em] text-white/75 ml-2 px-1.5 py-0.5 rounded border border-white/10">v2</span>
           </Link>
