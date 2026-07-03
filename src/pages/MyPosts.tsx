@@ -143,9 +143,9 @@ export default function MyPosts() {
               <span className="h-1.5 w-1.5 rounded-full bg-violet-400" />
               {selectedAccount ? 'Account feed' : 'Command center'}
             </div>
-            <h1 className="text-3xl md:text-4xl !text-white tracking-tight truncate" style={{ fontFamily: "'Instrument Serif', serif" }}>
+            <h1 className="text-2xl md:text-3xl font-semibold !text-white tracking-tight truncate">
               {selectedAccount ? (
-                <><span className="text-white/40">@</span>{selectedAccount.username}<span className="text-white/40 italic"> — posts</span></>
+                <><span className="text-white/40">@</span>{selectedAccount.username}<span className="text-white/40 font-normal"> — posts</span></>
               ) : 'Post Command Center'}
             </h1>
           </div>
