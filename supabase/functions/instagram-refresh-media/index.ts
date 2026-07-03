@@ -49,6 +49,16 @@ Deno.serve(async (req) => {
         });
       }
       userIdCheck = userRes.user.id;
+
+      // Subscription gate: block username scrape/refresh without active paid plan
+      const { data: sub } = await admin
+        .from('subscriptions').select('status, plan_type').eq('user_id', userIdCheck).maybeSingle();
+      const active = sub && sub.status === 'active' && ['monthly', 'lifetime'].includes(String(sub.plan_type ?? ''));
+      if (!active) {
+        return new Response(JSON.stringify({ error: 'Active subscription required to refresh Instagram posts.' }), {
+          status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
     }
 
     const { data: account, error: accErr } = await admin
