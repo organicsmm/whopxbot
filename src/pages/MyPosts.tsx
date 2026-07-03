@@ -136,39 +136,36 @@ export default function MyPosts() {
   return (
     <DashboardLayout>
       <div className="max-w-6xl mx-auto space-y-5">
-        {/* Editorial header */}
-        <div className="relative overflow-hidden rounded-3xl border border-white/5 bg-gradient-to-br from-white/[0.06] to-transparent p-6 md:p-8">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-4 md:gap-5 min-w-0">
-              <div className="h-12 w-12 md:h-14 md:w-14 flex items-center justify-center rounded-2xl bg-violet-600/20 text-violet-300 ring-1 ring-violet-500/30 shrink-0">
-                <Grid3x3 className="h-6 w-6 md:h-7 md:w-7" />
-              </div>
-              <div className="min-w-0">
-                <h1 className="text-2xl md:text-3xl font-normal !text-white tracking-tight truncate" style={{ fontFamily: "'Instrument Serif', serif" }}>
-                  {selectedAccount ? `@${selectedAccount.username} Posts` : 'Post Command Center'}
-                </h1>
-                <p className="text-sm text-white/55 mt-1">
-                  {selectedAccount ? 'Only this account posts are showing.' : 'Boost engagement on any of your Instagram posts.'}
-                </p>
-              </div>
+        {/* Minimal editorial header */}
+        <div className="flex items-end justify-between gap-4 pt-2 border-b border-white/10 pb-5">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] text-white/40 mb-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-violet-400" />
+              {selectedAccount ? 'Account feed' : 'Command center'}
             </div>
-            <Link to="/instagram" className="px-4 md:px-5 py-2.5 rounded-xl border border-white/10 bg-white/5 text-sm font-medium text-white/85 hover:bg-white/10 transition-all active:scale-95 shrink-0">
-              Accounts
-            </Link>
+            <h1 className="text-3xl md:text-4xl !text-white tracking-tight truncate" style={{ fontFamily: "'Instrument Serif', serif" }}>
+              {selectedAccount ? (
+                <><span className="text-white/40">@</span>{selectedAccount.username}<span className="text-white/40 italic"> — posts</span></>
+              ) : 'Post Command Center'}
+            </h1>
           </div>
+          <Link to="/instagram" className="shrink-0 text-sm text-white/60 hover:text-white underline underline-offset-4 decoration-white/20 hover:decoration-white/60 transition-colors">
+            Accounts
+          </Link>
         </div>
 
         {accounts.length > 1 && (
-          <div className="flex items-center gap-3 overflow-x-auto pb-1">
+          <div className="flex items-center gap-5 overflow-x-auto pb-1 -mt-1">
             {accounts.map((a) => {
               const active = selectedAccountId === a.id;
               return (
                 <button
                   key={a.id}
                   onClick={() => navigate(`/my-posts?account=${encodeURIComponent(a.id)}`)}
-                  className={`shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors ${active ? 'bg-violet-600 text-white shadow-lg shadow-violet-900/30' : 'border border-white/10 bg-white/5 text-white/60 hover:text-white hover:bg-white/10'}`}
+                  className={`shrink-0 text-sm transition-colors relative pb-1 ${active ? 'text-white' : 'text-white/40 hover:text-white/70'}`}
                 >
                   @{a.username}
+                  {active && <span className="absolute left-0 right-0 -bottom-0.5 h-px bg-violet-400" />}
                 </button>
               );
             })}
