@@ -21,11 +21,16 @@ async function getLinkedUser(chatId: number) {
   return data?.user_id as string | undefined;
 }
 
-async function placeEngagement(user_id: string, link: string, views: number, likes: number, comments: number, drip_minutes = 0) {
+type QtyMap = { views: number; likes: number; comments: number; saves: number; shares: number; reposts: number };
+const ENG_TYPES: (keyof QtyMap)[] = ["views", "likes", "comments", "saves", "shares", "reposts"];
+const emptyQty = (): QtyMap => ({ views: 0, likes: 0, comments: 0, saves: 0, shares: 0, reposts: 0 });
+const sumQty = (q: QtyMap) => ENG_TYPES.reduce((s, k) => s + (q[k] || 0), 0);
+
+async function placeEngagement(user_id: string, link: string, qty: QtyMap, drip_minutes = 0) {
   const res = await fetch(`${SUPABASE_URL}/functions/v1/instagram-place-engagement`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${SERVICE_KEY}`, apikey: SERVICE_KEY },
-    body: JSON.stringify({ user_id, link, views, likes, comments, drip_minutes, source: "telegram" }),
+    body: JSON.stringify({ user_id, link, ...qty, drip_minutes, source: "telegram" }),
   });
   return { ok: res.ok, ...(await res.json().catch(() => ({}))) };
 }
