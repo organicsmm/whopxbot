@@ -64,91 +64,97 @@ Deno.serve(async (req) => {
       });
     }
 
-    const url = `https://api.apify.com/v2/acts/apify~instagram-scraper/run-sync-get-dataset-items?token=${APIFY_TOKEN}&timeout=180`;
-    const apifyRes = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        directUrls: [`https://www.instagram.com/${account.username}/`],
-        resultsType: 'posts',
-        resultsLimit,
-        addParentData: false,
-      }),
-    });
-    const text = await apifyRes.text();
-    if (!apifyRes.ok) {
-      return new Response(JSON.stringify({ error: `Apify posts failed [${apifyRes.status}]: ${text.slice(0, 300)}` }), {
-        status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-    let posts: any[] = [];
-    try { posts = JSON.parse(text); } catch { posts = []; }
-    if (!Array.isArray(posts)) posts = [];
-
-    let imported = 0, updated = 0;
-    for (const p of posts) {
-      const mediaId = String(p.id ?? p.shortCode ?? '');
-      const shortcode = p.shortCode ?? p.shortcode ?? null;
-      const permalink = p.url ?? (shortcode ? `https://www.instagram.com/p/${shortcode}/` : null);
-      if (!mediaId || !permalink) continue;
-
-      const payload = {
-        account_id: account.id,
-        user_id: account.user_id,
-        media_id: mediaId,
-        shortcode,
-        media_type: detectMediaType(p),
-        permalink,
-        thumbnail_url: p.displayUrl ?? p.thumbnailUrl ?? null,
-        caption: (p.caption ?? '').slice(0, 2000),
-        like_count: p.likesCount ?? 0,
-        comment_count: p.commentsCount ?? 0,
-        view_count: p.videoViewCount ?? p.videoPlayCount ?? 0,
-        posted_at: p.timestamp ? new Date(p.timestamp).toISOString() : null,
-      };
-
-      const { data: existing } = await admin
-        .from('instagram_media').select('id').eq('account_id', account.id).eq('media_id', mediaId).maybeSingle();
-
-      const { error: upErr } = await admin
-        .from('instagram_media')
-        .upsert(payload, { onConflict: 'account_id,media_id' });
-      if (upErr) { console.error('upsert media err', upErr); continue; }
-      if (existing) updated++; else imported++;
-    }
-
-    // Refresh profile stats (followers + posts_count) so counters don't reset when a scrape returns 0
-    const acctUpdate: Record<string, any> = { last_scraped_at: new Date().toISOString() };
-    try {
-      const profUrl = `https://api.apify.com/v2/acts/apify~instagram-profile-scraper/run-sync-get-dataset-items?token=${APIFY_TOKEN}&timeout=90`;
-      const profRes = await fetch(profUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ usernames: [account.username] }),
-      });
-      if (profRes.ok) {
-        const profArr = await profRes.json().catch(() => []);
-        const prof = Array.isArray(profArr) ? profArr[0] : null;
-        if (prof && (prof.username || prof.id)) {
-          if (typeof prof.followersCount === 'number') acctUpdate.followers = prof.followersCount;
-          if (typeof prof.followsCount === 'number') acctUpdate.following = prof.followsCount;
-          if (typeof prof.postsCount === 'number') acctUpdate.posts_count = prof.postsCount;
-          if (prof.profilePicUrl || prof.profilePicUrlHD) acctUpdate.avatar_url = prof.profilePicUrlHD ?? prof.profilePicUrl;
-          if (prof.fullName) acctUpdate.full_name = prof.fullName;
+    // Run the scrape + upsert in the background so the request returns immediately
+    // and doesn't hit the 150s edge idle timeout.
+    const backgroundTask = (async () => {
+      try {
+        const url = `https://api.apify.com/v2/acts/apify~instagram-scraper/run-sync-get-dataset-items?token=${APIFY_TOKEN}&timeout=120`;
+        const apifyRes = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            directUrls: [`https://www.instagram.com/${account.username}/`],
+            resultsType: 'posts',
+            resultsLimit,
+            addParentData: false,
+          }),
+        });
+        const text = await apifyRes.text();
+        if (!apifyRes.ok) {
+          console.error(`Apify posts failed [${apifyRes.status}]: ${text.slice(0, 300)}`);
+          return;
         }
+        let posts: any[] = [];
+        try { posts = JSON.parse(text); } catch { posts = []; }
+        if (!Array.isArray(posts)) posts = [];
+
+        for (const p of posts) {
+          const mediaId = String(p.id ?? p.shortCode ?? '');
+          const shortcode = p.shortCode ?? p.shortcode ?? null;
+          const permalink = p.url ?? (shortcode ? `https://www.instagram.com/p/${shortcode}/` : null);
+          if (!mediaId || !permalink) continue;
+
+          const payload = {
+            account_id: account.id,
+            user_id: account.user_id,
+            media_id: mediaId,
+            shortcode,
+            media_type: detectMediaType(p),
+            permalink,
+            thumbnail_url: p.displayUrl ?? p.thumbnailUrl ?? null,
+            caption: (p.caption ?? '').slice(0, 2000),
+            like_count: p.likesCount ?? 0,
+            comment_count: p.commentsCount ?? 0,
+            view_count: p.videoViewCount ?? p.videoPlayCount ?? 0,
+            posted_at: p.timestamp ? new Date(p.timestamp).toISOString() : null,
+          };
+
+          const { error: upErr } = await admin
+            .from('instagram_media')
+            .upsert(payload, { onConflict: 'account_id,media_id' });
+          if (upErr) { console.error('upsert media err', upErr); continue; }
+        }
+
+        const acctUpdate: Record<string, any> = { last_scraped_at: new Date().toISOString() };
+        try {
+          const profUrl = `https://api.apify.com/v2/acts/apify~instagram-profile-scraper/run-sync-get-dataset-items?token=${APIFY_TOKEN}&timeout=90`;
+          const profRes = await fetch(profUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ usernames: [account.username] }),
+          });
+          if (profRes.ok) {
+            const profArr = await profRes.json().catch(() => []);
+            const prof = Array.isArray(profArr) ? profArr[0] : null;
+            if (prof && (prof.username || prof.id)) {
+              if (typeof prof.followersCount === 'number') acctUpdate.followers = prof.followersCount;
+              if (typeof prof.followsCount === 'number') acctUpdate.following = prof.followsCount;
+              if (typeof prof.postsCount === 'number') acctUpdate.posts_count = prof.postsCount;
+              if (prof.profilePicUrl || prof.profilePicUrlHD) acctUpdate.avatar_url = prof.profilePicUrlHD ?? prof.profilePicUrl;
+              if (prof.fullName) acctUpdate.full_name = prof.fullName;
+            }
+          }
+        } catch (e) {
+          console.warn('profile refresh failed', e);
+        }
+        if (acctUpdate.posts_count === undefined && posts.length > 0) {
+          acctUpdate.posts_count = posts.length;
+        }
+
+        await admin.from('instagram_accounts').update(acctUpdate).eq('id', account.id);
+      } catch (bgErr) {
+        console.error('background refresh failed', bgErr);
       }
-    } catch (e) {
-      console.warn('profile refresh failed', e);
+    })();
+
+    // @ts-ignore - EdgeRuntime is a Deno Deploy / Supabase Edge Runtime global
+    if (typeof EdgeRuntime !== 'undefined' && EdgeRuntime?.waitUntil) {
+      // @ts-ignore
+      EdgeRuntime.waitUntil(backgroundTask);
     }
-    // Fallback: only trust the media-scrape count when it actually returned posts
-    if (acctUpdate.posts_count === undefined && posts.length > 0) {
-      acctUpdate.posts_count = posts.length;
-    }
 
-    await admin.from('instagram_accounts').update(acctUpdate).eq('id', account.id);
-
-
-    return new Response(JSON.stringify({ imported, updated, total: posts.length }), {
+    return new Response(JSON.stringify({ queued: true, account_id: account.id }), {
+      status: 202,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (e) {
