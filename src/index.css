@@ -19,46 +19,47 @@ input[type="number"] {
 
 @layer base {
   :root {
-    /* ════ VIOLET AURORA — Dark SaaS ════ */
-    --background: 240 20% 2%;
-    --foreground: 0 0% 100%;
+    /* ════ VIOLET AURORA — Light Mode ════ */
+    --background: 0 0% 100%;
+    --foreground: 240 20% 10%;
 
-    --card: 240 20% 6%;
-    --card-foreground: 0 0% 100%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 20% 10%;
 
-    --popover: 240 20% 5%;
-    --popover-foreground: 0 0% 100%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 20% 10%;
 
-    --primary: 270 95% 65%;
+    --primary: 270 90% 55%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 240 15% 12%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 240 20% 96%;
+    --secondary-foreground: 240 20% 15%;
 
-    --muted: 240 12% 14%;
-    --muted-foreground: 240 5% 65%;
+    --muted: 240 20% 96%;
+    --muted-foreground: 240 8% 40%;
 
-    --accent: 280 90% 70%;
+    --accent: 280 85% 60%;
     --accent-foreground: 0 0% 100%;
 
-    --success: 160 70% 45%;
+    --success: 160 70% 40%;
     --success-foreground: 0 0% 100%;
 
-    --warning: 38 92% 60%;
+    --warning: 38 92% 50%;
     --warning-foreground: 0 0% 100%;
 
-    --destructive: 0 75% 60%;
+    --destructive: 0 75% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 240 15% 16%;
-    --input: 240 15% 14%;
-    --ring: 270 95% 65%;
+    --border: 240 15% 90%;
+    --input: 240 15% 92%;
+    --ring: 270 90% 55%;
 
     --radius: 1rem;
 
-    --shadow-soft: 0 4px 20px rgba(0,0,0,.4);
-    --shadow-glow: 0 0 30px rgba(168,85,247,.25);
+    --shadow-soft: 0 4px 20px rgba(15, 15, 30, .08);
+    --shadow-glow: 0 0 30px rgba(168,85,247,.18);
   }
+
 }
 
 html {
