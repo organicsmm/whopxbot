@@ -113,15 +113,18 @@ Deno.serve(async (req) => {
     push("views", views);
     push("likes", likes);
     push("comments", comments);
+    push("saves", saves);
+    push("shares", shares);
+    push("reposts", reposts);
 
     if (orderItems.length === 0) {
-      return new Response(JSON.stringify({ error: "No configured services for requested types" }), {
+      return new Response(JSON.stringify({ error: "No configured services for requested types (admin: add bundle_items for saves/shares/reposts)" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     const totalUsd = Number(orderItems.reduce((s, it) => s + it.price_usd, 0).toFixed(4));
-    const baseQty = views + likes + comments;
+    const baseQty = orderItems.reduce((s, it) => s + it.qty, 0);
 
     // Debit wallet (idempotent per link+minute+source)
     const idem = `ig:${extractShortcode(link) ?? link}:${source}:${Math.floor(Date.now() / 60000)}`;
