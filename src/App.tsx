@@ -119,6 +119,8 @@ const App = () => {
                     <Route path="/engagement-orders" element={<EngagementOrders />} />
                     <Route path="/engagement-orders/:orderNumber" element={<EngagementOrderDetail />} />
                     <Route path="/mass-order" element={<MassOrder />} />
+                    <Route path="/instagram" element={<InstagramPage />} />
+                    <Route path="/my-posts" element={<MyPosts />} />
 
                     {/* Admin — server-verified guard */}
                     <Route path="/admin" element={<AdminGuard><Admin /></AdminGuard>} />
