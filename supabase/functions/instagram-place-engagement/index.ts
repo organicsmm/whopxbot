@@ -53,16 +53,24 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Resolve user
-    let userId: string | null = body.user_id ?? null;
-    if (!userId) {
-      const authHeader = req.headers.get("Authorization") ?? "";
-      const token = authHeader.replace("Bearer ", "");
-      if (!token) {
-        return new Response(JSON.stringify({ error: "Unauthorized" }), {
-          status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    // Resolve user — always require valid JWT; body.user_id only honored for service-role callers
+    const authHeader = req.headers.get("Authorization") ?? "";
+    const token = authHeader.replace("Bearer ", "");
+    if (!token) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    let userId: string | null = null;
+    if (token === SERVICE_KEY) {
+      // Trusted internal caller (e.g. Telegram bot / cron) may specify user_id
+      userId = body.user_id ? String(body.user_id) : null;
+      if (!userId) {
+        return new Response(JSON.stringify({ error: "user_id required for service calls" }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
+    } else {
       const userClient = createClient(SUPABASE_URL, ANON_KEY, { global: { headers: { Authorization: authHeader } } });
       const { data: u } = await userClient.auth.getUser(token);
       userId = u?.user?.id ?? null;
