@@ -21,7 +21,7 @@ import Wallet from "./pages/Wallet";
 // Lazy — landing, auth, secondary, legal, all admin pages
 const Index = lazy(() => import("./pages/Index"));
 const Auth = lazy(() => import("./pages/Auth"));
-const OAuthConsent = lazy(() => import("./pages/OAuthConsent"));
+
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Services = lazy(() => import("./pages/Services"));
 
