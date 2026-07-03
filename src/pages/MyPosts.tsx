@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { Grid3x3, ExternalLink, Rocket, PlayCircle, Image as ImageIcon, Layers, Instagram } from 'lucide-react';
+import { Grid3x3, ExternalLink, Rocket, PlayCircle, Image as ImageIcon, Layers, Instagram, History } from 'lucide-react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { useCurrency } from '@/hooks/useCurrency';
 import { Input } from '@/components/ui/input';
@@ -233,6 +233,15 @@ export default function MyPosts() {
                 >
                   <Rocket className="w-3.5 h-3.5" /> Boost
                 </button>
+                {(r.active_orders > 0 || r.completed_orders > 0 || Number(r.total_spent) > 0) && (
+                  <button
+                    onClick={() => navigate(`/engagement-orders?q=${encodeURIComponent(r.permalink)}`)}
+                    className="w-full h-8 rounded-lg text-[11px] font-medium bg-white/5 hover:bg-white/10 border border-white/10 text-white/80 hover:text-white flex items-center justify-center gap-1.5 transition"
+                  >
+                    <History className="w-3.5 h-3.5" /> Order history
+                  </button>
+                )}
+
               </div>
             </div>
           ))}

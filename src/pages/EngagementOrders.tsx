@@ -1,6 +1,7 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useCurrency } from "@/hooks/useCurrency";
@@ -53,7 +54,13 @@ export default function EngagementOrders() {
   const navigate = useNavigate();
   const { user, isLoading: authLoading } = useAuth();
   const { formatPrice } = useCurrency();
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchParams] = useSearchParams();
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("q") ?? "");
+  useEffect(() => {
+    const q = searchParams.get("q");
+    if (q !== null) setSearchQuery(q);
+  }, [searchParams]);
+
 
   // Instant load with cache + moderate refresh
   const { data: orders, refetch } = useQuery({
