@@ -31,7 +31,16 @@ export default function InstagramPage() {
   const linkMut = useMutation({
     mutationFn: async (u: string) => {
       const { data, error } = await supabase.functions.invoke('instagram-link-account', { body: { username: u } });
-      if (error) throw new Error(error.message);
+      if (error) {
+        // Parse the actual server error body (functions.invoke returns non-2xx as generic error)
+        let msg = error.message;
+        try {
+          const ctx: any = (error as any).context;
+          if (ctx?.json) { const j = await ctx.json(); if (j?.error) msg = j.error; }
+          else if (ctx?.text) { const t = await ctx.text(); const j = JSON.parse(t); if (j?.error) msg = j.error; }
+        } catch { /* ignore */ }
+        throw new Error(msg);
+      }
       if (data?.error) throw new Error(data.error);
       return data;
     },
