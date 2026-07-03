@@ -189,10 +189,16 @@ export default function InstagramPage() {
                 <button
                   key={s.u}
                   type="button"
-                  onClick={() => setUsername(s.u)}
-                  title={`${s.n} · ${s.f}`}
-                  className="px-2.5 py-1 rounded-full text-[11px] font-medium bg-white/5 hover:bg-purple-500/20 border border-white/10 hover:border-purple-400/40 text-white/85 hover:text-white transition-all"
+                  disabled={linkMut.isPending || subLoading}
+                  onClick={() => {
+                    setUsername(s.u);
+                    if (!hasActiveSubscription) { setShowSubDialog(true); return; }
+                    linkMut.mutate(s.u);
+                  }}
+                  title={`${s.n} · ${s.f} — tap to search & link`}
+                  className="px-2.5 py-1 rounded-full text-[11px] font-medium bg-white/5 hover:bg-purple-500/20 border border-white/10 hover:border-purple-400/40 text-white/85 hover:text-white transition-all disabled:opacity-50 flex items-center gap-1"
                 >
+                  {linkMut.isPending && linkMut.variables === s.u && <Loader2 className="w-3 h-3 animate-spin" />}
                   @{s.u}
                 </button>
               ))}
