@@ -143,6 +143,7 @@ export default function InstagramPage() {
           ))}
         </div>
       </div>
+      <SubscriptionCheckDialog open={showSubDialog} onOpenChange={setShowSubDialog} />
     </DashboardLayout>
   );
 }
