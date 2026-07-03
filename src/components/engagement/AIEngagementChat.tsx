@@ -79,14 +79,14 @@ export function AIEngagementChat({ link, platform, engagements, totalQuantity }:
   useEffect(() => {
     if (open && messages.length === 0) {
       const greet: string[] = [];
-      if (linkOk) greet.push(`Mil gaya — ${detectedPlatform} ${detectedPostType} detect ho gaya.`);
-      else greet.push("Pehle apna post link paste karo, fir main usko analyze karunga.");
+      if (linkOk) greet.push(`Got it — detected a ${detectedPlatform} ${detectedPostType}.`);
+      else greet.push("Please paste your post link first so I can analyze it.");
       if (Object.keys(perType).length) {
-        greet.push(`Aapne ${Object.entries(perType).map(([k, v]) => `${v.toLocaleString()} ${k}`).join(", ")} select kiye hain.`);
-        if (report.bottingPct >= 40) greet.push(`Botting risk: **${report.bottingPct}%** — mix thoda artificial lag rha hai.`);
-        else greet.push(`Botting risk abhi **${report.bottingPct}%** hai — kaafi natural hai.`);
+        greet.push(`You've selected ${Object.entries(perType).map(([k, v]) => `${v.toLocaleString()} ${k}`).join(", ")}.`);
+        if (report.bottingPct >= 40) greet.push(`Botting risk: **${report.bottingPct}%** — the mix looks a bit artificial.`);
+        else greet.push(`Botting risk is **${report.bottingPct}%** — looks quite natural.`);
       }
-      greet.push("Aap pooch sakte ho — 'kitne likes daalu?', 'safe hai ya nahi?', 'kitna time lagega?'");
+      greet.push("You can ask — 'How many likes should I add?', 'Is this safe?', 'How long will delivery take?'");
       setMessages([{ role: "assistant", content: greet.join(" ") }]);
     }
     if (open) setTimeout(() => inputRef.current?.focus(), 100);
@@ -116,10 +116,10 @@ export function AIEngagementChat({ link, platform, engagements, totalQuantity }:
   };
 
   const quickAsks = [
-    "Kya ye safe hai?",
-    "Kitna time lagega delivery me?",
-    "Likes kitne aur add karu?",
-    "Best ratio bata do",
+    "Is this safe?",
+    "How long will delivery take?",
+    "How many more likes should I add?",
+    "Suggest the best ratio",
   ];
 
   return (
@@ -142,7 +142,7 @@ export function AIEngagementChat({ link, platform, engagements, totalQuantity }:
             Organic AI Assistant
           </DialogTitle>
           <DialogDescription className="text-xs">
-            Apke link ko samjhke real-time engagement guidance deta hai.
+            Analyzes your link and gives real-time engagement guidance.
           </DialogDescription>
         </DialogHeader>
 
@@ -154,7 +154,7 @@ export function AIEngagementChat({ link, platform, engagements, totalQuantity }:
             {linkOk ? (
               <span className="text-muted-foreground truncate max-w-[260px]">{link}</span>
             ) : (
-              <span className="text-amber-600 flex items-center gap-1"><AlertTriangle className="w-3 h-3" />link paste karo</span>
+              <span className="text-amber-600 flex items-center gap-1"><AlertTriangle className="w-3 h-3" />paste a link</span>
             )}
           </div>
           {Object.keys(perType).length > 0 && (
@@ -201,7 +201,7 @@ export function AIEngagementChat({ link, platform, engagements, totalQuantity }:
           {loading && (
             <div className="flex justify-start">
               <div className="bg-muted rounded-2xl px-3 py-2 flex items-center gap-2 text-xs text-muted-foreground">
-                <Loader2 className="w-3 h-3 animate-spin" /> soch raha hu…
+                <Loader2 className="w-3 h-3 animate-spin" /> thinking…
               </div>
             </div>
           )}
@@ -230,7 +230,7 @@ export function AIEngagementChat({ link, platform, engagements, totalQuantity }:
         >
           <Input
             ref={inputRef}
-            placeholder="Apna sawaal likho…"
+            placeholder="Type your question…"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             disabled={loading}
