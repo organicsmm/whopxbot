@@ -78,24 +78,35 @@ Deno.serve(async (req) => {
     // and doesn't hit the 150s edge idle timeout.
     const backgroundTask = (async () => {
       try {
-        const url = `https://api.apify.com/v2/acts/apify~instagram-scraper/run-sync-get-dataset-items?token=${APIFY_TOKEN}&timeout=120`;
-        const apifyRes = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            directUrls: [`https://www.instagram.com/${account.username}/`],
-            resultsType: 'posts',
-            resultsLimit,
-            addParentData: false,
-          }),
-        });
-        const text = await apifyRes.text();
-        if (!apifyRes.ok) {
-          console.error(`Apify posts failed [${apifyRes.status}]: ${text.slice(0, 300)}`);
+        const runScrape = async (limit: number, timeoutSec: number) => {
+          const url = `https://api.apify.com/v2/acts/apify~instagram-scraper/run-sync-get-dataset-items?token=${APIFY_TOKEN}&timeout=${timeoutSec}`;
+          const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              directUrls: [`https://www.instagram.com/${account.username}/`],
+              resultsType: 'posts',
+              resultsLimit: limit,
+              addParentData: false,
+            }),
+          });
+          const txt = await res.text();
+          return { ok: res.ok, status: res.status, text: txt };
+        };
+
+        // First attempt with requested limit + 300s timeout
+        let attempt = await runScrape(resultsLimit, 300);
+        // Retry once with smaller limit if timed out
+        if (!attempt.ok && attempt.text.includes('TIMED-OUT')) {
+          console.warn(`Apify scrape timed out at limit=${resultsLimit}, retrying with limit=6`);
+          attempt = await runScrape(6, 300);
+        }
+        if (!attempt.ok) {
+          console.error(`Apify posts failed [${attempt.status}]: ${attempt.text.slice(0, 300)}`);
           return;
         }
         let posts: any[] = [];
-        try { posts = JSON.parse(text); } catch { posts = []; }
+        try { posts = JSON.parse(attempt.text); } catch { posts = []; }
         if (!Array.isArray(posts)) posts = [];
 
         for (const p of posts) {
