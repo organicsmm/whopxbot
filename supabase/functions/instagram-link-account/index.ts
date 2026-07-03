@@ -57,24 +57,36 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Apify: profile scraper (sync)
-    const apifyUrl = `https://api.apify.com/v2/acts/apify~instagram-profile-scraper/run-sync-get-dataset-items?token=${APIFY_TOKEN}&timeout=120`;
-    const apifyRes = await fetch(apifyUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ usernames: [username] }),
-    });
-    const apifyText = await apifyRes.text();
-    if (!apifyRes.ok) {
-      return new Response(JSON.stringify({ error: `Apify profile fetch failed [${apifyRes.status}]: ${apifyText.slice(0, 300)}` }), {
+    // Apify: profile scraper (sync) — retry once on timeout/empty
+    const fetchProfile = async (timeoutSec: number) => {
+      const url = `https://api.apify.com/v2/acts/apify~instagram-profile-scraper/run-sync-get-dataset-items?token=${APIFY_TOKEN}&timeout=${timeoutSec}`;
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ usernames: [username] }),
+      });
+      const text = await res.text();
+      return { ok: res.ok, status: res.status, text };
+    };
+
+    let attempt = await fetchProfile(240);
+    if (!attempt.ok || attempt.text.trim() === '' || attempt.text === '[]') {
+      console.warn(`Profile scrape attempt 1 failed/empty for @${username}, retrying. status=${attempt.status} body=${attempt.text.slice(0, 200)}`);
+      await new Promise(r => setTimeout(r, 1500));
+      attempt = await fetchProfile(240);
+    }
+    if (!attempt.ok) {
+      return new Response(JSON.stringify({ error: `Apify profile fetch failed [${attempt.status}]: ${attempt.text.slice(0, 300)}` }), {
         status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
     let profileArr: any[] = [];
-    try { profileArr = JSON.parse(apifyText); } catch { profileArr = []; }
+    try { profileArr = JSON.parse(attempt.text); } catch { profileArr = []; }
     const profile = Array.isArray(profileArr) ? profileArr[0] : null;
-    if (!profile || profile.error || (!profile.username && !profile.id)) {
-      return new Response(JSON.stringify({ error: `Instagram profile not found for @${username}` }), {
+    if (!profile || profile.error || (!profile.username && !profile.id && !profile.fullName)) {
+      const detail = profile?.error ? ` (${JSON.stringify(profile.error).slice(0, 150)})` : '';
+      console.error(`Profile not found for @${username}. Apify returned: ${attempt.text.slice(0, 300)}`);
+      return new Response(JSON.stringify({ error: `Instagram profile not found for @${username}${detail}. Check username spelling or try again — the profile may be private or Apify timed out.` }), {
         status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
