@@ -165,24 +165,49 @@ async function handleCommand(chatId: number, username: string | null, text: stri
   }
 
   if (cmd === "/order") {
-    const usage = "Usage:\n<code>/order</code> (uses saved defaults)\n<code>/order &lt;link&gt;</code>\n<code>/order &lt;link&gt; VIEWS LIKES COMMENTS</code>\n<code>/order &lt;link&gt; VIEWS LIKES COMMENTS DRIP_MIN</code>\n\nSet defaults: <code>/setlink</code>, <code>/setdefault</code>";
+    const EX_FULL = "/order https://instagram.com/p/ABC123/ 5000 500 50";
+    // Consistent error formatter: emoji header + bullet lines
+    const orderErr = (o: {
+      icon?: string; title: string; problem?: string; fix?: string; example?: string; extra?: string;
+    }) => {
+      const lines = [`${o.icon ?? "❌"} <b>${o.title}</b>`];
+      if (o.problem) lines.push(`• <b>Problem:</b> ${o.problem}`);
+      if (o.fix) lines.push(`• <b>Fix:</b> ${o.fix}`);
+      if (o.example) lines.push(`• <b>Example:</b> <code>${o.example}</code>`);
+      if (o.extra) lines.push(o.extra);
+      return reply(chatId, lines.join("\n"));
+    };
 
     // Reject too many args early so users don't silently drop values
     if (args.length > 5) {
-      return reply(chatId, `❌ Too many arguments (${args.length}). Max allowed: 5 (link + views + likes + comments + drip).\n\n${usage}`);
+      return orderErr({
+        title: "Too many arguments",
+        problem: `You sent ${args.length} arguments (max 5: link + views + likes + comments + drip).`,
+        fix: "Remove extras or wrap the link if it has spaces.",
+        example: EX_FULL,
+      });
     }
 
     // Load preset once — used for defaults on link + quantities
     const { data: preset, error: presetErr } = await supabase
       .from("engagement_presets").select("*").eq("user_id", userId).maybeSingle();
-    if (presetErr) return reply(chatId, `❌ Could not load your saved defaults: ${presetErr.message}`);
+    if (presetErr) return orderErr({
+      title: "Could not load your saved defaults",
+      problem: presetErr.message,
+      fix: "Try again in a few seconds. If it persists, contact support.",
+    });
 
     // ---------- 1. Resolve + validate LINK ----------
     let link = args[0];
     let linkSource: "arg" | "preset" = "arg";
     if (!link) {
       if (!preset?.default_link) {
-        return reply(chatId, `❌ No link given and no default link saved.\nSet one with <code>/setlink &lt;instagram-link&gt;</code>, or pass it inline:\n<code>/order https://instagram.com/p/ABC123/</code>`);
+        return orderErr({
+          title: "No link given and no default link saved",
+          problem: "Bot doesn't know which post to boost.",
+          fix: "Save a default with <code>/setlink &lt;instagram-link&gt;</code>, or pass one inline.",
+          example: "/order https://instagram.com/p/ABC123/",
+        });
       }
       link = preset.default_link as string;
       linkSource = "preset";
@@ -192,23 +217,50 @@ async function handleCommand(chatId: number, username: string | null, text: stri
     link = link.trim().replace(/^[<"']|[>"']$/g, "");
 
     if (link.length > 300) {
-      return reply(chatId, `❌ Link too long (${link.length} chars, max 300). Copy the URL directly from Instagram — no tracking suffix.`);
+      return orderErr({
+        title: "Link too long",
+        problem: `${link.length} chars (max 300).`,
+        fix: "Copy the URL directly from Instagram — remove tracking/query suffix.",
+        example: "https://instagram.com/p/ABC123/",
+      });
     }
 
     let parsedUrl: URL;
     try { parsedUrl = new URL(link); }
-    catch { return reply(chatId, `❌ Link is not a valid URL: <code>${link}</code>\nMust start with <code>https://</code> and be a full Instagram post/reel URL.`); }
+    catch {
+      return orderErr({
+        title: "Link is not a valid URL",
+        problem: `Could not parse: <code>${link}</code>`,
+        fix: "Must start with <code>https://</code> and be a full Instagram post/reel URL.",
+        example: "https://instagram.com/p/ABC123/",
+      });
+    }
 
     if (parsedUrl.protocol !== "https:" && parsedUrl.protocol !== "http:") {
-      return reply(chatId, `❌ Link must use <code>https://</code> (got <code>${parsedUrl.protocol}</code>).`);
+      return orderErr({
+        title: "Link must use https://",
+        problem: `Got protocol <code>${parsedUrl.protocol}</code>.`,
+        fix: "Use the standard https Instagram URL.",
+        example: "https://instagram.com/p/ABC123/",
+      });
     }
     const host = parsedUrl.hostname.toLowerCase().replace(/^www\./, "");
     if (host !== "instagram.com") {
-      return reply(chatId, `❌ Only Instagram links are supported (got host <code>${host}</code>).\nExample: <code>https://instagram.com/p/ABC123/</code>`);
+      return orderErr({
+        title: "Only Instagram links are supported",
+        problem: `Got host <code>${host}</code>.`,
+        fix: "Use a public instagram.com post/reel URL.",
+        example: "https://instagram.com/p/ABC123/",
+      });
     }
     const pathMatch = parsedUrl.pathname.match(/^\/(p|reel|reels|tv)\/([A-Za-z0-9_-]{5,})\/?/);
     if (!pathMatch) {
-      return reply(chatId, `❌ Not a post/reel URL. Path must look like <code>/p/&lt;code&gt;/</code>, <code>/reel/&lt;code&gt;/</code> or <code>/tv/&lt;code&gt;/</code>.\nGot: <code>${parsedUrl.pathname}</code>`);
+      return orderErr({
+        title: "Not a post/reel URL",
+        problem: `Path <code>${parsedUrl.pathname}</code> doesn't match a post/reel.`,
+        fix: "Path must be <code>/p/&lt;code&gt;/</code>, <code>/reel/&lt;code&gt;/</code> or <code>/tv/&lt;code&gt;/</code>.",
+        example: "https://instagram.com/reel/XYZ456/",
+      });
     }
     // normalize link to canonical form (drops query string / fbclid etc.)
     link = `https://instagram.com/${pathMatch[1]}/${pathMatch[2]}/`;
@@ -216,39 +268,68 @@ async function handleCommand(chatId: number, username: string | null, text: stri
     // ---------- 2. Resolve + validate QUANTITIES ----------
     const raw = [args[1], args[2], args[3]];
     const provided = raw.some((x) => x !== undefined);
-    const parseQty = (label: string, s: string | undefined): { val: number; err?: string } => {
+    const parseQty = (label: string, s: string | undefined): { val: number; err?: { title: string; problem: string; fix: string } } => {
       if (s === undefined || s === "") return { val: 0 };
-      if (!/^\d+$/.test(s)) return { val: 0, err: `❌ ${label} must be a whole number (got "<code>${s}</code>"). No commas, decimals, or letters.` };
+      if (!/^\d+$/.test(s)) return { val: 0, err: {
+        title: `${label} is not a whole number`,
+        problem: `Got "<code>${s}</code>".`,
+        fix: "Use digits only — no commas, decimals, k/M, or letters.",
+      }};
       const n = Number(s);
-      if (!Number.isFinite(n) || n < 0) return { val: 0, err: `❌ ${label} must be 0 or more.` };
-      if (n > 1_000_000) return { val: 0, err: `❌ ${label} too high (${n.toLocaleString()}). Max 1,000,000 per field.` };
+      if (!Number.isFinite(n) || n < 0) return { val: 0, err: {
+        title: `${label} must be 0 or more`,
+        problem: `Got "<code>${s}</code>".`,
+        fix: "Use 0 to skip this engagement type.",
+      }};
+      if (n > 1_000_000) return { val: 0, err: {
+        title: `${label} too high`,
+        problem: `${n.toLocaleString()} exceeds cap.`,
+        fix: "Max 1,000,000 per field. Split into multiple orders if needed.",
+      }};
       return { val: n };
     };
     let v = 0, l = 0, c = 0;
     let qtySource: "arg" | "preset" = "arg";
     if (provided) {
-      // If user supplied ANY quantity, require ALL three so intent is unambiguous
       const missing: string[] = [];
       if (raw[0] === undefined) missing.push("VIEWS");
       if (raw[1] === undefined) missing.push("LIKES");
       if (raw[2] === undefined) missing.push("COMMENTS");
       if (missing.length) {
-        return reply(chatId, `❌ Missing quantity: ${missing.join(", ")}.\nPass all three (use 0 to skip):\n<code>/order &lt;link&gt; VIEWS LIKES COMMENTS</code>`);
+        return orderErr({
+          title: "Missing quantity value(s)",
+          problem: `Not provided: ${missing.join(", ")}.`,
+          fix: "Pass all three (use 0 to skip a type):",
+          example: "/order <link> VIEWS LIKES COMMENTS",
+        });
       }
       const pv = parseQty("Views", raw[0]);
       const pl = parseQty("Likes", raw[1]);
       const pc = parseQty("Comments", raw[2]);
       const err = pv.err || pl.err || pc.err;
-      if (err) return reply(chatId, `${err}\n\n${usage}`);
+      if (err) return orderErr({ ...err, example: EX_FULL });
       v = pv.val; l = pl.val; c = pc.val;
-      if (v + l + c === 0) return reply(chatId, "❌ At least one of VIEWS / LIKES / COMMENTS must be greater than 0.");
+      if (v + l + c === 0) return orderErr({
+        title: "All quantities are zero",
+        problem: "Views + Likes + Comments = 0.",
+        fix: "Set at least one field greater than 0.",
+        example: EX_FULL,
+      });
     } else {
       if (!preset) {
-        return reply(chatId, "❌ No quantities given and no preset saved.\nSet one:\n<code>/setdefault VIEWS LIKES COMMENTS [DRIP_MIN]</code>\nOr pass inline:\n<code>/order &lt;link&gt; VIEWS LIKES COMMENTS</code>");
+        return orderErr({
+          title: "No quantities given and no preset saved",
+          fix: "Save a preset with <code>/setdefault VIEWS LIKES COMMENTS [DRIP_MIN]</code>, or pass values inline.",
+          example: EX_FULL,
+        });
       }
       const hasQty = [preset.views, preset.likes, preset.comments].some((n) => Number(n) > 0);
       if (!hasQty) {
-        return reply(chatId, "❌ Your saved preset has all zero quantities.\nUpdate it: <code>/setdefault VIEWS LIKES COMMENTS</code>\nOr pass values inline this time.");
+        return orderErr({
+          title: "Your saved preset has all zero quantities",
+          fix: "Update it with <code>/setdefault VIEWS LIKES COMMENTS</code>, or pass values inline this time.",
+          example: EX_FULL,
+        });
       }
       v = Math.max(0, Math.floor(Number(preset.views) || 0));
       l = Math.max(0, Math.floor(Number(preset.likes) || 0));
@@ -260,10 +341,19 @@ async function handleCommand(chatId: number, username: string | null, text: stri
     let drip = 0;
     if (args[4] !== undefined && args[4] !== "") {
       if (!/^\d+$/.test(args[4])) {
-        return reply(chatId, `❌ DRIP_MIN must be a whole number of minutes (got "<code>${args[4]}</code>").`);
+        return orderErr({
+          title: "DRIP_MIN is not a whole number",
+          problem: `Got "<code>${args[4]}</code>".`,
+          fix: "Pass minutes as an integer (0–1440).",
+          example: "/order <link> 5000 500 50 60",
+        });
       }
       const d = Number(args[4]);
-      if (d > 1440) return reply(chatId, `❌ DRIP_MIN too high (${d}). Max 1440 minutes (24h).`);
+      if (d > 1440) return orderErr({
+        title: "DRIP_MIN too high",
+        problem: `${d} minutes exceeds cap.`,
+        fix: "Max 1440 minutes (24h).",
+      });
       drip = d;
     } else {
       drip = Math.max(0, Math.floor(Number(preset?.drip_minutes) || 0));
@@ -272,69 +362,91 @@ async function handleCommand(chatId: number, username: string | null, text: stri
 
     // ---------- 4. Service-wise min/max enforcement ----------
     const { limits, err: limErr } = await getIgServiceLimits();
-    if (limErr) return reply(chatId, `❌ Cannot verify service limits: ${limErr}. Try again shortly.`);
+    if (limErr) return orderErr({
+      title: "Cannot verify service limits right now",
+      problem: limErr,
+      fix: "Try again in a few seconds.",
+    });
     const fmt = (n: number) => n.toLocaleString();
-    const checkQty = (type: string, qty: number, label: string): string | null => {
-      if (qty <= 0) return null; // 0 = skip that engagement type
+    const checkQty = (type: string, qty: number, label: string): { title: string; problem: string; fix: string } | null => {
+      if (qty <= 0) return null;
       const lim = limits[type];
-      if (!lim) return `❌ ${label} service not configured for Instagram right now. Try later or contact support.`;
-      if (qty < lim.min) return `❌ ${label} quantity ${fmt(qty)} is below minimum. Allowed range: <b>${fmt(lim.min)} – ${fmt(lim.max)}</b>. (Use 0 to skip ${label.toLowerCase()}.)`;
-      if (qty > lim.max) return `❌ ${label} quantity ${fmt(qty)} exceeds maximum. Allowed range: <b>${fmt(lim.min)} – ${fmt(lim.max)}</b>.`;
+      if (!lim) return {
+        title: `${label} service unavailable`,
+        problem: `Not configured for Instagram right now.`,
+        fix: `Use <code>0</code> for ${label.toLowerCase()}, or try again later.`,
+      };
+      if (qty < lim.min) return {
+        title: `${label} quantity below minimum`,
+        problem: `You asked for ${fmt(qty)}.`,
+        fix: `Use a value in range <b>${fmt(lim.min)} – ${fmt(lim.max)}</b>, or 0 to skip.`,
+      };
+      if (qty > lim.max) return {
+        title: `${label} quantity above maximum`,
+        problem: `You asked for ${fmt(qty)}.`,
+        fix: `Use a value in range <b>${fmt(lim.min)} – ${fmt(lim.max)}</b>.`,
+      };
       return null;
     };
-    const limErrMsg =
-      checkQty("views", v, "Views") ||
-      checkQty("likes", l, "Likes") ||
-      checkQty("comments", c, "Comments");
-    if (limErrMsg) {
+    const limIssue = checkQty("views", v, "Views") || checkQty("likes", l, "Likes") || checkQty("comments", c, "Comments");
+    if (limIssue) {
       const summary = ["views", "likes", "comments"]
         .filter((t) => limits[t])
         .map((t) => `${t}: ${fmt(limits[t].min)}–${fmt(limits[t].max)}`)
         .join(" · ");
-      return reply(chatId, `${limErrMsg}\n\n<b>Current service limits</b>\n${summary}`);
+      return orderErr({ ...limIssue, extra: `\n<b>Current limits</b>\n• ${summary}` });
     }
 
     // ---------- 5. Duplicate-submission guard ----------
-    // (a) In-flight lock (chat-scoped) — blocks accidental double-tap while first call is running
     const lockKey = `tg:order:${chatId}:${link}`;
     if ((globalThis as any).__tgOrderLocks instanceof Set === false) {
       (globalThis as any).__tgOrderLocks = new Set<string>();
     }
     const locks: Set<string> = (globalThis as any).__tgOrderLocks;
     if (locks.has(lockKey)) {
-      return reply(chatId, "⏳ Ek order already process ho raha hai is link ke liye. Please wait a few seconds before retrying.");
+      return orderErr({
+        icon: "⏳",
+        title: "Order already in progress",
+        problem: "A previous /order for this link is still executing.",
+        fix: "Wait a few seconds, then retry.",
+      });
     }
-    // (b) DB dedupe — same user + same link in last 90 seconds
     const since = new Date(Date.now() - 90_000).toISOString();
     const { data: dupes, error: dupeErr } = await supabase
       .from("engagement_orders")
       .select("id,order_number,status,created_at,total_price")
       .eq("user_id", userId).eq("link", link).gte("created_at", since)
       .order("created_at", { ascending: false }).limit(1);
-    if (dupeErr) return reply(chatId, `❌ Duplicate check failed: ${dupeErr.message}`);
+    if (dupeErr) return orderErr({
+      title: "Duplicate check failed",
+      problem: dupeErr.message,
+      fix: "Try again shortly.",
+    });
     if (dupes && dupes.length > 0) {
       const d: any = dupes[0];
       const ageSec = Math.max(1, Math.round((Date.now() - new Date(d.created_at).getTime()) / 1000));
-      return reply(
-        chatId,
-        `⚠️ Duplicate order blocked.\nAn identical order for this link was placed <b>${ageSec}s ago</b>.\n\n<b>Existing order:</b> <code>#${d.order_number}</code> · ${d.status}\nCheck with <code>/status ${d.order_number}</code>.\n\n<i>Retry after 90s if you really want a second order.</i>`,
-      );
+      return orderErr({
+        icon: "⚠️",
+        title: "Duplicate order blocked",
+        problem: `Identical order placed ${ageSec}s ago: <code>#${d.order_number}</code> · ${d.status}.`,
+        fix: `Check with <code>/status ${d.order_number}</code>. Retry after 90s if you really want a second order.`,
+      });
     }
 
     // ---------- 6. Place order ----------
     locks.add(lockKey);
     const r = await placeEngagement(userId, link, v, l, c, drip).finally(() => locks.delete(lockKey));
     if (!r.ok) {
-      const raw = String(r.error ?? "Order failed");
-      let hint = "";
-      if (/insufficient|balance|wallet/i.test(raw)) hint = "\n💡 Top up wallet in the app to continue.";
-      else if (/subscription|plan/i.test(raw)) hint = "\n💡 Activate a plan (Monthly / Lifetime) to place orders.";
-      else if (/service|provider|mapping/i.test(raw)) hint = "\n💡 Service temporarily unavailable — try again in a few minutes.";
-      else if (/rate|limit|too many/i.test(raw)) hint = "\n💡 Slow down — you're hitting the rate limit.";
-      return reply(chatId, `❌ Order failed: ${raw}${hint}`);
+      const rawMsg = String(r.error ?? "Order failed");
+      let fix = "Try again in a few seconds.";
+      if (/insufficient|balance|wallet/i.test(rawMsg)) fix = "Top up wallet in the app, then retry.";
+      else if (/subscription|plan/i.test(rawMsg)) fix = "Activate a plan (Monthly / Lifetime) to place orders.";
+      else if (/service|provider|mapping/i.test(rawMsg)) fix = "Service temporarily unavailable — try again in a few minutes.";
+      else if (/rate|limit|too many/i.test(rawMsg)) fix = "Slow down — you're hitting the rate limit.";
+      return orderErr({ title: "Order failed", problem: rawMsg, fix });
     }
     const src = `${linkSource === "preset" ? "saved link" : "inline link"} · ${qtySource === "preset" ? "saved qty" : "inline qty"}`;
-    return reply(chatId, `✅ Order <code>#${r.order_number}</code> placed\nLink: <code>${link}</code>\nViews:${v} Likes:${l} Comments:${c}${drip ? ` · Drip:${drip}m` : ""}\nCharged: ₹${r.charged_inr}\n<i>${src}</i>`);
+    return reply(chatId, `✅ <b>Order placed</b>\n• <b>ID:</b> <code>#${r.order_number}</code>\n• <b>Link:</b> <code>${link}</code>\n• <b>Views:</b> ${v} · <b>Likes:</b> ${l} · <b>Comments:</b> ${c}${drip ? `\n• <b>Drip:</b> ${drip}m` : ""}\n• <b>Charged:</b> ₹${r.charged_inr}\n<i>${src}</i>`);
   }
 
 
