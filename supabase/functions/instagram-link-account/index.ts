@@ -12,13 +12,18 @@ Deno.serve(async (req) => {
     if (!APIFY_TOKEN) throw new Error('APIFY_API_TOKEN not configured');
 
     const authHeader = req.headers.get('Authorization') ?? '';
-    const token = authHeader.replace('Bearer ', '');
-    const userClient = createClient(SUPABASE_URL, ANON_KEY, {
-      global: { headers: { Authorization: authHeader } },
-    });
-    const { data: userRes, error: userErr } = await userClient.auth.getUser(token);
-    if (userErr || !userRes.user) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+    const token = authHeader.replace(/^Bearer\s+/i, '').trim();
+    if (!token) {
+      return new Response(JSON.stringify({ error: 'Missing Authorization token' }), {
+        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    // Verify token via service-role admin client (avoids stale anon key issues)
+    const adminAuthClient = createClient(SUPABASE_URL, SERVICE_KEY);
+    const { data: userRes, error: userErr } = await adminAuthClient.auth.getUser(token);
+    if (userErr || !userRes?.user) {
+      console.error('auth.getUser failed', userErr?.message);
+      return new Response(JSON.stringify({ error: `Auth verification failed: ${userErr?.message ?? 'no user'}` }), {
         status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
