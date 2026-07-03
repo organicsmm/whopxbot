@@ -75,8 +75,22 @@ export default function EngagementOrder() {
   const { applyMarkup } = useGlobalMarkup();
 
   // Form State
+  const [searchParams] = useSearchParams();
   const [platform, setPlatform] = useState('instagram');
-  const [link, setLink] = useState('');
+  const [link, setLink] = useState(searchParams.get('link') ?? '');
+
+  // Sync link + platform when arriving via ?link=
+  useEffect(() => {
+    const initial = searchParams.get('link');
+    if (initial) {
+      setLink(initial);
+      const lower = initial.toLowerCase();
+      if (lower.includes('instagram.com')) setPlatform('instagram');
+      else if (lower.includes('tiktok.com')) setPlatform('tiktok');
+      else if (lower.includes('youtube.com') || lower.includes('youtu.be')) setPlatform('youtube');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const [showPreview, setShowPreview] = useState(false);
   const [baseQuantity, setBaseQuantity] = useState(10000);
   // Debounce base quantity for expensive recalculations
