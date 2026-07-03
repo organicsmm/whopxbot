@@ -79,7 +79,7 @@ export default function InstagramPage() {
               <input
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && username && linkMut.mutate(username)}
+                onKeyDown={(e) => { if (e.key === 'Enter' && username) { if (!hasActiveSubscription) { setShowSubDialog(true); } else { linkMut.mutate(username); } } }}
                 placeholder="your_username"
                 className="w-full h-11 pl-8 pr-3 rounded-xl bg-black/40 border border-white/10 text-white placeholder:text-white/30 focus:outline-none focus:border-purple-400/40"
               />
