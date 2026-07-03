@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Eye, Heart, MessageCircle, Bookmark, Share2, TrendingUp, Zap, BarChart3, Pause, Play, X } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Eye, Heart, MessageCircle, Bookmark, Share2, TrendingUp, Zap, BarChart3, Pause, Play, X, RefreshCw } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
