@@ -122,6 +122,7 @@ const App = () => {
                     <Route path="/mass-order" element={<MassOrder />} />
                     <Route path="/instagram" element={<InstagramPage />} />
                     <Route path="/my-posts" element={<MyPosts />} />
+                    <Route path="/telegram-bot" element={<TelegramBot />} />
 
                     {/* Admin — server-verified guard */}
                     <Route path="/admin" element={<AdminGuard><Admin /></AdminGuard>} />
