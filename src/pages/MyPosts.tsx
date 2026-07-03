@@ -86,7 +86,14 @@ export default function MyPosts() {
       });
     },
     enabled: !!user?.id,
+    // Background scrape lands rows asynchronously — poll until posts appear
+    refetchInterval: (query) => {
+      const data = query.state.data as Row[] | undefined;
+      return !data || data.length === 0 ? 3000 : false;
+    },
+    refetchIntervalInBackground: false,
   });
+
 
   const { data: accounts = [] } = useQuery({
     queryKey: ['ig-accounts', user?.id],
@@ -109,16 +116,19 @@ export default function MyPosts() {
     })();
   }, [selectedAccountId, qc]);
 
-  // realtime: any engagement order change → refetch
+  // realtime: any engagement order change or new IG media → refetch
   useEffect(() => {
     if (!user?.id) return;
     const ch = supabase
       .channel(`eo-mypost-${user.id}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'engagement_orders', filter: `user_id=eq.${user.id}` },
         () => qc.invalidateQueries({ queryKey: ['ig-posts-summary'] }))
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'instagram_media', filter: `user_id=eq.${user.id}` },
+        () => qc.invalidateQueries({ queryKey: ['ig-posts-summary'] }))
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, [user?.id, qc]);
+
 
   const selectedAccount = selectedAccountId ? accounts.find((a) => a.id === selectedAccountId) : null;
 
