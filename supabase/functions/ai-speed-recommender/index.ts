@@ -86,7 +86,7 @@ Order context:
 ${ratioLines.length ? ratioLines.join("\n") : "  (none selected yet)"}
 ${flags.length ? "\nDetected ratio warnings:\n- " + flags.join("\n- ") : ""}
 
-When the user asks "is this safe?", "kitna time lagega?", "kitne likes daalu?", give a clear answer using the numbers above. When suggesting a fix, give exact target quantities (e.g. "Aap 12,000 views ke saath ~700 likes (≈6%) rakho").`;
+When the user asks "is this safe?", "how long will it take?", "how many likes should I add?", give a clear answer using the numbers above. When suggesting a fix, give exact target quantities (e.g. "With 12,000 views, keep likes around ~700 (≈6%)").`;
 
       const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
