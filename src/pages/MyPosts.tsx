@@ -207,6 +207,13 @@ export default function MyPosts() {
           ))}
         </div>
       </div>
+      <QuickOrderSheet
+        open={!!boostLink}
+        onOpenChange={(v) => { if (!v) setBoostLink(null); }}
+        link={boostLink ?? ''}
+        onPlaced={() => { setManualLink(''); qc.invalidateQueries({ queryKey: ['ig-posts-summary'] }); }}
+      />
     </DashboardLayout>
+
   );
 }
