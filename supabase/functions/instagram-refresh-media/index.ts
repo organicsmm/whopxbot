@@ -23,7 +23,7 @@ Deno.serve(async (req) => {
 
     const body = await req.json().catch(() => ({}));
     const accountId = String(body.account_id ?? '');
-    const resultsLimit = Math.min(Math.max(Number(body.results_limit ?? 50), 1), 200);
+    const resultsLimit = Math.min(Math.max(Number(body.results_limit ?? 12), 1), 50);
     if (!accountId) {
       return new Response(JSON.stringify({ error: 'account_id required' }), {
         status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
