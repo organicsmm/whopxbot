@@ -81,30 +81,26 @@ async function handleCommand(chatId: number, username: string | null, text: stri
       `<code>/orders</code> — recent orders\n` +
       `<code>/cancel ID</code> — cancel pending order\n\n` +
       `<b>Defaults (auto-apply on /order)</b>\n` +
-      `<code>/setlink &lt;instagram-link&gt;</code> — default post link\n` +
-      `<code>/setdefault VIEWS LIKES COMMENTS [DRIP_MIN]</code> — default quantities\n` +
+      `<code>/setlink &lt;link&gt;</code> — default post\n` +
+      `<code>/setdefault V L C [SV SH RP] [DRIP]</code> — default quantities\n` +
+      `   or flags: <code>/setdefault v=5000 l=500 sv=100 drip=60</code>\n` +
       `<code>/mode auto|manual</code> — auto-order on new posts\n` +
-      `<code>/mydefaults</code> — show saved defaults\n` +
-      `<code>/cleardefaults</code> — remove saved link\n\n` +
-      `<b>/order — Place an engagement order</b>\n` +
-      `Allowed formats:\n` +
-      `1. <code>/order</code>\n` +
-      `   → uses saved link + saved quantities\n` +
-      `2. <code>/order &lt;link&gt;</code>\n` +
-      `   → uses saved quantities on given link\n` +
-      `3. <code>/order &lt;link&gt; VIEWS LIKES COMMENTS</code>\n` +
-      `   → full override (any qty can be 0)\n` +
-      `4. <code>/order &lt;link&gt; VIEWS LIKES COMMENTS DRIP_MIN</code>\n` +
-      `   → override + drip-feed over N minutes\n\n` +
-      `<b>Examples</b>\n` +
-      `<code>/order</code>\n` +
-      `<code>/order https://instagram.com/p/ABC123/</code>\n` +
-      `<code>/order https://instagram.com/reel/XYZ/ 5000 500 50</code>\n` +
-      `<code>/order https://instagram.com/p/ABC/ 10000 0 0 60</code>\n\n` +
+      `<code>/mydefaults</code> — show saved defaults\n\n` +
+      `<b>/order — place engagement</b>\n` +
+      `You only pay for what you type. Skip a type = 0 = no order for it.\n\n` +
+      `Positional (in order): <b>V L C SAVES SHARES REPOSTS [DRIP]</b>\n` +
+      `1. <code>/order</code> — saved link + saved qty\n` +
+      `2. <code>/order &lt;link&gt;</code> — saved qty on this link\n` +
+      `3. <code>/order &lt;link&gt; 5000</code> — only 5000 views\n` +
+      `4. <code>/order &lt;link&gt; 5000 500</code> — views + likes\n` +
+      `5. <code>/order &lt;link&gt; 5000 500 50</code> — V + L + C\n` +
+      `6. <code>/order &lt;link&gt; 5000 500 50 100 50 20</code> — all 6\n\n` +
+      `Flag form (any order): <code>/order &lt;link&gt; v=5000 sv=100 drip=60</code>\n` +
+      `Keys: <code>v l c sv sh rp drip</code>\n\n` +
       `<b>Rules</b>\n` +
-      `• Link must be an Instagram post/reel URL\n` +
-      `• Each quantity: 0 – 1,000,000 (at least one &gt; 0)\n` +
-      `• DRIP_MIN optional: 0 = instant, up to 1440 (24h)\n\n` +
+      `• Each qty 0 – 1,000,000 (at least one &gt; 0)\n` +
+      `• DRIP optional: 0–1440 minutes\n` +
+      `• Saves/Shares/Reposts require admin to enable those services\n\n` +
       `Get CODE from app → More → Telegram Bot.`);
   }
 
