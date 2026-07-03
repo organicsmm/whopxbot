@@ -193,14 +193,49 @@ async function handleCommand(chatId: number, username: string | null, text: stri
 
   if (cmd === "/cancel") {
     const n = Number(args[0]);
-    if (!n) return reply(chatId, "Usage: <code>/cancel ORDER_NUMBER</code>");
-    const { data: match } = await supabase.from("engagement_orders").select("id,status").eq("user_id", userId).eq("order_number", n).maybeSingle();
-    if (!match) return reply(chatId, "Not found.");
-    if (!["pending", "processing"].includes(match.status)) return reply(chatId, `Cannot cancel (status: ${match.status}).`);
-    const { error } = await supabase.functions.invoke("cancel-order", { body: { engagement_order_id: match.id } });
-    if (error) return reply(chatId, `❌ ${error.message}`);
-    return reply(chatId, `✅ Cancel requested for #${n}. Refund not applicable on user cancels.`);
+    if (!n || n <= 0) return reply(chatId, "❌ Usage: <code>/cancel ORDER_NUMBER</code>\nExample: <code>/cancel 123</code>\nSee IDs with <code>/orders</code>.");
+    const { data: match, error: findErr } = await supabase
+      .from("engagement_orders")
+      .select("id,status,order_number,link")
+      .eq("user_id", userId)
+      .eq("order_number", n)
+      .maybeSingle();
+    if (findErr) return reply(chatId, `❌ Lookup failed: ${findErr.message}`);
+    if (!match) return reply(chatId, `❌ Order <code>#${n}</code> not found in your account.`);
+    if (!["pending", "processing", "paused"].includes(match.status)) {
+      return reply(chatId, `⚠️ Order <code>#${n}</code> cannot be cancelled (current status: <b>${match.status}</b>).`);
+    }
+
+    // 1. Flip parent order first so backend workers stop dispatching
+    const { error: oErr } = await supabase
+      .from("engagement_orders")
+      .update({ status: "cancelled" })
+      .eq("id", match.id)
+      .neq("status", "cancelled");
+    if (oErr) return reply(chatId, `❌ Cancel failed: ${oErr.message}`);
+
+    // 2. Cancel non-final items
+    const { data: items, error: iErr } = await supabase
+      .from("engagement_order_items")
+      .update({ status: "cancelled" })
+      .eq("engagement_order_id", match.id)
+      .not("status", "in", '("completed","cancelled","failed")')
+      .select("id");
+    if (iErr) return reply(chatId, `⚠️ Order marked cancelled, but items update failed: ${iErr.message}`);
+
+    // 3. Cancel non-final runs
+    const itemIds = (items ?? []).map((i: any) => i.id);
+    if (itemIds.length > 0) {
+      await supabase
+        .from("organic_run_schedule")
+        .update({ status: "cancelled", error_message: "Cancelled via Telegram bot", completed_at: new Date().toISOString() })
+        .in("engagement_order_item_id", itemIds)
+        .not("status", "in", '("completed","cancelled","failed")');
+    }
+
+    return reply(chatId, `🚫 <b>Order #${n} cancelled</b>\nAll pending runs stopped.\n<a href="${match.link}">view post</a>\n\nNote: user cancellations are non-refundable.`);
   }
+
 
   return reply(chatId, "Unknown command. Send /help.");
 }
