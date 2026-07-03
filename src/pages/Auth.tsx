@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -34,10 +34,16 @@ export default function Auth() {
 
   const { signIn, signUp, user, isLoading } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  // Preserve `next` (e.g. OAuth consent URL) as a same-origin relative path only.
+  const rawNext = searchParams.get('next') || '';
+  const nextPath = rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : '';
+  const postAuthTarget = nextPath || '/engagement-order';
 
   useEffect(() => {
-    if (!isLoading && user) navigate('/engagement-order');
-  }, [user, isLoading, navigate]);
+    if (!isLoading && user) navigate(postAuthTarget, { replace: true });
+  }, [user, isLoading, navigate, postAuthTarget]);
 
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,7 +75,7 @@ export default function Auth() {
           else setError('Login failed.');
           setIsSubmitting(false); return;
         }
-        navigate('/engagement-order', { replace: true });
+        navigate(postAuthTarget, { replace: true });
       } else {
         const v = signupSchema.safeParse({ email, password, fullName });
         if (!v.success) { setError(v.error.errors[0].message); setIsSubmitting(false); return; }
