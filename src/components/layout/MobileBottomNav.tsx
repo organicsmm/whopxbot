@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils';
 
 const primary = [
   { icon: LayoutDashboard, label: 'Home', path: '/dashboard' },
-  { icon: Grid3x3, label: 'Posts', path: '/my-posts' },
+  { icon: Instagram, label: 'Accounts', path: '/instagram' },
   { icon: Rocket, label: 'Engage', path: '/engagement-order' },
   { icon: Wallet, label: 'Wallet', path: '/wallet' },
 ];
