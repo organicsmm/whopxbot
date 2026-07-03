@@ -136,28 +136,37 @@ export default function MyPosts() {
   return (
     <DashboardLayout>
       <div className="max-w-6xl mx-auto space-y-5">
-        <div className="rounded-3xl p-5 bg-gradient-to-br from-purple-600/15 via-fuchsia-500/10 to-transparent border border-purple-400/20 flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-gradient-to-br from-fuchsia-500 to-purple-600 shadow-lg shrink-0">
-            <Grid3x3 className="w-6 h-6 text-white" />
+        {/* Editorial header */}
+        <div className="relative overflow-hidden rounded-3xl border border-white/5 bg-gradient-to-br from-white/[0.06] to-transparent p-6 md:p-8">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4 md:gap-5 min-w-0">
+              <div className="h-12 w-12 md:h-14 md:w-14 flex items-center justify-center rounded-2xl bg-violet-600/20 text-violet-300 ring-1 ring-violet-500/30 shrink-0">
+                <Grid3x3 className="h-6 w-6 md:h-7 md:w-7" />
+              </div>
+              <div className="min-w-0">
+                <h1 className="text-2xl md:text-3xl font-normal !text-white tracking-tight truncate" style={{ fontFamily: "'Instrument Serif', serif" }}>
+                  {selectedAccount ? `@${selectedAccount.username} Posts` : 'Post Command Center'}
+                </h1>
+                <p className="text-sm text-white/55 mt-1">
+                  {selectedAccount ? 'Only this account posts are showing.' : 'Boost engagement on any of your Instagram posts.'}
+                </p>
+              </div>
+            </div>
+            <Link to="/instagram" className="px-4 md:px-5 py-2.5 rounded-xl border border-white/10 bg-white/5 text-sm font-medium text-white/85 hover:bg-white/10 transition-all active:scale-95 shrink-0">
+              Accounts
+            </Link>
           </div>
-          <div className="flex-1 min-w-0">
-            <h1 className="text-xl md:text-2xl font-bold !text-white">{selectedAccount ? `@${selectedAccount.username} Posts` : 'Post Command Center'}</h1>
-            <p className="text-[13px] text-white/85">{selectedAccount ? 'Only this account posts are showing.' : 'Boost engagement on any of your Instagram posts.'}</p>
-          </div>
-          <Link to="/instagram" className="h-10 px-4 rounded-xl font-semibold text-[13px] bg-white/5 hover:bg-white/10 border border-white/10 text-white/80 flex items-center shrink-0">
-            Accounts
-          </Link>
         </div>
 
         {accounts.length > 1 && (
-          <div className="flex gap-2 overflow-x-auto pb-1">
+          <div className="flex items-center gap-3 overflow-x-auto pb-1">
             {accounts.map((a) => {
               const active = selectedAccountId === a.id;
               return (
                 <button
                   key={a.id}
                   onClick={() => navigate(`/my-posts?account=${encodeURIComponent(a.id)}`)}
-                  className={`shrink-0 h-8 px-3 rounded-full text-[12px] font-semibold border transition-colors ${active ? 'bg-gradient-to-b from-purple-500 to-fuchsia-600 text-white border-transparent' : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10'}`}
+                  className={`shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors ${active ? 'bg-violet-600 text-white shadow-lg shadow-violet-900/30' : 'border border-white/10 bg-white/5 text-white/60 hover:text-white hover:bg-white/10'}`}
                 >
                   @{a.username}
                 </button>
@@ -166,20 +175,24 @@ export default function MyPosts() {
           </div>
         )}
 
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-3 flex flex-col sm:flex-row gap-2">
-          <Input
-            placeholder={selectedAccount ? `Paste a link from @${selectedAccount.username}…` : 'Paste any Instagram reel/post link…'}
-            value={manualLink}
-            onChange={(e) => setManualLink(e.target.value)}
-            className="bg-black/30 border-white/10 text-white"
-          />
-          <Button
-            onClick={() => { if (/instagram\.com\//i.test(manualLink)) goBoost(manualLink.trim()); }}
-            disabled={!/instagram\.com\//i.test(manualLink)}
-            className="bg-gradient-to-b from-purple-500 to-fuchsia-600"
-          >
-            <Rocket className="w-4 h-4 mr-1" /> Boost Link
-          </Button>
+        {/* Boost link input */}
+        <div className="relative group">
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-violet-600/20 to-fuchsia-600/20 rounded-2xl blur opacity-60 group-focus-within:opacity-100 transition duration-700 pointer-events-none"></div>
+          <div className="relative flex flex-col sm:flex-row items-stretch sm:items-center gap-2 p-2 rounded-2xl bg-[#0a0a0a] border border-white/10 shadow-2xl">
+            <Input
+              placeholder={selectedAccount ? `Paste a link from @${selectedAccount.username}…` : 'Paste any Instagram reel/post link…'}
+              value={manualLink}
+              onChange={(e) => setManualLink(e.target.value)}
+              className="flex-1 bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 text-white/90 placeholder:text-white/35 px-4 text-sm h-11"
+            />
+            <Button
+              onClick={() => { if (/instagram\.com\//i.test(manualLink)) goBoost(manualLink.trim()); }}
+              disabled={!/instagram\.com\//i.test(manualLink)}
+              className="h-11 px-6 rounded-xl bg-gradient-to-br from-violet-500 to-violet-700 hover:from-violet-500 hover:to-violet-600 text-white font-semibold text-sm hover:shadow-[0_0_20px_rgba(139,92,246,0.35)] transition-all"
+            >
+              <Rocket className="w-4 h-4 mr-1.5" /> Boost Link
+            </Button>
+          </div>
         </div>
 
 
