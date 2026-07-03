@@ -111,7 +111,7 @@ Deno.serve(async (req) => {
           'Authorization': `Bearer ${SERVICE_KEY}`,
           'apikey': SERVICE_KEY,
         },
-        body: JSON.stringify({ account_id: account.id, results_limit: 30 }),
+        body: JSON.stringify({ account_id: account.id, results_limit: 12 }),
       }).catch((e) => console.error('bg refresh-media failed', e));
       // @ts-ignore EdgeRuntime background task
       if (typeof EdgeRuntime !== 'undefined' && EdgeRuntime.waitUntil) {
