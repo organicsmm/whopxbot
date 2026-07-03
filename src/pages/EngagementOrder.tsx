@@ -399,6 +399,26 @@ export default function EngagementOrder() {
     });
   }, [debouncedBaseQuantity, bundles, servicePrices, userSavedRatios, isAutoRatios]);
 
+  // Refill mode: after engagements populate, enable only the requested type(s)
+  const [refillApplied, setRefillApplied] = useState(false);
+  useEffect(() => {
+    if (refillApplied) return;
+    const rawTypes = searchParams.get('types');
+    if (!rawTypes) return;
+    const wanted = rawTypes.split(',').map(t => t.trim().toLowerCase()).filter(Boolean);
+    if (!wanted.length) return;
+    if (!engagements || Object.keys(engagements).length === 0) return;
+    setEngagements(prev => {
+      const next: EngagementConfigs = {};
+      Object.entries(prev).forEach(([k, cfg]) => {
+        next[k] = { ...cfg, enabled: wanted.includes(k.toLowerCase()) };
+      });
+      return next;
+    });
+    setRefillApplied(true);
+  }, [engagements, searchParams, refillApplied]);
+
+
   const handleEngagementChange = useCallback((type: EngagementType, config: EngagementConfig) => {
     setEngagements(prev => ({ ...prev, [type]: config }));
     // Reset draw mode when user manually changes quantity
