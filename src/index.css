@@ -20,7 +20,7 @@ input[type="number"] {
 @layer base {
   :root {
     /* ════ VIOLET AURORA — Dark SaaS ════ */
-    --background: 240 20% 2%;
+    --background: 0 0% 0%;
     --foreground: 0 0% 100%;
 
     --card: 240 20% 6%;
