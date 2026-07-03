@@ -225,10 +225,10 @@ async function handleCommand(chatId: number, username: string | null, text: stri
     };
 
     // Reject too many args early so users don't silently drop values
-    if (args.length > 5) {
+    if (args.length > 8) {
       return orderErr({
         title: "Too many arguments",
-        problem: `You sent ${args.length} arguments (max 5: link + views + likes + comments + drip).`,
+        problem: `You sent ${args.length} arguments (max: link + 6 quantities + drip = 8).`,
         fix: "Remove extras or wrap the link if it has spaces.",
         example: EX_FULL,
       });
@@ -246,6 +246,10 @@ async function handleCommand(chatId: number, username: string | null, text: stri
     // ---------- 1. Resolve + validate LINK ----------
     let link = args[0];
     let linkSource: "arg" | "preset" = "arg";
+    // If first arg is a k=v flag (or a bare number), no link was passed inline
+    if (link && (link.includes("=") || /^\d+$/.test(link))) {
+      link = undefined as any;
+    }
     if (!link) {
       if (!preset?.default_link) {
         return orderErr({
@@ -257,6 +261,9 @@ async function handleCommand(chatId: number, username: string | null, text: stri
       }
       link = preset.default_link as string;
       linkSource = "preset";
+    } else {
+      // consume args[0] as link → shift remaining
+      args.shift();
     }
 
     // strip common wrapping chars
@@ -308,105 +315,53 @@ async function handleCommand(chatId: number, username: string | null, text: stri
         example: "https://instagram.com/reel/XYZ456/",
       });
     }
-    // normalize link to canonical form (drops query string / fbclid etc.)
     link = `https://instagram.com/${pathMatch[1]}/${pathMatch[2]}/`;
 
-    // ---------- 2. Resolve + validate QUANTITIES ----------
-    const raw = [args[1], args[2], args[3]];
-    const provided = raw.some((x) => x !== undefined);
-    const parseQty = (label: string, s: string | undefined): { val: number; err?: { title: string; problem: string; fix: string } } => {
-      if (s === undefined || s === "") return { val: 0 };
-      if (!/^\d+$/.test(s)) return { val: 0, err: {
-        title: `${label} is not a whole number`,
-        problem: `Got "<code>${s}</code>".`,
-        fix: "Use digits only — no commas, decimals, k/M, or letters.",
-      }};
-      const n = Number(s);
-      if (!Number.isFinite(n) || n < 0) return { val: 0, err: {
-        title: `${label} must be 0 or more`,
-        problem: `Got "<code>${s}</code>".`,
-        fix: "Use 0 to skip this engagement type.",
-      }};
-      if (n > 1_000_000) return { val: 0, err: {
-        title: `${label} too high`,
-        problem: `${n.toLocaleString()} exceeds cap.`,
-        fix: "Max 1,000,000 per field. Split into multiple orders if needed.",
-      }};
-      return { val: n };
-    };
-    let v = 0, l = 0, c = 0;
+    // ---------- 2. Resolve QUANTITIES + DRIP (positional or flag) ----------
+    let qty: QtyMap;
+    let drip = 0;
     let qtySource: "arg" | "preset" = "arg";
-    if (provided) {
-      const missing: string[] = [];
-      if (raw[0] === undefined) missing.push("VIEWS");
-      if (raw[1] === undefined) missing.push("LIKES");
-      if (raw[2] === undefined) missing.push("COMMENTS");
-      if (missing.length) {
-        return orderErr({
-          title: "Missing quantity value(s)",
-          problem: `Not provided: ${missing.join(", ")}.`,
-          fix: "Pass all three (use 0 to skip a type):",
-          example: "/order <link> VIEWS LIKES COMMENTS",
-        });
-      }
-      const pv = parseQty("Views", raw[0]);
-      const pl = parseQty("Likes", raw[1]);
-      const pc = parseQty("Comments", raw[2]);
-      const err = pv.err || pl.err || pc.err;
-      if (err) return orderErr({ ...err, example: EX_FULL });
-      v = pv.val; l = pl.val; c = pc.val;
-      if (v + l + c === 0) return orderErr({
+    if (args.length > 0) {
+      const parsed = parseQtyArgs(args);
+      if (parsed.err) return orderErr({
+        title: "Invalid quantity",
+        problem: parsed.err,
+        fix: "Use digits only. Skip a type by leaving it at 0.",
+        example: EX_FULL,
+      });
+      qty = parsed.qty;
+      drip = parsed.drip !== null ? parsed.drip : Math.max(0, Math.floor(Number(preset?.drip_minutes) || 0));
+      if (sumQty(qty) === 0) return orderErr({
         title: "All quantities are zero",
-        problem: "Views + Likes + Comments = 0.",
-        fix: "Set at least one field greater than 0.",
+        problem: "You didn't request any engagement.",
+        fix: "Set at least one type &gt; 0.",
         example: EX_FULL,
       });
     } else {
-      if (!preset) {
-        return orderErr({
-          title: "No quantities given and no preset saved",
-          fix: "Save a preset with <code>/setdefault VIEWS LIKES COMMENTS [DRIP_MIN]</code>, or pass values inline.",
-          example: EX_FULL,
-        });
-      }
-      const hasQty = [preset.views, preset.likes, preset.comments].some((n) => Number(n) > 0);
-      if (!hasQty) {
-        return orderErr({
-          title: "Your saved preset has all zero quantities",
-          fix: "Update it with <code>/setdefault VIEWS LIKES COMMENTS</code>, or pass values inline this time.",
-          example: EX_FULL,
-        });
-      }
-      v = Math.max(0, Math.floor(Number(preset.views) || 0));
-      l = Math.max(0, Math.floor(Number(preset.likes) || 0));
-      c = Math.max(0, Math.floor(Number(preset.comments) || 0));
+      if (!preset) return orderErr({
+        title: "No quantities given and no preset saved",
+        fix: "Save a preset with <code>/setdefault V L C [SV SH RP] [DRIP]</code>, or pass values inline.",
+        example: EX_FULL,
+      });
+      qty = {
+        views: Math.max(0, Math.floor(Number((preset as any).views) || 0)),
+        likes: Math.max(0, Math.floor(Number((preset as any).likes) || 0)),
+        comments: Math.max(0, Math.floor(Number((preset as any).comments) || 0)),
+        saves: Math.max(0, Math.floor(Number((preset as any).saves) || 0)),
+        shares: Math.max(0, Math.floor(Number((preset as any).shares) || 0)),
+        reposts: Math.max(0, Math.floor(Number((preset as any).reposts) || 0)),
+      };
+      if (sumQty(qty) === 0) return orderErr({
+        title: "Your saved preset has all zero quantities",
+        fix: "Update with <code>/setdefault V L C [SV SH RP]</code>, or pass values inline.",
+        example: EX_FULL,
+      });
+      drip = Math.max(0, Math.floor(Number((preset as any).drip_minutes) || 0));
       qtySource = "preset";
     }
+    if (drip > 1440) drip = 1440;
 
-    // ---------- 3. Resolve + validate DRIP ----------
-    let drip = 0;
-    if (args[4] !== undefined && args[4] !== "") {
-      if (!/^\d+$/.test(args[4])) {
-        return orderErr({
-          title: "DRIP_MIN is not a whole number",
-          problem: `Got "<code>${args[4]}</code>".`,
-          fix: "Pass minutes as an integer (0–1440).",
-          example: "/order <link> 5000 500 50 60",
-        });
-      }
-      const d = Number(args[4]);
-      if (d > 1440) return orderErr({
-        title: "DRIP_MIN too high",
-        problem: `${d} minutes exceeds cap.`,
-        fix: "Max 1440 minutes (24h).",
-      });
-      drip = d;
-    } else {
-      drip = Math.max(0, Math.floor(Number(preset?.drip_minutes) || 0));
-      if (drip > 1440) drip = 1440;
-    }
-
-    // ---------- 4. Service-wise min/max enforcement ----------
+    // ---------- 3. Service-wise min/max enforcement (only for requested types) ----------
     const { limits, err: limErr } = await getIgServiceLimits();
     if (limErr) return orderErr({
       title: "Cannot verify service limits right now",
@@ -414,36 +369,32 @@ async function handleCommand(chatId: number, username: string | null, text: stri
       fix: "Try again in a few seconds.",
     });
     const fmt = (n: number) => n.toLocaleString();
-    const checkQty = (type: string, qty: number, label: string): { title: string; problem: string; fix: string } | null => {
-      if (qty <= 0) return null;
-      const lim = limits[type];
-      if (!lim) return {
-        title: `${label} service unavailable`,
-        problem: `Not configured for Instagram right now.`,
-        fix: `Use <code>0</code> for ${label.toLowerCase()}, or try again later.`,
-      };
-      if (qty < lim.min) return {
-        title: `${label} quantity below minimum`,
-        problem: `You asked for ${fmt(qty)}.`,
-        fix: `Use a value in range <b>${fmt(lim.min)} – ${fmt(lim.max)}</b>, or 0 to skip.`,
-      };
-      if (qty > lim.max) return {
-        title: `${label} quantity above maximum`,
-        problem: `You asked for ${fmt(qty)}.`,
-        fix: `Use a value in range <b>${fmt(lim.min)} – ${fmt(lim.max)}</b>.`,
-      };
-      return null;
+    const LABEL: Record<keyof QtyMap, string> = {
+      views: "Views", likes: "Likes", comments: "Comments",
+      saves: "Saves", shares: "Shares", reposts: "Reposts",
     };
-    const limIssue = checkQty("views", v, "Views") || checkQty("likes", l, "Likes") || checkQty("comments", c, "Comments");
-    if (limIssue) {
-      const summary = ["views", "likes", "comments"]
-        .filter((t) => limits[t])
-        .map((t) => `${t}: ${fmt(limits[t].min)}–${fmt(limits[t].max)}`)
-        .join(" · ");
-      return orderErr({ ...limIssue, extra: `\n<b>Current limits</b>\n• ${summary}` });
+    for (const t of ENG_TYPES) {
+      const q = qty[t];
+      if (q <= 0) continue;
+      const lim = limits[t];
+      if (!lim) return orderErr({
+        title: `${LABEL[t]} service unavailable`,
+        problem: `Not configured for Instagram right now.`,
+        fix: `Use <code>0</code> for ${LABEL[t].toLowerCase()}, or ask admin to enable it.`,
+      });
+      if (q < lim.min) return orderErr({
+        title: `${LABEL[t]} quantity below minimum`,
+        problem: `You asked for ${fmt(q)}.`,
+        fix: `Use a value in range <b>${fmt(lim.min)} – ${fmt(lim.max)}</b>, or 0 to skip.`,
+      });
+      if (q > lim.max) return orderErr({
+        title: `${LABEL[t]} quantity above maximum`,
+        problem: `You asked for ${fmt(q)}.`,
+        fix: `Use a value in range <b>${fmt(lim.min)} – ${fmt(lim.max)}</b>.`,
+      });
     }
 
-    // ---------- 5. Duplicate-submission guard ----------
+    // ---------- 4. Duplicate-submission guard ----------
     const lockKey = `tg:order:${chatId}:${link}`;
     if ((globalThis as any).__tgOrderLocks instanceof Set === false) {
       (globalThis as any).__tgOrderLocks = new Set<string>();
@@ -479,9 +430,9 @@ async function handleCommand(chatId: number, username: string | null, text: stri
       });
     }
 
-    // ---------- 6. Place order ----------
+    // ---------- 5. Place order ----------
     locks.add(lockKey);
-    const r = await placeEngagement(userId, link, v, l, c, drip).finally(() => locks.delete(lockKey));
+    const r = await placeEngagement(userId, link, qty, drip).finally(() => locks.delete(lockKey));
     if (!r.ok) {
       const rawMsg = String(r.error ?? "Order failed");
       let fix = "Try again in a few seconds.";
@@ -492,7 +443,8 @@ async function handleCommand(chatId: number, username: string | null, text: stri
       return orderErr({ title: "Order failed", problem: rawMsg, fix });
     }
     const src = `${linkSource === "preset" ? "saved link" : "inline link"} · ${qtySource === "preset" ? "saved qty" : "inline qty"}`;
-    return reply(chatId, `✅ <b>Order placed</b>\n• <b>ID:</b> <code>#${r.order_number}</code>\n• <b>Link:</b> <code>${link}</code>\n• <b>Views:</b> ${v} · <b>Likes:</b> ${l} · <b>Comments:</b> ${c}${drip ? `\n• <b>Drip:</b> ${drip}m` : ""}\n• <b>Charged:</b> ₹${r.charged_inr}\n<i>${src}</i>`);
+    const qtyLine = ENG_TYPES.filter((t) => qty[t] > 0).map((t) => `<b>${LABEL[t]}:</b> ${qty[t]}`).join(" · ");
+    return reply(chatId, `✅ <b>Order placed</b>\n• <b>ID:</b> <code>#${r.order_number}</code>\n• <b>Link:</b> <code>${link}</code>\n• ${qtyLine}${drip ? `\n• <b>Drip:</b> ${drip}m` : ""}\n• <b>Charged:</b> ₹${r.charged_inr}\n<i>${src}</i>`);
   }
 
 
