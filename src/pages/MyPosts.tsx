@@ -1,11 +1,10 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { Grid3x3, ExternalLink, Rocket, Sparkles, PlayCircle, Image as ImageIcon, Layers, RefreshCw, Loader2, Instagram } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
+import { Grid3x3, ExternalLink, Rocket, PlayCircle, Image as ImageIcon, Layers, Instagram } from 'lucide-react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useCurrency } from '@/hooks/useCurrency';
 
 type Row = {
@@ -16,6 +15,7 @@ type Row = {
   media_type: string | null;
   caption: string | null;
   posted_at: string | null;
+  account_id: string | null;
   account_username: string | null;
   total_orders: number;
   active_orders: number;
@@ -34,14 +34,51 @@ export default function MyPosts() {
   const qc = useQueryClient();
   const navigate = useNavigate();
   const { formatPrice } = useCurrency();
-  const [refreshing, setRefreshing] = useState(false);
+  const [searchParams] = useSearchParams();
+  const selectedAccountId = searchParams.get('account');
 
   const { data: rows = [], isLoading } = useQuery({
-    queryKey: ['ig-posts-summary', user?.id],
+    queryKey: ['ig-posts-summary', user?.id, selectedAccountId],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc('get_posts_with_order_summary', { _user_id: user!.id });
-      if (error) throw error;
-      return (data ?? []) as Row[];
+      let mediaQuery = supabase
+        .from('instagram_media')
+        .select('media_id,shortcode,permalink,thumbnail_url,media_type,caption,posted_at,account_id,instagram_accounts!inner(username)')
+        .eq('user_id', user!.id)
+        .order('posted_at', { ascending: false, nullsFirst: false });
+
+      if (selectedAccountId) mediaQuery = mediaQuery.eq('account_id', selectedAccountId);
+
+      const { data: media, error: mediaError } = await mediaQuery;
+      if (mediaError) throw mediaError;
+
+      const { data: orders, error: ordersError } = await supabase
+        .from('engagement_orders')
+        .select('link,status,total_price')
+        .eq('user_id', user!.id);
+      if (ordersError) throw ordersError;
+
+      return (media ?? []).map((m: any) => {
+        const matchingOrders = (orders ?? []).filter((o: any) => {
+          if (!m.shortcode || !o.link) return false;
+          return String(o.link).toLowerCase().includes(String(m.shortcode).toLowerCase());
+        });
+
+        return {
+          media_id: m.media_id,
+          shortcode: m.shortcode,
+          permalink: m.permalink,
+          thumbnail_url: m.thumbnail_url,
+          media_type: m.media_type,
+          caption: m.caption,
+          posted_at: m.posted_at,
+          account_id: m.account_id,
+          account_username: m.instagram_accounts?.username ?? null,
+          total_orders: matchingOrders.length,
+          active_orders: matchingOrders.filter((o: any) => ['pending', 'processing'].includes(o.status)).length,
+          completed_orders: matchingOrders.filter((o: any) => o.status === 'completed').length,
+          total_spent: matchingOrders.reduce((sum: number, o: any) => sum + Number(o.total_price ?? 0), 0),
+        } as Row;
+      });
     },
     enabled: !!user?.id,
   });
@@ -49,7 +86,7 @@ export default function MyPosts() {
   const { data: accounts = [] } = useQuery({
     queryKey: ['ig-accounts', user?.id],
     queryFn: async () => {
-      const { data, error } = await supabase.from('instagram_accounts').select('id,username').eq('user_id', user!.id);
+      const { data, error } = await supabase.from('instagram_accounts').select('id,username').eq('user_id', user!.id).order('created_at', { ascending: false });
       if (error) throw error;
       return data as any[];
     },
@@ -67,31 +104,7 @@ export default function MyPosts() {
     return () => { supabase.removeChannel(ch); };
   }, [user?.id, qc]);
 
-  const importAll = async () => {
-    if (accounts.length === 0) {
-      toast.error('Link an Instagram account first');
-      navigate('/instagram');
-      return;
-    }
-    setRefreshing(true);
-    try {
-      let total = 0;
-      for (const a of accounts) {
-        const { data, error } = await supabase.functions.invoke('instagram-refresh-media', {
-          body: { account_id: a.id, results_limit: 100 },
-        });
-        if (error) throw new Error(error.message);
-        if (data?.error) throw new Error(data.error);
-        total += (data?.imported ?? 0) + (data?.updated ?? 0);
-      }
-      toast.success(`Imported/updated ${total} posts`);
-      qc.invalidateQueries({ queryKey: ['ig-posts-summary'] });
-    } catch (e) {
-      toast.error((e as Error).message);
-    } finally {
-      setRefreshing(false);
-    }
-  };
+  const selectedAccount = selectedAccountId ? accounts.find((a) => a.id === selectedAccountId) : null;
 
   return (
     <DashboardLayout>
@@ -101,17 +114,12 @@ export default function MyPosts() {
             <Grid3x3 className="w-6 h-6 text-white" />
           </div>
           <div className="flex-1 min-w-0">
-            <h1 className="text-xl md:text-2xl font-bold !text-white">Post Command Center</h1>
-            <p className="text-[13px] text-white/60">Boost engagement on any of your Instagram posts.</p>
+            <h1 className="text-xl md:text-2xl font-bold !text-white">{selectedAccount ? `@${selectedAccount.username} Posts` : 'Post Command Center'}</h1>
+            <p className="text-[13px] text-white/60">{selectedAccount ? 'Only this account posts are showing.' : 'Boost engagement on any of your Instagram posts.'}</p>
           </div>
-          <button
-            onClick={importAll}
-            disabled={refreshing}
-            className="h-10 px-4 rounded-xl font-semibold text-[13px] bg-gradient-to-b from-purple-500 to-fuchsia-600 text-white shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 transition-all disabled:opacity-50 flex items-center gap-2 shrink-0"
-          >
-            {refreshing ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
-            Import All
-          </button>
+          <Link to="/instagram" className="h-10 px-4 rounded-xl font-semibold text-[13px] bg-white/5 hover:bg-white/10 border border-white/10 text-white/80 flex items-center shrink-0">
+            Accounts
+          </Link>
         </div>
 
         {isLoading && (
@@ -125,9 +133,9 @@ export default function MyPosts() {
         {!isLoading && rows.length === 0 && (
           <div className="text-center py-14 rounded-2xl border border-dashed border-white/10 space-y-3">
             <Instagram className="w-10 h-10 text-white/30 mx-auto" />
-            <p className="text-white/50 text-sm">No posts imported yet.</p>
+            <p className="text-white/50 text-sm">No posts found for this account yet.</p>
             <Link to="/instagram" className="inline-flex items-center gap-2 px-4 h-10 rounded-xl bg-gradient-to-b from-purple-500 to-fuchsia-600 text-white text-sm font-semibold">
-              Link Instagram Account
+              Back to Instagram Accounts
             </Link>
           </div>
         )}
