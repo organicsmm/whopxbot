@@ -233,6 +233,15 @@ export default function MyPosts() {
                 >
                   <Rocket className="w-3.5 h-3.5" /> Boost
                 </button>
+                {(r.active_orders > 0 || r.completed_orders > 0 || Number(r.total_spent) > 0) && (
+                  <button
+                    onClick={() => navigate(`/engagement-orders?q=${encodeURIComponent(r.permalink)}`)}
+                    className="w-full h-8 rounded-lg text-[11px] font-medium bg-white/5 hover:bg-white/10 border border-white/10 text-white/80 hover:text-white flex items-center justify-center gap-1.5 transition"
+                  >
+                    <History className="w-3.5 h-3.5" /> Order history
+                  </button>
+                )}
+
               </div>
             </div>
           ))}
