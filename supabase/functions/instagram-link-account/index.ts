@@ -77,27 +77,30 @@ Deno.serve(async (req) => {
       .single();
     if (accErr) throw accErr;
 
-    // Kick off initial media backfill (fire and forget, but await response for import count)
-    let imported = 0;
+    // Kick off initial media backfill in background (do NOT await — return fast)
     try {
-      const refreshRes = await fetch(`${SUPABASE_URL}/functions/v1/instagram-refresh-media`, {
+      const bgPromise = fetch(`${SUPABASE_URL}/functions/v1/instagram-refresh-media`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${SERVICE_KEY}`,
           'apikey': SERVICE_KEY,
         },
-        body: JSON.stringify({ account_id: account.id, results_limit: 50 }),
-      });
-      const refreshJson = await refreshRes.json().catch(() => ({}));
-      imported = refreshJson?.imported ?? 0;
+        body: JSON.stringify({ account_id: account.id, results_limit: 30 }),
+      }).catch((e) => console.error('bg refresh-media failed', e));
+      // @ts-ignore EdgeRuntime background task
+      if (typeof EdgeRuntime !== 'undefined' && EdgeRuntime.waitUntil) {
+        // @ts-ignore
+        EdgeRuntime.waitUntil(bgPromise);
+      }
     } catch (e) {
       console.error('refresh-media invocation failed', e);
     }
 
-    return new Response(JSON.stringify({ account, imported }), {
+    return new Response(JSON.stringify({ account, imported: 0, importing: true }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
+
   } catch (e) {
     console.error('instagram-link-account error', e);
     return new Response(JSON.stringify({ error: (e as Error).message }), {
