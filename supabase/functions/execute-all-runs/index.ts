@@ -1698,6 +1698,13 @@ async function processAllRuns(supabase: any, executionId: string, startTime: num
             .eq('id', item.engagement_order_id).not('status', 'in', '("cancelled","paused")'),
         ]
         
+        // Snapshot order status BEFORE we flip it, so we can notify only on the first pending→processing transition
+        let _prevOrderStatus: string | null = null
+        try {
+          const { data: eoPrev } = await supabase.from('engagement_orders').select('status').eq('id', item.engagement_order_id).maybeSingle()
+          _prevOrderStatus = eoPrev?.status ?? null
+        } catch (_) {}
+
         const [runUpdateResult] = await Promise.all(updatePromises)
         
         if (!runUpdateResult.data || runUpdateResult.data.length === 0) {
@@ -1705,12 +1712,9 @@ async function processAllRuns(supabase: any, executionId: string, startTime: num
           continue
         }
 
-        // Notify order owner on first transition to processing
-        try {
-          const { data: eo } = await supabase.from('engagement_orders').select('status').eq('id', item.engagement_order_id).maybeSingle()
-          // notify helper is no-op if status already processing/notified state; we pass prev as 'pending' to force check
-          await notifyEngagementOrderStatus(supabase, item.engagement_order_id, 'pending', eo?.status === 'processing' ? 'processing' : (eo?.status ?? 'processing'))
-        } catch (_) {}
+        if (_prevOrderStatus === 'pending') {
+          await notifyEngagementOrderStatus(supabase, item.engagement_order_id, 'pending', 'processing')
+        }
 
         if (!executionProviderMap.has(localExecutionKey)) {
           executionProviderMap.set(localExecutionKey, new Set())
