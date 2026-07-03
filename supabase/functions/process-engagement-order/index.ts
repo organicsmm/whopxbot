@@ -267,11 +267,25 @@ serve(async (req) => {
     const token = authHeader.replace('Bearer ', '')
     const body = await req.json()
 
-    // ---------- INTERNAL MODE: called from other edge fns with service-role token ----------
+    // ---------- INTERNAL / RESUME MODE ----------
     // Body: { engagement_order_id }. Order + items already exist and wallet already debited.
-    // We just hydrate state and run the scheduling backgroundWork.
-    const isInternal = !!body?.engagement_order_id && token === SERVICE_KEY
+    // Allowed if caller has service-role token OR is the order owner (or admin).
+    const isServiceRole = !!body?.engagement_order_id && token === SERVICE_KEY
+    let isResumeOwner = false
+    if (!isServiceRole && body?.engagement_order_id) {
+      const { data: { user: reqUser } } = await supabase.auth.getUser(token)
+      if (reqUser) {
+        const { data: ordCheck } = await supabase.from('engagement_orders').select('user_id').eq('id', body.engagement_order_id).maybeSingle()
+        if (ordCheck?.user_id === reqUser.id) isResumeOwner = true
+        if (!isResumeOwner) {
+          const { data: adminRow } = await supabase.from('user_roles').select('role').eq('user_id', reqUser.id).eq('role', 'admin').maybeSingle()
+          if (adminRow) isResumeOwner = true
+        }
+      }
+    }
+    const isInternal = isServiceRole || isResumeOwner
     let user_id: string
+
     let link: string
     let bundle_id: string | null = null
     let aiOrganicEnabled = true
