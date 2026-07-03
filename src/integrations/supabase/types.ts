@@ -535,6 +535,145 @@ export type Database = {
           },
         ]
       }
+      instagram_accounts: {
+        Row: {
+          auto_boost_enabled: boolean | null
+          avatar_url: string | null
+          biography: string | null
+          created_at: string
+          default_bundle_id: string | null
+          followers: number | null
+          following: number | null
+          full_name: string | null
+          id: string
+          ig_user_id: string | null
+          is_private: boolean | null
+          is_verified: boolean | null
+          last_scraped_at: string | null
+          posts_count: number | null
+          status: string
+          updated_at: string
+          user_id: string
+          username: string
+        }
+        Insert: {
+          auto_boost_enabled?: boolean | null
+          avatar_url?: string | null
+          biography?: string | null
+          created_at?: string
+          default_bundle_id?: string | null
+          followers?: number | null
+          following?: number | null
+          full_name?: string | null
+          id?: string
+          ig_user_id?: string | null
+          is_private?: boolean | null
+          is_verified?: boolean | null
+          last_scraped_at?: string | null
+          posts_count?: number | null
+          status?: string
+          updated_at?: string
+          user_id: string
+          username: string
+        }
+        Update: {
+          auto_boost_enabled?: boolean | null
+          avatar_url?: string | null
+          biography?: string | null
+          created_at?: string
+          default_bundle_id?: string | null
+          followers?: number | null
+          following?: number | null
+          full_name?: string | null
+          id?: string
+          ig_user_id?: string | null
+          is_private?: boolean | null
+          is_verified?: boolean | null
+          last_scraped_at?: string | null
+          posts_count?: number | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+          username?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "instagram_accounts_default_bundle_id_fkey"
+            columns: ["default_bundle_id"]
+            isOneToOne: false
+            referencedRelation: "engagement_bundles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      instagram_media: {
+        Row: {
+          account_id: string
+          caption: string | null
+          comment_count: number | null
+          created_at: string
+          detected_at: string
+          engagement_applied: boolean
+          id: string
+          like_count: number | null
+          media_id: string
+          media_type: string | null
+          permalink: string
+          posted_at: string | null
+          shortcode: string | null
+          thumbnail_url: string | null
+          updated_at: string
+          user_id: string
+          view_count: number | null
+        }
+        Insert: {
+          account_id: string
+          caption?: string | null
+          comment_count?: number | null
+          created_at?: string
+          detected_at?: string
+          engagement_applied?: boolean
+          id?: string
+          like_count?: number | null
+          media_id: string
+          media_type?: string | null
+          permalink: string
+          posted_at?: string | null
+          shortcode?: string | null
+          thumbnail_url?: string | null
+          updated_at?: string
+          user_id: string
+          view_count?: number | null
+        }
+        Update: {
+          account_id?: string
+          caption?: string | null
+          comment_count?: number | null
+          created_at?: string
+          detected_at?: string
+          engagement_applied?: boolean
+          id?: string
+          like_count?: number | null
+          media_id?: string
+          media_type?: string | null
+          permalink?: string
+          posted_at?: string | null
+          shortcode?: string | null
+          thumbnail_url?: string | null
+          updated_at?: string
+          user_id?: string
+          view_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "instagram_media_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "instagram_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mass_order_batch_items: {
         Row: {
           batch_id: string
@@ -1391,6 +1530,45 @@ export type Database = {
           },
         ]
       }
+      telegram_engagement_links: {
+        Row: {
+          code_expires_at: string | null
+          created_at: string
+          id: string
+          link_code: string | null
+          linked_at: string | null
+          status: string
+          telegram_chat_id: number | null
+          telegram_username: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          code_expires_at?: string | null
+          created_at?: string
+          id?: string
+          link_code?: string | null
+          linked_at?: string | null
+          status?: string
+          telegram_chat_id?: number | null
+          telegram_username?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          code_expires_at?: string | null
+          created_at?: string
+          id?: string
+          link_code?: string | null
+          linked_at?: string | null
+          status?: string
+          telegram_chat_id?: number | null
+          telegram_username?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       transactions: {
         Row: {
           amount: number
@@ -1608,6 +1786,53 @@ export type Database = {
       }
       get_admin_dashboard_stats: { Args: never; Returns: Json }
       get_admin_users_summary: { Args: never; Returns: Json }
+      get_orders_by_link: {
+        Args: { _link: string; _user_id: string }
+        Returns: {
+          base_quantity: number
+          bundle_id: string | null
+          campaign_name: string | null
+          completed_at: string | null
+          created_at: string | null
+          current_botting_percent: number | null
+          current_health_score: number | null
+          error_message: string | null
+          id: string
+          is_organic_mode: boolean | null
+          last_health_check_at: string | null
+          link: string
+          order_number: number
+          peak_hours_enabled: boolean | null
+          status: string | null
+          total_price: number
+          updated_at: string | null
+          user_id: string
+          variance_percent: number | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "engagement_orders"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      get_posts_with_order_summary: {
+        Args: { _user_id: string }
+        Returns: {
+          account_username: string
+          active_orders: number
+          caption: string
+          completed_orders: number
+          media_id: string
+          media_type: string
+          permalink: string
+          posted_at: string
+          shortcode: string
+          thumbnail_url: string
+          total_orders: number
+          total_spent: number
+        }[]
+      }
       get_provider_topup_breakdown: {
         Args: never
         Returns: {
