@@ -261,115 +261,178 @@ serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
 
   try {
-    const authHeader = req.headers.get('Authorization')
     const supabase = supabaseModule
-    const token = authHeader?.replace('Bearer ', '') || ''
-    
-    // Fix: Use getUser instead of getClaims
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token)
-
-    if (authError || !user) {
-      console.error('Auth error:', authError)
-      return new Response(JSON.stringify({ error: authError?.message || 'Unauthorized' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
-    }
-    const user_id = user.id
-
-    // Subscription gate (admin bypass)
-    const { data: isAdminRow } = await supabase
-      .from('user_roles').select('role').eq('user_id', user_id).eq('role', 'admin').maybeSingle()
-    if (!isAdminRow) {
-      const { data: sub } = await supabase
-        .from('subscriptions').select('status, plan_type').eq('user_id', user_id).maybeSingle()
-      const active = sub && sub.status === 'active' && sub.plan_type !== 'trial' && sub.plan_type !== 'none'
-      if (!active) {
-        return new Response(JSON.stringify({ error: 'Subscription required to place orders' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
-      }
-    }
-
+    const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    const authHeader = req.headers.get('Authorization') || ''
+    const token = authHeader.replace('Bearer ', '')
     const body = await req.json()
-    const { bundle_id, link, total_price, engagements, base_quantity, campaign_name } = body
-    const sanitizedCampaignName = typeof campaign_name === 'string'
-      ? campaign_name.trim().slice(0, 120) || null
-      : null
 
-    if (!bundle_id || !Array.isArray(engagements) || engagements.length === 0 || !total_price || total_price <= 0) {
-      return new Response(JSON.stringify({ error: 'Invalid request' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
-    }
-
-    // Server-side price verification against bundle_items.price_per_k (fallback to services.price)
-    const { data: bItems, error: biErr } = await supabase
-      .from('bundle_items')
-      .select('id, service_id, engagement_type, price_per_k, services:service_id(price)')
-      .eq('bundle_id', bundle_id)
-    if (biErr || !bItems || bItems.length === 0) {
-      return new Response(JSON.stringify({ error: 'Bundle not found' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
-    }
-
-    let expectedTotal = 0
-    for (const eng of engagements) {
-      const qty = Math.max(0, Math.floor(Number(eng?.quantity) || 0))
-      if (qty <= 0) {
-        return new Response(JSON.stringify({ error: 'Invalid engagement quantity' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    // ---------- INTERNAL / RESUME MODE ----------
+    // Body: { engagement_order_id }. Order + items already exist and wallet already debited.
+    // Allowed if caller has service-role token OR is the order owner (or admin).
+    const isServiceRole = !!body?.engagement_order_id && token === SERVICE_KEY
+    let isResumeOwner = false
+    if (!isServiceRole && body?.engagement_order_id) {
+      const { data: { user: reqUser } } = await supabase.auth.getUser(token)
+      if (reqUser) {
+        const { data: ordCheck } = await supabase.from('engagement_orders').select('user_id').eq('id', body.engagement_order_id).maybeSingle()
+        if (ordCheck?.user_id === reqUser.id) isResumeOwner = true
+        if (!isResumeOwner) {
+          const { data: adminRow } = await supabase.from('user_roles').select('role').eq('user_id', reqUser.id).eq('role', 'admin').maybeSingle()
+          if (adminRow) isResumeOwner = true
+        }
       }
-      const match = bItems.find((b: any) => b.engagement_type === eng.type && (!eng.service_id || b.service_id === eng.service_id))
-      if (!match) {
-        return new Response(JSON.stringify({ error: `Engagement ${eng.type} not in bundle` }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
-      }
-      const pricePerK = Number(match.price_per_k ?? (match as any).services?.price ?? 0)
-      expectedTotal += (qty / 1000) * pricePerK
     }
+    const isInternal = isServiceRole || isResumeOwner
+    let user_id: string
 
-    if (expectedTotal <= 0 || Math.abs(Number(total_price) - expectedTotal) / expectedTotal > 0.01) {
-      return new Response(JSON.stringify({ error: 'Price mismatch' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
-    }
-
-    // Lock wallet and fetch balance
-    const { data: wallet } = await supabase.from('wallets').select('*').eq('user_id', user_id).single()
-    if (!wallet || wallet.balance < total_price) return new Response(JSON.stringify({ error: 'Insufficient balance' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
-
-    // Deduct payment
-    const newBalance = wallet.balance - total_price
-    const newSpent = (wallet.total_spent || 0) + total_price
-    await supabase.from('wallets').update({ balance: newBalance, total_spent: newSpent, updated_at: new Date().toISOString() }).eq('id', wallet.id)
-
-    // Check if bundle has AI Organic Mode enabled (default ON)
+    let link: string
+    let bundle_id: string | null = null
     let aiOrganicEnabled = true
-    if (bundle_id) {
-      const { data: bundle } = await supabase.from('engagement_bundles').select('ai_organic_enabled').eq('id', bundle_id).single()
-      if (bundle) aiOrganicEnabled = bundle.ai_organic_enabled ?? true
-    }
+    let newBalance = 0
+    let order: any
+    let createdItemIds: Array<{ type: string; itemId: string; engagement: any; finalServiceId: string }> = []
 
-    // Create order
-    const { data: order, error: orderError } = await supabase.from('engagement_orders').insert({
-      user_id, bundle_id, link, total_price, base_quantity, is_organic_mode: true, status: 'processing',
-      campaign_name: sanitizedCampaignName,
-    }).select().single()
+    if (isInternal) {
+      const { data: ord, error: ordErr } = await supabase
+        .from('engagement_orders')
+        .select('*')
+        .eq('id', body.engagement_order_id)
+        .single()
+      if (ordErr || !ord) return new Response(JSON.stringify({ error: 'Order not found' }), { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+      order = ord
+      user_id = ord.user_id
+      link = ord.link
+      bundle_id = ord.bundle_id
 
-    if (orderError || !order) return new Response(JSON.stringify({ error: `Failed to create order: ${orderError?.message || 'Unknown error'}` }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+      if (bundle_id) {
+        const { data: bundle } = await supabase.from('engagement_bundles').select('ai_organic_enabled').eq('id', bundle_id).single()
+        if (bundle) aiOrganicEnabled = bundle.ai_organic_enabled ?? true
+      }
 
-    // Record transaction for revenue tracking
-    await supabase.from('transactions').insert({
-      user_id,
-      type: 'order_payment',
-      amount: total_price,
-      balance_after: newBalance,
-      order_id: order.id,
-      status: 'completed',
-      description: `Engagement Order #${order.order_number}`,
-    })
+      const { data: items } = await supabase
+        .from('engagement_order_items')
+        .select('id, engagement_type, service_id, quantity, price, drip_interval, drip_interval_unit')
+        .eq('engagement_order_id', order.id)
+      for (const it of items ?? []) {
+        createdItemIds.push({
+          type: it.engagement_type,
+          itemId: it.id,
+          finalServiceId: it.service_id,
+          engagement: {
+            type: it.engagement_type,
+            service_id: it.service_id,
+            quantity: it.quantity,
+            price: it.price,
+            time_limit_hours: 0,
+            peak_hours_enabled: ord.peak_hours_enabled ?? false,
+            scheduled_runs: [],
+          },
+        })
+      }
 
-    const createdItemIds: Array<{ type: string; itemId: string; engagement: any; finalServiceId: string }> = []
-    for (const eng of engagements) {
-      const { data: item } = await supabase.from('engagement_order_items').insert({
-        engagement_order_id: order.id,
-        engagement_type: eng.type,
-        service_id: eng.service_id,
-        quantity: eng.quantity,
-        price: eng.price,
-        status: 'pending'
+      // Flip order to processing so UI shows correct state
+      await supabase.from('engagement_orders').update({ status: 'processing' }).eq('id', order.id)
+    } else {
+      // ---------- NORMAL USER FLOW ----------
+      const { data: { user }, error: authError } = await supabase.auth.getUser(token)
+      if (authError || !user) {
+        console.error('Auth error:', authError)
+        return new Response(JSON.stringify({ error: authError?.message || 'Unauthorized' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+      }
+      user_id = user.id
+
+      const { data: isAdminRow } = await supabase
+        .from('user_roles').select('role').eq('user_id', user_id).eq('role', 'admin').maybeSingle()
+      if (!isAdminRow) {
+        const { data: sub } = await supabase
+          .from('subscriptions').select('status, plan_type').eq('user_id', user_id).maybeSingle()
+        const active = sub && sub.status === 'active' && sub.plan_type !== 'trial' && sub.plan_type !== 'none'
+        if (!active) {
+          return new Response(JSON.stringify({ error: 'Subscription required to place orders' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+        }
+      }
+
+      const { bundle_id: bId, link: reqLink, total_price, engagements, base_quantity, campaign_name } = body
+      bundle_id = bId
+      link = reqLink
+      const sanitizedCampaignName = typeof campaign_name === 'string'
+        ? campaign_name.trim().slice(0, 120) || null
+        : null
+
+      if (!bundle_id || !Array.isArray(engagements) || engagements.length === 0 || !total_price || total_price <= 0) {
+        return new Response(JSON.stringify({ error: 'Invalid request' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+      }
+
+      const { data: bItems, error: biErr } = await supabase
+        .from('bundle_items')
+        .select('id, service_id, engagement_type, price_per_k, services:service_id(price)')
+        .eq('bundle_id', bundle_id)
+      if (biErr || !bItems || bItems.length === 0) {
+        return new Response(JSON.stringify({ error: 'Bundle not found' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+      }
+
+      let expectedTotal = 0
+      for (const eng of engagements) {
+        const qty = Math.max(0, Math.floor(Number(eng?.quantity) || 0))
+        if (qty <= 0) {
+          return new Response(JSON.stringify({ error: 'Invalid engagement quantity' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+        }
+        const match = bItems.find((b: any) => b.engagement_type === eng.type && (!eng.service_id || b.service_id === eng.service_id))
+        if (!match) {
+          return new Response(JSON.stringify({ error: `Engagement ${eng.type} not in bundle` }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+        }
+        const pricePerK = Number(match.price_per_k ?? (match as any).services?.price ?? 0)
+        expectedTotal += (qty / 1000) * pricePerK
+      }
+
+      if (expectedTotal <= 0 || Math.abs(Number(total_price) - expectedTotal) / expectedTotal > 0.01) {
+        return new Response(JSON.stringify({ error: 'Price mismatch' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+      }
+
+      const { data: wallet } = await supabase.from('wallets').select('*').eq('user_id', user_id).single()
+      if (!wallet || wallet.balance < total_price) return new Response(JSON.stringify({ error: 'Insufficient balance' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+
+      newBalance = wallet.balance - total_price
+      const newSpent = (wallet.total_spent || 0) + total_price
+      await supabase.from('wallets').update({ balance: newBalance, total_spent: newSpent, updated_at: new Date().toISOString() }).eq('id', wallet.id)
+
+      if (bundle_id) {
+        const { data: bundle } = await supabase.from('engagement_bundles').select('ai_organic_enabled').eq('id', bundle_id).single()
+        if (bundle) aiOrganicEnabled = bundle.ai_organic_enabled ?? true
+      }
+
+      const { data: ord, error: orderError } = await supabase.from('engagement_orders').insert({
+        user_id, bundle_id, link, total_price, base_quantity, is_organic_mode: true, status: 'processing',
+        campaign_name: sanitizedCampaignName,
       }).select().single()
-      if (item) createdItemIds.push({ type: eng.type, itemId: item.id, engagement: eng, finalServiceId: eng.service_id })
+
+      if (orderError || !ord) return new Response(JSON.stringify({ error: `Failed to create order: ${orderError?.message || 'Unknown error'}` }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+      order = ord
+
+      await supabase.from('transactions').insert({
+        user_id,
+        type: 'order_payment',
+        amount: total_price,
+        balance_after: newBalance,
+        order_id: order.id,
+        status: 'completed',
+        description: `Engagement Order #${order.order_number}`,
+      })
+
+      for (const eng of engagements) {
+        const { data: item } = await supabase.from('engagement_order_items').insert({
+          engagement_order_id: order.id,
+          engagement_type: eng.type,
+          service_id: eng.service_id,
+          quantity: eng.quantity,
+          price: eng.price,
+          status: 'pending'
+        }).select().single()
+        if (item) createdItemIds.push({ type: eng.type, itemId: item.id, engagement: eng, finalServiceId: eng.service_id })
+      }
     }
+
 
     const backgroundWork = async () => {
       try {
