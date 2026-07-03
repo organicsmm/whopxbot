@@ -98,12 +98,12 @@ export default function Dashboard() {
             { icon: TrendingUp, label: 'Total Spent', value: formatPrice(stats?.totalSpent || 0), sub: 'All time', accent: '#c97a52' },
           ].map((s, i) => (
             <div key={i} className="rounded-xl p-5" style={cardStyle}>
-              <div className="w-9 h-9 rounded-lg flex items-center justify-center mb-3" style={{ background: s.accent + '12', color: s.accent }}>
+              <div className="w-9 h-9 rounded-lg flex items-center justify-center mb-3" style={{ background: s.accent + '1f', color: s.accent }}>
                 <s.icon className="w-4 h-4" />
               </div>
-              <p className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: '#aaa' }}>{s.label}</p>
-              <p className="text-2xl font-extrabold tracking-tight" style={{ color: '#2a2418' }}>{s.value}</p>
-              <p className="text-[11px] mt-1" style={{ color: '#bbb' }}>{s.sub}</p>
+              <p className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: FAINT }}>{s.label}</p>
+              <p className="text-2xl font-extrabold tracking-tight" style={{ color: TEXT }}>{s.value}</p>
+              <p className="text-[11px] mt-1" style={{ color: MUTED }}>{s.sub}</p>
             </div>
           ))}
         </div>
