@@ -41,7 +41,39 @@ async function handleCommand(chatId: number, username: string | null, text: stri
 
   if (cmd === "/start" || cmd === "/help") {
     return reply(chatId,
-      `<b>OrganicSMM Pro Bot</b>\n\nCommands:\n<code>/link CODE</code> — pair account\n<code>/wallet</code> — balance\n<code>/posts</code> — recent IG posts\n<code>/orders</code> — recent orders\n<code>/cancel ID</code> — cancel pending\n\n<b>Defaults (auto-apply on /order)</b>\n<code>/setdefault VIEWS LIKES COMMENTS [DRIP_MIN]</code>\n<code>/setlink &lt;instagram-link&gt;</code>\n<code>/mode auto|manual</code>\n<code>/mydefaults</code> — show saved defaults\n<code>/cleardefaults</code> — remove saved link\n\n<b>Order</b>\n<code>/order</code> — use saved link + qty\n<code>/order &lt;link&gt;</code> — use saved qty\n<code>/order &lt;link&gt; V L C</code> — override\n\nGet CODE from app → More → Telegram Bot.`);
+      `<b>OrganicSMM Pro Bot</b>\n\n` +
+      `<b>Account</b>\n` +
+      `<code>/link CODE</code> — pair account\n` +
+      `<code>/wallet</code> — balance\n` +
+      `<code>/posts</code> — recent IG posts\n` +
+      `<code>/orders</code> — recent orders\n` +
+      `<code>/cancel ID</code> — cancel pending order\n\n` +
+      `<b>Defaults (auto-apply on /order)</b>\n` +
+      `<code>/setlink &lt;instagram-link&gt;</code> — default post link\n` +
+      `<code>/setdefault VIEWS LIKES COMMENTS [DRIP_MIN]</code> — default quantities\n` +
+      `<code>/mode auto|manual</code> — auto-order on new posts\n` +
+      `<code>/mydefaults</code> — show saved defaults\n` +
+      `<code>/cleardefaults</code> — remove saved link\n\n` +
+      `<b>/order — Place an engagement order</b>\n` +
+      `Allowed formats:\n` +
+      `1. <code>/order</code>\n` +
+      `   → uses saved link + saved quantities\n` +
+      `2. <code>/order &lt;link&gt;</code>\n` +
+      `   → uses saved quantities on given link\n` +
+      `3. <code>/order &lt;link&gt; VIEWS LIKES COMMENTS</code>\n` +
+      `   → full override (any qty can be 0)\n` +
+      `4. <code>/order &lt;link&gt; VIEWS LIKES COMMENTS DRIP_MIN</code>\n` +
+      `   → override + drip-feed over N minutes\n\n` +
+      `<b>Examples</b>\n` +
+      `<code>/order</code>\n` +
+      `<code>/order https://instagram.com/p/ABC123/</code>\n` +
+      `<code>/order https://instagram.com/reel/XYZ/ 5000 500 50</code>\n` +
+      `<code>/order https://instagram.com/p/ABC/ 10000 0 0 60</code>\n\n` +
+      `<b>Rules</b>\n` +
+      `• Link must be an Instagram post/reel URL\n` +
+      `• Each quantity: 0 – 1,000,000 (at least one &gt; 0)\n` +
+      `• DRIP_MIN optional: 0 = instant, up to 1440 (24h)\n\n` +
+      `Get CODE from app → More → Telegram Bot.`);
   }
 
   if (cmd === "/link") {
