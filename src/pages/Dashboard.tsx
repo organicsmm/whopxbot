@@ -78,8 +78,8 @@ export default function Dashboard() {
             <button onClick={() => navigate('/engagement-order')} className="h-10 px-4 rounded-lg text-[12px] font-semibold flex items-center gap-1.5" style={{ border: '1px solid rgba(0,0,0,.08)', color: '#555' }}>
               <Sparkles className="w-3.5 h-3.5" style={{ color: '#c97a52' }} /> Engagement
             </button>
-            <button onClick={() => navigate('/order')} className="h-10 px-4 rounded-lg text-[12px] font-semibold text-white flex items-center gap-1.5" style={{ background: '#2a2418' }}>
-              <Zap className="w-3.5 h-3.5" /> New Order
+            <button onClick={() => navigate('/mass-order')} className="h-10 px-4 rounded-lg text-[12px] font-semibold text-white flex items-center gap-1.5" style={{ background: '#2a2418' }}>
+              <Zap className="w-3.5 h-3.5" /> Mass Order
             </button>
           </div>
         </div>
@@ -165,7 +165,7 @@ export default function Dashboard() {
               )) : (
                 <div className="px-5 py-12 text-center">
                   <p className="text-[13px] mb-3" style={{ color: '#999' }}>No orders yet</p>
-                  <button onClick={() => navigate('/order')} className="text-[12px] font-semibold px-4 py-2 rounded-lg text-white" style={{ background: '#2a2418' }}>Place Order</button>
+                  <button onClick={() => navigate('/engagement-order')} className="text-[12px] font-semibold px-4 py-2 rounded-lg text-white" style={{ background: '#2a2418' }}>Place Order</button>
                 </div>
               )}
             </div>
