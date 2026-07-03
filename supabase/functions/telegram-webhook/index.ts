@@ -633,13 +633,22 @@ async function handleCallback(cq: any) {
     const media = await findMediaByShortcode(userId, shortcode);
     if (!media) { await reply(chatId, "Post not found in your account."); return; }
     const { data: preset } = await supabase.from("engagement_presets").select("*").eq("user_id", userId).maybeSingle();
-    if (!preset || (preset.views + preset.likes + preset.comments) === 0) {
-      await reply(chatId, "No preset. Set with <code>/setdefault V L C [DRIP]</code>");
+    const pQty: QtyMap = {
+      views: Math.max(0, Math.floor(Number((preset as any)?.views) || 0)),
+      likes: Math.max(0, Math.floor(Number((preset as any)?.likes) || 0)),
+      comments: Math.max(0, Math.floor(Number((preset as any)?.comments) || 0)),
+      saves: Math.max(0, Math.floor(Number((preset as any)?.saves) || 0)),
+      shares: Math.max(0, Math.floor(Number((preset as any)?.shares) || 0)),
+      reposts: Math.max(0, Math.floor(Number((preset as any)?.reposts) || 0)),
+    };
+    if (!preset || sumQty(pQty) === 0) {
+      await reply(chatId, "No preset. Set with <code>/setdefault V L C [SV SH RP] [DRIP]</code>");
       return;
     }
-    const r = await placeEngagement(userId, media.permalink, preset.views, preset.likes, preset.comments, preset.drip_minutes ?? 0);
+    const r = await placeEngagement(userId, media.permalink, pQty, Number((preset as any).drip_minutes) || 0);
     if (!r.ok) { await reply(chatId, `❌ ${r.error ?? "Order failed"}`); return; }
     await reply(chatId, `✅ Order <code>#${r.order_number}</code> placed on ${shortcode}\nCharged: ₹${r.charged_inr}`);
+
     return;
   }
 
