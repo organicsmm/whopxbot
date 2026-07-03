@@ -1784,6 +1784,7 @@ export type Database = {
         }
         Returns: Json
       }
+      generate_telegram_link_code: { Args: never; Returns: Json }
       get_admin_dashboard_stats: { Args: never; Returns: Json }
       get_admin_users_summary: { Args: never; Returns: Json }
       get_orders_by_link: {
@@ -1875,6 +1876,10 @@ export type Database = {
       pg_advisory_xact_lock: { Args: { key: number }; Returns: undefined }
       redeem_promo_code: {
         Args: { p_code: string; p_deposit_usd: number }
+        Returns: Json
+      }
+      redeem_telegram_link_code: {
+        Args: { p_chat_id: number; p_code: string; p_username: string }
         Returns: Json
       }
       reschedule_organic_run: {
