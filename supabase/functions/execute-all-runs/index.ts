@@ -1,5 +1,38 @@
 import { createClient, SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { notifyUserTelegram, statusEmoji } from "../_shared/notify.ts"
+
+// Sends a Telegram message to the order owner if the engagement_orders status just changed
+// to a notify-worthy state. Safe to call multiple times — no-op on unchanged state.
+async function notifyEngagementOrderStatus(supabase: any, engagementOrderId: string, prevStatus: string | null | undefined, newStatus: string) {
+  try {
+    if (!engagementOrderId || !newStatus) return
+    if (prevStatus === newStatus) return
+    const NOTIFY = new Set(['processing', 'completed', 'partial', 'failed', 'cancelled'])
+    if (!NOTIFY.has(newStatus)) return
+    const { data: o } = await supabase
+      .from('engagement_orders')
+      .select('user_id, order_number, link')
+      .eq('id', engagementOrderId)
+      .maybeSingle()
+    if (!o?.user_id) return
+    const label: Record<string, string> = {
+      processing: 'Processing started',
+      completed: 'Delivered ✅',
+      partial: 'Partially delivered',
+      failed: 'Failed',
+      cancelled: 'Cancelled',
+    }
+    await notifyUserTelegram(
+      supabase,
+      o.user_id,
+      `${statusEmoji(newStatus)} <b>Order #${o.order_number}</b>\n${label[newStatus] ?? newStatus}\nLink: <code>${o.link ?? ''}</code>`,
+    )
+  } catch (e) {
+    console.error('notifyEngagementOrderStatus failed', e)
+  }
+}
+
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
