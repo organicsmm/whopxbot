@@ -137,12 +137,12 @@ export default function ZapUpiDepositCard() {
           </div>
           <div>
             <h2 className="text-lg font-bold !text-white tracking-tight">Add Funds — Instant UPI</h2>
-            <p className="text-[12px] text-white/50">Pay with any UPI app · auto credit in seconds</p>
+            <p className="text-[12px] text-white/80">Pay with any UPI app · auto credit in seconds</p>
           </div>
         </div>
 
         <div className="relative mt-5">
-          <label className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/50">
+          <label className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/80">
             Amount (INR)
           </label>
           <div className="mt-2 flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2.5 focus-within:border-purple-400/40 focus-within:bg-white/[0.05] transition-colors">
@@ -154,7 +154,7 @@ export default function ZapUpiDepositCard() {
               max={MAX_AMOUNT}
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              className="flex-1 bg-transparent outline-none text-lg font-bold !text-white placeholder:text-white/30"
+              className="flex-1 bg-transparent outline-none text-lg font-bold !text-white placeholder:text-white/65"
               placeholder="100"
             />
           </div>
@@ -193,7 +193,7 @@ export default function ZapUpiDepositCard() {
             )}
           </button>
 
-          <div className="mt-4 flex items-center gap-2 text-[11px] text-white/50">
+          <div className="mt-4 flex items-center gap-2 text-[11px] text-white/80">
             <ShieldCheck className="h-3.5 w-3.5 text-emerald-300" />
             Secure UPI payment · auto wallet credit · no manual approval
           </div>

@@ -84,7 +84,7 @@ export default function ApiAccess() {
                         </div>
                         <div>
                             <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">API Access</h1>
-                            <p className="text-sm text-zinc-400 mt-1 max-w-xl">
+                            <p className="text-sm text-zinc-200 mt-1 max-w-xl">
                                 Apna API key generate karein aur ise apne panel mein use karein — same services, same rates.
                             </p>
                         </div>
@@ -107,7 +107,7 @@ export default function ApiAccess() {
                                 </code>
                                 <button
                                     onClick={() => setShowKey(!showKey)}
-                                    className="shrink-0 text-zinc-500 hover:text-zinc-300 transition-colors p-1.5 rounded-lg hover:bg-white/5"
+                                    className="shrink-0 text-zinc-500 hover:text-zinc-100 transition-colors p-1.5 rounded-lg hover:bg-white/5"
                                     title={showKey ? 'Hide key' : 'Show key'}
                                 >
                                     {showKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -131,7 +131,7 @@ export default function ApiAccess() {
                                 size="sm"
                                 onClick={handleGenerateKey}
                                 disabled={isGenerating}
-                                className="text-zinc-400 border-white/[0.07] hover:text-white hover:bg-white/5 hover:border-white/[0.12]"
+                                className="text-zinc-200 border-white/[0.07] hover:text-white hover:bg-white/5 hover:border-white/[0.12]"
                             >
                                 {isGenerating ? (
                                     <RefreshCw className="h-3.5 w-3.5 mr-2 animate-spin" />
@@ -300,7 +300,7 @@ function EndpointCard({
                     <p className="text-[13px] font-semibold text-white">{label}</p>
                     <p className="text-[11px] text-zinc-500">{description}</p>
                 </div>
-                <span className="text-[10px] font-mono bg-zinc-800 text-zinc-400 px-2 py-1 rounded-md border border-white/[0.05]">
+                <span className="text-[10px] font-mono bg-zinc-800 text-zinc-200 px-2 py-1 rounded-md border border-white/[0.05]">
                     action: "{action}"
                 </span>
             </div>
@@ -309,14 +309,14 @@ function EndpointCard({
             <div className="flex border-b border-white/[0.05] bg-zinc-950">
                 <button
                     onClick={() => setTab('request')}
-                    className={`flex-1 py-2 text-[12px] font-medium transition-colors ${tab === 'request' ? 'text-white border-b-2 border-violet-500 bg-violet-500/5' : 'text-zinc-600 hover:text-zinc-400'
+                    className={`flex-1 py-2 text-[12px] font-medium transition-colors ${tab === 'request' ? 'text-white border-b-2 border-violet-500 bg-violet-500/5' : 'text-zinc-600 hover:text-zinc-200'
                         }`}
                 >
                     Request
                 </button>
                 <button
                     onClick={() => setTab('response')}
-                    className={`flex-1 py-2 text-[12px] font-medium transition-colors ${tab === 'response' ? 'text-white border-b-2 border-emerald-500 bg-emerald-500/5' : 'text-zinc-600 hover:text-zinc-400'
+                    className={`flex-1 py-2 text-[12px] font-medium transition-colors ${tab === 'response' ? 'text-white border-b-2 border-emerald-500 bg-emerald-500/5' : 'text-zinc-600 hover:text-zinc-200'
                         }`}
                 >
                     Response
@@ -325,13 +325,13 @@ function EndpointCard({
 
             {/* Code block */}
             <div className="relative bg-[#0d0d0d] p-4 group">
-                <pre className="text-[12px] font-mono text-zinc-300 whitespace-pre overflow-x-auto">
+                <pre className="text-[12px] font-mono text-zinc-100 whitespace-pre overflow-x-auto">
                     {tab === 'request' ? request : response}
                 </pre>
                 {tab === 'request' && (
                     <button
                         onClick={onCopyRequest}
-                        className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity text-zinc-600 hover:text-zinc-300 p-1.5 rounded-lg hover:bg-white/5"
+                        className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity text-zinc-600 hover:text-zinc-100 p-1.5 rounded-lg hover:bg-white/5"
                     >
                         <Copy className="h-3.5 w-3.5" />
                     </button>

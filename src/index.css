@@ -210,7 +210,7 @@ html {
   main .text-stone-700, main .text-neutral-700, main .text-gray-700, main .text-slate-700, main .text-zinc-700 { color: rgba(255,255,255,0.78) !important; }
   main .text-stone-600, main .text-neutral-600, main .text-gray-600, main .text-slate-600, main .text-zinc-600 { color: rgba(255,255,255,0.65) !important; }
   main .text-stone-500, main .text-neutral-500, main .text-gray-500, main .text-slate-500, main .text-zinc-500 { color: rgba(255,255,255,0.55) !important; }
-  main .text-stone-400, main .text-neutral-400, main .text-gray-400, main .text-slate-400, main .text-zinc-400 { color: rgba(255,255,255,0.45) !important; }
+  main .text-stone-400, main .text-neutral-200, main .text-gray-200, main .text-slate-200, main .text-zinc-200 { color: rgba(255,255,255,0.45) !important; }
 
   main .border-stone-200, main .border-neutral-200, main .border-gray-200, main .border-slate-200, main .border-zinc-200,
   main .border-stone-100, main .border-neutral-100, main .border-gray-100, main .border-slate-100, main .border-zinc-100 {

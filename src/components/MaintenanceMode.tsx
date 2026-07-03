@@ -52,7 +52,7 @@ export function MaintenancePage() {
         </div>
 
         {/* Footer note */}
-        <p className="text-xs text-muted-foreground/60 pt-4">
+        <p className="text-xs text-muted-foreground pt-4">
           Thank you for your patience. We appreciate your support!
         </p>
       </div>

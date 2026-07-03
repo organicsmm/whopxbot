@@ -322,7 +322,7 @@ export function EngagementTypeCard({
             )}>
               <Icon className={cn(
                 "h-3.5 w-3.5 sm:h-4 sm:w-4",
-                config.enabled ? "text-primary" : "text-white/20"
+                config.enabled ? "text-primary" : "text-white/80"
               )} />
             </div>
             <div className="min-w-0 flex-1">
@@ -340,7 +340,7 @@ export function EngagementTypeCard({
                 )}
               </div>
               {config.enabled && scheduleData && (
-                <div className="flex items-center gap-1 sm:gap-1.5 text-[9px] sm:text-[10px] text-white/30 mt-0.5 font-black uppercase tracking-wider">
+                <div className="flex items-center gap-1 sm:gap-1.5 text-[9px] sm:text-[10px] text-white/65 mt-0.5 font-black uppercase tracking-wider">
                   <Sparkles className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-primary shrink-0" />
                   <span>{scheduleData.runCount} runs</span>
                   <span className="opacity-20">•</span>
@@ -366,7 +366,7 @@ export function EngagementTypeCard({
                 )}
               />
             )}
-            <Badge variant="outline" className="font-black text-[10px] sm:text-xs border-white/10 bg-white/5 text-white/60 px-1.5 sm:px-2 py-0.5 sm:py-1 shrink-0">
+            <Badge variant="outline" className="font-black text-[10px] sm:text-xs border-white/10 bg-white/5 text-white/85 px-1.5 sm:px-2 py-0.5 sm:py-1 shrink-0">
               {formatPrice(config.price)}
             </Badge>
             <div className="scale-90 sm:scale-100">

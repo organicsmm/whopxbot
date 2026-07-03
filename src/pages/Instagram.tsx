@@ -66,7 +66,7 @@ export default function InstagramPage() {
             </div>
             <div>
               <h1 className="text-2xl font-bold !text-white">Instagram Accounts</h1>
-              <p className="text-sm text-white/60">Link your IG account to import posts and boost engagement.</p>
+              <p className="text-sm text-white/85">Link your IG account to import posts and boost engagement.</p>
             </div>
           </div>
         </div>
@@ -91,7 +91,7 @@ export default function InstagramPage() {
                       {plan}
                     </span>
                   </div>
-                  <p className="text-xs text-white/60 mt-0.5">
+                  <p className="text-xs text-white/85 mt-0.5">
                     {isLifetime
                       ? 'Lifetime access — never expires.'
                       : expiresStr
@@ -116,7 +116,7 @@ export default function InstagramPage() {
                     </span>
                   )}
                 </div>
-                <p className="text-xs text-white/60 mt-0.5">
+                <p className="text-xs text-white/85 mt-0.5">
                   Linking Instagram accounts requires an active plan.
                 </p>
               </div>
@@ -131,16 +131,16 @@ export default function InstagramPage() {
         })()}
 
         <div className="rounded-2xl p-5 bg-[#0a0a14]/80 border border-white/10">
-          <label className="block text-xs font-semibold uppercase tracking-wider text-white/50 mb-2">Add Instagram Username</label>
+          <label className="block text-xs font-semibold uppercase tracking-wider text-white/80 mb-2">Add Instagram Username</label>
           <div className="flex gap-2">
             <div className="flex-1 relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40">@</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/75">@</span>
               <input
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 onKeyDown={(e) => { if (e.key === 'Enter' && username) { if (!hasActiveSubscription) { setShowSubDialog(true); } else { linkMut.mutate(username); } } }}
                 placeholder="your_username"
-                className="w-full h-11 pl-8 pr-3 rounded-xl bg-black/40 border border-white/10 text-white placeholder:text-white/30 focus:outline-none focus:border-purple-400/40"
+                className="w-full h-11 pl-8 pr-3 rounded-xl bg-black/40 border border-white/10 text-white placeholder:text-white/65 focus:outline-none focus:border-purple-400/40"
               />
             </div>
             <button
@@ -155,15 +155,15 @@ export default function InstagramPage() {
               Link
             </button>
           </div>
-          <p className="mt-2 text-[11px] text-white/40 flex items-center gap-1.5">
+          <p className="mt-2 text-[11px] text-white/75 flex items-center gap-1.5">
             <ShieldAlert className="w-3 h-3" /> Read-only. We only fetch public profile info & posts.
           </p>
         </div>
 
         <div className="space-y-3">
-          {isLoading && <div className="text-center text-white/50 py-8">Loading...</div>}
+          {isLoading && <div className="text-center text-white/80 py-8">Loading...</div>}
           {!isLoading && accounts.length === 0 && (
-            <div className="text-center py-10 rounded-2xl border border-dashed border-white/10 text-white/40">
+            <div className="text-center py-10 rounded-2xl border border-dashed border-white/10 text-white/75">
               No Instagram accounts linked yet.
             </div>
           )}
@@ -181,8 +181,8 @@ export default function InstagramPage() {
                   <span className="font-semibold !text-white truncate">@{a.username}</span>
                   {a.is_verified && <CheckCircle2 className="w-4 h-4 text-sky-400 shrink-0" />}
                 </div>
-                {a.full_name && <p className="text-[13px] text-white/60 truncate">{a.full_name}</p>}
-                <p className="text-[11px] text-white/40 mt-0.5">
+                {a.full_name && <p className="text-[13px] text-white/85 truncate">{a.full_name}</p>}
+                <p className="text-[11px] text-white/75 mt-0.5">
                   {a.followers?.toLocaleString('en-IN') ?? 0} followers · {a.posts_count ?? 0} posts
                 </p>
               </div>

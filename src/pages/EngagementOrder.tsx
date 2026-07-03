@@ -837,7 +837,7 @@ export default function EngagementOrder() {
                 <div className="relative flex items-center gap-3">
                   <div className={cn(
                     "shrink-0 w-9 h-9 rounded-lg flex items-center justify-center border transition-all",
-                    isOrganicMode ? "bg-emerald-500/20 border-emerald-400/40 text-emerald-200" : "bg-white/5 border-white/10 text-white/50"
+                    isOrganicMode ? "bg-emerald-500/20 border-emerald-400/40 text-emerald-200" : "bg-white/5 border-white/10 text-white/80"
                   )}>
                     <Brain className="h-4 w-4" />
                   </div>
@@ -846,12 +846,12 @@ export default function EngagementOrder() {
                       <span className="text-[12px] sm:text-[13px] font-bold !text-white tracking-tight">AI Organic Algorithm</span>
                       <span className={cn(
                         "text-[9px] font-bold uppercase tracking-[0.14em] px-1.5 py-0.5 rounded-md border",
-                        isOrganicMode ? "bg-emerald-500/15 text-emerald-200 border-emerald-400/30" : "bg-white/5 text-white/40 border-white/10"
+                        isOrganicMode ? "bg-emerald-500/15 text-emerald-200 border-emerald-400/30" : "bg-white/5 text-white/75 border-white/10"
                       )}>
                         {isOrganicMode ? "Active" : "Idle"}
                       </span>
                     </div>
-                    <p className="text-[10.5px] sm:text-[11px] text-white/50 leading-snug">
+                    <p className="text-[10.5px] sm:text-[11px] text-white/80 leading-snug">
                       Unique S-curve · Random variance · Anti-bot
                     </p>
                   </div>
@@ -884,7 +884,7 @@ export default function EngagementOrder() {
                 <div className="relative flex items-center gap-3">
                   <div className={cn(
                     "shrink-0 w-9 h-9 rounded-lg flex items-center justify-center border transition-all",
-                    isAutoRatios ? "bg-purple-500/20 border-purple-400/40 text-purple-200" : "bg-white/5 border-white/10 text-white/50"
+                    isAutoRatios ? "bg-purple-500/20 border-purple-400/40 text-purple-200" : "bg-white/5 border-white/10 text-white/80"
                   )}>
                     <Percent className="h-4 w-4" />
                   </div>
@@ -893,12 +893,12 @@ export default function EngagementOrder() {
                       <span className="text-[12px] sm:text-[13px] font-bold !text-white tracking-tight">AI Smart Ratios</span>
                       <span className={cn(
                         "text-[9px] font-bold uppercase tracking-[0.14em] px-1.5 py-0.5 rounded-md border",
-                        isAutoRatios ? "bg-purple-500/15 text-purple-200 border-purple-400/30" : "bg-white/5 text-white/40 border-white/10"
+                        isAutoRatios ? "bg-purple-500/15 text-purple-200 border-purple-400/30" : "bg-white/5 text-white/75 border-white/10"
                       )}>
                         {isAutoRatios ? "Auto" : "Manual"}
                       </span>
                     </div>
-                    <p className="text-[10.5px] sm:text-[11px] text-white/50 leading-snug italic">
+                    <p className="text-[10.5px] sm:text-[11px] text-white/80 leading-snug italic">
                       {isAutoRatios ? "Optimized for platform algorithms" : "You set the engagement mix"}
                     </p>
                   </div>

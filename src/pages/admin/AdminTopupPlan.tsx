@@ -64,7 +64,7 @@ function categoryColor(cat: string | null): string {
   if (k.includes("instagram")) return "bg-pink-500/15 text-pink-700 dark:text-pink-300 border-pink-500/30";
   if (k.includes("youtube")) return "bg-red-500/15 text-red-700 dark:text-red-300 border-red-500/30";
   if (k.includes("facebook")) return "bg-blue-500/15 text-blue-700 dark:text-blue-300 border-blue-500/30";
-  if (k.includes("twitter") || k.includes("x ")) return "bg-slate-500/15 text-slate-700 dark:text-slate-300 border-slate-500/30";
+  if (k.includes("twitter") || k.includes("x ")) return "bg-slate-500/15 text-slate-700 dark:text-slate-100 border-slate-500/30";
   if (k.includes("telegram")) return "bg-sky-500/15 text-sky-700 dark:text-sky-300 border-sky-500/30";
   return "bg-muted text-muted-foreground border-border";
 }

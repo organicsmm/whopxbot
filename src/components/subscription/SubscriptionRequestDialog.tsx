@@ -346,7 +346,7 @@ Request ID: ${requestData.id}`;
                 disabled
                 className="h-12 rounded-xl bg-muted/50 text-muted-foreground"
               />
-              <Shield className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
+              <Shield className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             </div>
             <p className="text-[10px] text-muted-foreground">Email is auto-filled from your account</p>
           </div>
