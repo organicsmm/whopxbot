@@ -270,7 +270,31 @@ async function handleCommand(chatId: number, username: string | null, text: stri
       if (drip > 1440) drip = 1440;
     }
 
-    // ---------- 4. Place order ----------
+    // ---------- 4. Service-wise min/max enforcement ----------
+    const { limits, err: limErr } = await getIgServiceLimits();
+    if (limErr) return reply(chatId, `❌ Cannot verify service limits: ${limErr}. Try again shortly.`);
+    const fmt = (n: number) => n.toLocaleString();
+    const checkQty = (type: string, qty: number, label: string): string | null => {
+      if (qty <= 0) return null; // 0 = skip that engagement type
+      const lim = limits[type];
+      if (!lim) return `❌ ${label} service not configured for Instagram right now. Try later or contact support.`;
+      if (qty < lim.min) return `❌ ${label} quantity ${fmt(qty)} is below minimum. Allowed range: <b>${fmt(lim.min)} – ${fmt(lim.max)}</b>. (Use 0 to skip ${label.toLowerCase()}.)`;
+      if (qty > lim.max) return `❌ ${label} quantity ${fmt(qty)} exceeds maximum. Allowed range: <b>${fmt(lim.min)} – ${fmt(lim.max)}</b>.`;
+      return null;
+    };
+    const limErrMsg =
+      checkQty("views", v, "Views") ||
+      checkQty("likes", l, "Likes") ||
+      checkQty("comments", c, "Comments");
+    if (limErrMsg) {
+      const summary = ["views", "likes", "comments"]
+        .filter((t) => limits[t])
+        .map((t) => `${t}: ${fmt(limits[t].min)}–${fmt(limits[t].max)}`)
+        .join(" · ");
+      return reply(chatId, `${limErrMsg}\n\n<b>Current service limits</b>\n${summary}`);
+    }
+
+    // ---------- 5. Place order ----------
     const r = await placeEngagement(userId, link, v, l, c, drip);
     if (!r.ok) {
       const raw = String(r.error ?? "Order failed");
