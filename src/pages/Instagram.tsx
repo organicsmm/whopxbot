@@ -167,6 +167,37 @@ export default function InstagramPage() {
           <p className="mt-2 text-[11px] text-white/75 flex items-center gap-1.5">
             <ShieldAlert className="w-3 h-3" /> Read-only. We only fetch public profile info & posts.
           </p>
+
+          {/* Popular / suggested Instagram accounts */}
+          <div className="mt-4 pt-4 border-t border-white/10">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-white/60 mb-2">
+              ✨ Popular accounts — tap to try
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {[
+                { u: 'selenagomez', n: 'Selena Gomez', f: '405M+' },
+                { u: 'therock', n: 'Dwayne Johnson', f: '382M+' },
+                { u: 'arianagrande', n: 'Ariana Grande', f: '363M+' },
+                { u: 'kyliejenner', n: 'Kylie Jenner', f: '382M+' },
+                { u: 'zendaya', n: 'Zendaya', f: '175M+' },
+                { u: 'kevinhart4real', n: 'Kevin Hart', f: '176M+' },
+                { u: 'jennierubyjane', n: 'Jennie Kim', f: '89M+' },
+                { u: 'shraddhakapoor', n: 'Shraddha Kapoor', f: '94M+' },
+                { u: 'priyankachopra', n: 'Priyanka Chopra', f: '92M+' },
+                { u: 'aliaabhatt', n: 'Alia Bhatt', f: '87M+' },
+              ].map((s) => (
+                <button
+                  key={s.u}
+                  type="button"
+                  onClick={() => setUsername(s.u)}
+                  title={`${s.n} · ${s.f}`}
+                  className="px-2.5 py-1 rounded-full text-[11px] font-medium bg-white/5 hover:bg-purple-500/20 border border-white/10 hover:border-purple-400/40 text-white/85 hover:text-white transition-all"
+                >
+                  @{s.u}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
         <div className="space-y-3">
