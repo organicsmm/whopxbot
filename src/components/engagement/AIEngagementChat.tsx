@@ -201,7 +201,7 @@ export function AIEngagementChat({ link, platform, engagements, totalQuantity }:
           {loading && (
             <div className="flex justify-start">
               <div className="bg-muted rounded-2xl px-3 py-2 flex items-center gap-2 text-xs text-muted-foreground">
-                <Loader2 className="w-3 h-3 animate-spin" /> soch raha hu…
+                <Loader2 className="w-3 h-3 animate-spin" /> thinking…
               </div>
             </div>
           )}
