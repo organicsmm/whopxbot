@@ -142,7 +142,7 @@ export function AIEngagementChat({ link, platform, engagements, totalQuantity }:
             Organic AI Assistant
           </DialogTitle>
           <DialogDescription className="text-xs">
-            Apke link ko samjhke real-time engagement guidance deta hai.
+            Analyzes your link and gives real-time engagement guidance.
           </DialogDescription>
         </DialogHeader>
 
