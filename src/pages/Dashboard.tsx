@@ -165,7 +165,7 @@ export default function Dashboard() {
               )) : (
                 <div className="px-5 py-12 text-center">
                   <p className="text-[13px] mb-3" style={{ color: '#999' }}>No orders yet</p>
-                  <button onClick={() => navigate('/order')} className="text-[12px] font-semibold px-4 py-2 rounded-lg text-white" style={{ background: '#2a2418' }}>Place Order</button>
+                  <button onClick={() => navigate('/engagement-order')} className="text-[12px] font-semibold px-4 py-2 rounded-lg text-white" style={{ background: '#2a2418' }}>Place Order</button>
                 </div>
               )}
             </div>
