@@ -126,6 +126,23 @@ export default function MyPosts() {
           </Link>
         </div>
 
+        <div className="rounded-2xl border border-white/10 bg-white/5 p-3 flex flex-col sm:flex-row gap-2">
+          <Input
+            placeholder="Paste any Instagram reel/post link…"
+            value={manualLink}
+            onChange={(e) => setManualLink(e.target.value)}
+            className="bg-black/30 border-white/10 text-white"
+          />
+          <Button
+            onClick={() => { if (/instagram\.com\//i.test(manualLink)) setBoostLink(manualLink.trim()); }}
+            disabled={!/instagram\.com\//i.test(manualLink)}
+            className="bg-gradient-to-b from-purple-500 to-fuchsia-600"
+          >
+            <Rocket className="w-4 h-4 mr-1" /> Boost Link
+          </Button>
+        </div>
+
+
         {isLoading && (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
             {Array.from({ length: 8 }).map((_, i) => (
