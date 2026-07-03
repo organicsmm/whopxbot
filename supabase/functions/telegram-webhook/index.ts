@@ -116,20 +116,57 @@ async function handleCommand(chatId: number, username: string | null, text: stri
   const userId = await getLinkedUser(chatId);
   if (!userId) return reply(chatId, "🔒 Not linked. App → More → Telegram Bot → copy code → <code>/link CODE</code>.");
 
-  if (cmd === "/wallet") {
-    const { data: w } = await supabase.from("wallets").select("balance,total_spent").eq("user_id", userId).maybeSingle();
-    const inr = (v: number) => `₹${(v * 83.5).toFixed(2)}`;
-    return reply(chatId, `💰 <b>Wallet</b>\nBalance: ${inr(Number(w?.balance ?? 0))}\nTotal Spent: ${inr(Number(w?.total_spent ?? 0))}`);
-  }
+  // shared: parse V/L/C/SV/SH/RP/DRIP from either flag (k=v) or positional
+  const KEY_ALIAS: Record<string, keyof QtyMap | "drip"> = {
+    v: "views", views: "views",
+    l: "likes", likes: "likes",
+    c: "comments", comments: "comments",
+    sv: "saves", saves: "saves",
+    sh: "shares", shares: "shares",
+    rp: "reposts", reposts: "reposts",
+    d: "drip", drip: "drip",
+  };
+  const parseQtyArgs = (tokens: string[]): { qty: QtyMap; drip: number | null; err?: string } => {
+    const qty = emptyQty();
+    let drip: number | null = null;
+    const hasFlag = tokens.some((t) => t.includes("="));
+    if (hasFlag) {
+      for (const t of tokens) {
+        const [rawK, rawV] = t.split("=");
+        if (!rawV) return { qty, drip, err: `Bad flag: "${t}"` };
+        const key = KEY_ALIAS[rawK.toLowerCase()];
+        if (!key) return { qty, drip, err: `Unknown key: "${rawK}"` };
+        if (!/^\d+$/.test(rawV)) return { qty, drip, err: `"${rawK}" must be a whole number, got "${rawV}"` };
+        const n = Number(rawV);
+        if (n < 0 || n > 1_000_000) return { qty, drip, err: `"${rawK}"=${n} out of range (0–1,000,000)` };
+        if (key === "drip") drip = Math.min(1440, n);
+        else qty[key] = n;
+      }
+    } else {
+      // positional: V L C SV SH RP [DRIP]
+      for (let i = 0; i < tokens.length; i++) {
+        const s = tokens[i];
+        if (!/^\d+$/.test(s)) return { qty, drip, err: `Arg ${i + 1} not a number: "${s}"` };
+        const n = Number(s);
+        if (n < 0 || n > 1_000_000) return { qty, drip, err: `Arg ${i + 1}=${n} out of range` };
+        if (i < 6) qty[ENG_TYPES[i]] = n;
+        else if (i === 6) drip = Math.min(1440, n);
+        else return { qty, drip, err: "Too many arguments (max 7 numbers after link)" };
+      }
+    }
+    return { qty, drip };
+  };
 
   if (cmd === "/setdefault") {
-    const [v, l, c, d] = args.map((n) => Math.max(0, Math.floor(Number(n) || 0)));
-    if (args.length < 3) return reply(chatId, "Usage: <code>/setdefault VIEWS LIKES COMMENTS [DRIP_MIN]</code>\nExample: <code>/setdefault 5000 500 50 60</code>");
-    const { error } = await supabase.from("engagement_presets").upsert({
-      user_id: userId, views: v, likes: l, comments: c, drip_minutes: d || 0,
-    });
+    if (args.length === 0) return reply(chatId, "Usage:\n<code>/setdefault V L C [SV SH RP] [DRIP]</code>\nor flags: <code>/setdefault v=5000 l=500 sv=100 drip=60</code>");
+    const { qty, drip, err } = parseQtyArgs(args);
+    if (err) return reply(chatId, `❌ ${err}`);
+    const payload: any = { user_id: userId, ...qty };
+    if (drip !== null) payload.drip_minutes = drip;
+    const { error } = await supabase.from("engagement_presets").upsert(payload);
     if (error) return reply(chatId, `❌ ${error.message}`);
-    return reply(chatId, `✅ Default quantities saved.\nViews: ${v} · Likes: ${l} · Comments: ${c} · Drip: ${d || 0}m\n\nAb <code>/order</code> chalao — quantity auto-apply hogi.`);
+    const list = ENG_TYPES.map((k) => `${k}: ${qty[k]}`).join(" · ");
+    return reply(chatId, `✅ Defaults saved.\n${list}${drip !== null ? `\nDrip: ${drip}m` : ""}\n\nAb <code>/order</code> chalao — sirf non-zero types ka order lagega.`);
   }
 
   if (cmd === "/setlink") {
@@ -153,8 +190,9 @@ async function handleCommand(chatId: number, username: string | null, text: stri
   if (cmd === "/mydefaults") {
     const { data: p } = await supabase.from("engagement_presets").select("*").eq("user_id", userId).maybeSingle();
     if (!p) return reply(chatId, "No defaults saved yet.\nUse <code>/setdefault</code>, <code>/setlink</code>, <code>/mode</code>.");
+    const qtyLine = ENG_TYPES.map((k) => `${k}: ${(p as any)[k] ?? 0}`).join(" · ");
     return reply(chatId,
-      `<b>Your defaults</b>\nMode: <code>${p.mode ?? "manual"}</code>\nLink: ${p.default_link ? `<code>${p.default_link}</code>` : "<i>(not set)</i>"}\nViews: ${p.views ?? 0} · Likes: ${p.likes ?? 0} · Comments: ${p.comments ?? 0}\nDrip: ${p.drip_minutes ?? 0}m`);
+      `<b>Your defaults</b>\nMode: <code>${p.mode ?? "manual"}</code>\nLink: ${p.default_link ? `<code>${p.default_link}</code>` : "<i>(not set)</i>"}\n${qtyLine}\nDrip: ${p.drip_minutes ?? 0}m`);
   }
 
   if (cmd === "/mode") {
