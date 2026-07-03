@@ -36,9 +36,11 @@ export default function MyPosts() {
   const qc = useQueryClient();
   const { formatPrice } = useCurrency();
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const selectedAccountId = searchParams.get('account');
-  const [boostLink, setBoostLink] = useState<string | null>(null);
   const [manualLink, setManualLink] = useState('');
+
+  const goBoost = (url: string) => navigate(`/engagement-order?link=${encodeURIComponent(url)}`);
 
   const { data: rows = [], isLoading } = useQuery({
     queryKey: ['ig-posts-summary', user?.id, selectedAccountId],
