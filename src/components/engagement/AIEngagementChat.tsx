@@ -116,10 +116,10 @@ export function AIEngagementChat({ link, platform, engagements, totalQuantity }:
   };
 
   const quickAsks = [
-    "Kya ye safe hai?",
-    "Kitna time lagega delivery me?",
-    "Likes kitne aur add karu?",
-    "Best ratio bata do",
+    "Is this safe?",
+    "How long will delivery take?",
+    "How many more likes should I add?",
+    "Suggest the best ratio",
   ];
 
   return (
