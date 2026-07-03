@@ -139,9 +139,26 @@ export default function MyPosts() {
           </Link>
         </div>
 
+        {accounts.length > 1 && (
+          <div className="flex gap-2 overflow-x-auto pb-1">
+            {accounts.map((a) => {
+              const active = selectedAccountId === a.id;
+              return (
+                <button
+                  key={a.id}
+                  onClick={() => navigate(`/my-posts?account=${encodeURIComponent(a.id)}`)}
+                  className={`shrink-0 h-8 px-3 rounded-full text-[12px] font-semibold border transition-colors ${active ? 'bg-gradient-to-b from-purple-500 to-fuchsia-600 text-white border-transparent' : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10'}`}
+                >
+                  @{a.username}
+                </button>
+              );
+            })}
+          </div>
+        )}
+
         <div className="rounded-2xl border border-white/10 bg-white/5 p-3 flex flex-col sm:flex-row gap-2">
           <Input
-            placeholder="Paste any Instagram reel/post link…"
+            placeholder={selectedAccount ? `Paste a link from @${selectedAccount.username}…` : 'Paste any Instagram reel/post link…'}
             value={manualLink}
             onChange={(e) => setManualLink(e.target.value)}
             className="bg-black/30 border-white/10 text-white"
@@ -154,6 +171,7 @@ export default function MyPosts() {
             <Rocket className="w-4 h-4 mr-1" /> Boost Link
           </Button>
         </div>
+
 
 
         {isLoading && (
