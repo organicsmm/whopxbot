@@ -535,6 +535,39 @@ export type Database = {
           },
         ]
       }
+      engagement_presets: {
+        Row: {
+          comments: number
+          created_at: string
+          drip_minutes: number
+          likes: number
+          mode: string
+          updated_at: string
+          user_id: string
+          views: number
+        }
+        Insert: {
+          comments?: number
+          created_at?: string
+          drip_minutes?: number
+          likes?: number
+          mode?: string
+          updated_at?: string
+          user_id: string
+          views?: number
+        }
+        Update: {
+          comments?: number
+          created_at?: string
+          drip_minutes?: number
+          likes?: number
+          mode?: string
+          updated_at?: string
+          user_id?: string
+          views?: number
+        }
+        Relationships: []
+      }
       instagram_accounts: {
         Row: {
           auto_boost_enabled: boolean | null
@@ -669,6 +702,32 @@ export type Database = {
             foreignKeyName: "instagram_media_account_id_fkey"
             columns: ["account_id"]
             isOneToOne: false
+            referencedRelation: "instagram_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      instagram_poll_state: {
+        Row: {
+          account_id: string
+          last_polled_at: string
+          last_seen_media_id: string | null
+        }
+        Insert: {
+          account_id: string
+          last_polled_at?: string
+          last_seen_media_id?: string | null
+        }
+        Update: {
+          account_id?: string
+          last_polled_at?: string
+          last_seen_media_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "instagram_poll_state_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: true
             referencedRelation: "instagram_accounts"
             referencedColumns: ["id"]
           },
