@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, Rocket, Droplets, Sparkles, Wallet, Code2,
-  LifeBuoy, Settings, Shield, LogOut, MoreHorizontal, X, History
+  LifeBuoy, Settings, Shield, LogOut, MoreHorizontal, X, History,
+  Instagram, Grid3x3
 } from 'lucide-react';
 import logo from '@/assets/logo.jpg';
 import { useAuth } from '@/hooks/useAuth';
@@ -11,12 +12,14 @@ import { cn } from '@/lib/utils';
 
 const primary = [
   { icon: LayoutDashboard, label: 'Home', path: '/dashboard' },
+  { icon: Grid3x3, label: 'Posts', path: '/my-posts' },
   { icon: Rocket, label: 'Engage', path: '/engagement-order' },
-  { icon: Droplets, label: 'Mass', path: '/mass-order' },
   { icon: Wallet, label: 'Wallet', path: '/wallet' },
 ];
 
 const more = [
+  { icon: Instagram, label: 'Instagram', path: '/instagram' },
+  { icon: Droplets, label: 'Mass Order', path: '/mass-order' },
   { icon: History, label: 'Order History', path: '/orders' },
   { icon: Sparkles, label: 'Engagement Orders', path: '/engagement-orders' },
   { icon: Code2, label: 'API Access', path: '/api-access' },
