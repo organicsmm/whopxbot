@@ -138,56 +138,124 @@ async function handleCommand(chatId: number, username: string | null, text: stri
   }
 
   if (cmd === "/order") {
-    const usage = "Usage: <code>/order</code> (uses saved defaults)\n<code>/order &lt;link&gt;</code>\n<code>/order &lt;link&gt; VIEWS LIKES COMMENTS</code>\n\nSet defaults: <code>/setlink</code>, <code>/setdefault</code>";
+    const usage = "Usage:\n<code>/order</code> (uses saved defaults)\n<code>/order &lt;link&gt;</code>\n<code>/order &lt;link&gt; VIEWS LIKES COMMENTS</code>\n<code>/order &lt;link&gt; VIEWS LIKES COMMENTS DRIP_MIN</code>\n\nSet defaults: <code>/setlink</code>, <code>/setdefault</code>";
+
+    // Reject too many args early so users don't silently drop values
+    if (args.length > 5) {
+      return reply(chatId, `❌ Too many arguments (${args.length}). Max allowed: 5 (link + views + likes + comments + drip).\n\n${usage}`);
+    }
 
     // Load preset once — used for defaults on link + quantities
-    const { data: preset } = await supabase.from("engagement_presets").select("*").eq("user_id", userId).maybeSingle();
+    const { data: preset, error: presetErr } = await supabase
+      .from("engagement_presets").select("*").eq("user_id", userId).maybeSingle();
+    if (presetErr) return reply(chatId, `❌ Could not load your saved defaults: ${presetErr.message}`);
 
-    // 1. Resolve link (arg or preset.default_link)
+    // ---------- 1. Resolve + validate LINK ----------
     let link = args[0];
+    let linkSource: "arg" | "preset" = "arg";
     if (!link) {
       if (!preset?.default_link) {
-        return reply(chatId, `❌ No link given and no default link saved.\nSet one with <code>/setlink &lt;instagram-link&gt;</code>.\n\n${usage}`);
+        return reply(chatId, `❌ No link given and no default link saved.\nSet one with <code>/setlink &lt;instagram-link&gt;</code>, or pass it inline:\n<code>/order https://instagram.com/p/ABC123/</code>`);
       }
       link = preset.default_link as string;
+      linkSource = "preset";
     }
-    if (!/^https?:\/\/(www\.)?instagram\.com\/(p|reel|tv)\/[A-Za-z0-9_-]+/i.test(link)) {
-      return reply(chatId, `❌ Invalid link. Must be an Instagram post/reel URL.`);
-    }
-    if (link.length > 300) return reply(chatId, "❌ Link too long (max 300 chars).");
 
-    // 2. Quantities — inline overrides preset
+    // strip common wrapping chars
+    link = link.trim().replace(/^[<"']|[>"']$/g, "");
+
+    if (link.length > 300) {
+      return reply(chatId, `❌ Link too long (${link.length} chars, max 300). Copy the URL directly from Instagram — no tracking suffix.`);
+    }
+
+    let parsedUrl: URL;
+    try { parsedUrl = new URL(link); }
+    catch { return reply(chatId, `❌ Link is not a valid URL: <code>${link}</code>\nMust start with <code>https://</code> and be a full Instagram post/reel URL.`); }
+
+    if (parsedUrl.protocol !== "https:" && parsedUrl.protocol !== "http:") {
+      return reply(chatId, `❌ Link must use <code>https://</code> (got <code>${parsedUrl.protocol}</code>).`);
+    }
+    const host = parsedUrl.hostname.toLowerCase().replace(/^www\./, "");
+    if (host !== "instagram.com") {
+      return reply(chatId, `❌ Only Instagram links are supported (got host <code>${host}</code>).\nExample: <code>https://instagram.com/p/ABC123/</code>`);
+    }
+    const pathMatch = parsedUrl.pathname.match(/^\/(p|reel|reels|tv)\/([A-Za-z0-9_-]{5,})\/?/);
+    if (!pathMatch) {
+      return reply(chatId, `❌ Not a post/reel URL. Path must look like <code>/p/&lt;code&gt;/</code>, <code>/reel/&lt;code&gt;/</code> or <code>/tv/&lt;code&gt;/</code>.\nGot: <code>${parsedUrl.pathname}</code>`);
+    }
+    // normalize link to canonical form (drops query string / fbclid etc.)
+    link = `https://instagram.com/${pathMatch[1]}/${pathMatch[2]}/`;
+
+    // ---------- 2. Resolve + validate QUANTITIES ----------
     const raw = [args[1], args[2], args[3]];
     const provided = raw.some((x) => x !== undefined);
     const parseQty = (label: string, s: string | undefined): { val: number; err?: string } => {
       if (s === undefined || s === "") return { val: 0 };
-      if (!/^\d+$/.test(s)) return { val: 0, err: `❌ ${label} must be a whole number (got "<code>${s}</code>").` };
+      if (!/^\d+$/.test(s)) return { val: 0, err: `❌ ${label} must be a whole number (got "<code>${s}</code>"). No commas, decimals, or letters.` };
       const n = Number(s);
       if (!Number.isFinite(n) || n < 0) return { val: 0, err: `❌ ${label} must be 0 or more.` };
-      if (n > 1_000_000) return { val: 0, err: `❌ ${label} too high (max 1,000,000).` };
+      if (n > 1_000_000) return { val: 0, err: `❌ ${label} too high (${n.toLocaleString()}). Max 1,000,000 per field.` };
       return { val: n };
     };
     let v = 0, l = 0, c = 0;
+    let qtySource: "arg" | "preset" = "arg";
     if (provided) {
+      // If user supplied ANY quantity, require ALL three so intent is unambiguous
+      const missing: string[] = [];
+      if (raw[0] === undefined) missing.push("VIEWS");
+      if (raw[1] === undefined) missing.push("LIKES");
+      if (raw[2] === undefined) missing.push("COMMENTS");
+      if (missing.length) {
+        return reply(chatId, `❌ Missing quantity: ${missing.join(", ")}.\nPass all three (use 0 to skip):\n<code>/order &lt;link&gt; VIEWS LIKES COMMENTS</code>`);
+      }
       const pv = parseQty("Views", raw[0]);
       const pl = parseQty("Likes", raw[1]);
       const pc = parseQty("Comments", raw[2]);
       const err = pv.err || pl.err || pc.err;
-      if (err) return reply(chatId, `${err}\n${usage}`);
+      if (err) return reply(chatId, `${err}\n\n${usage}`);
       v = pv.val; l = pl.val; c = pc.val;
       if (v + l + c === 0) return reply(chatId, "❌ At least one of VIEWS / LIKES / COMMENTS must be greater than 0.");
     } else {
-      if (!preset) return reply(chatId, "❌ No quantities given and no preset saved.\nSet one with <code>/setdefault VIEWS LIKES COMMENTS</code>.");
+      if (!preset) {
+        return reply(chatId, "❌ No quantities given and no preset saved.\nSet one:\n<code>/setdefault VIEWS LIKES COMMENTS [DRIP_MIN]</code>\nOr pass inline:\n<code>/order &lt;link&gt; VIEWS LIKES COMMENTS</code>");
+      }
+      const hasQty = [preset.views, preset.likes, preset.comments].some((n) => Number(n) > 0);
+      if (!hasQty) {
+        return reply(chatId, "❌ Your saved preset has all zero quantities.\nUpdate it: <code>/setdefault VIEWS LIKES COMMENTS</code>\nOr pass values inline this time.");
+      }
       v = Math.max(0, Math.floor(Number(preset.views) || 0));
       l = Math.max(0, Math.floor(Number(preset.likes) || 0));
       c = Math.max(0, Math.floor(Number(preset.comments) || 0));
-      if (v + l + c === 0) return reply(chatId, "❌ Your preset has all zero quantities. Update it with <code>/setdefault VIEWS LIKES COMMENTS</code>.");
+      qtySource = "preset";
     }
 
-    const drip = Math.max(0, Math.floor(Number(preset?.drip_minutes) || 0));
+    // ---------- 3. Resolve + validate DRIP ----------
+    let drip = 0;
+    if (args[4] !== undefined && args[4] !== "") {
+      if (!/^\d+$/.test(args[4])) {
+        return reply(chatId, `❌ DRIP_MIN must be a whole number of minutes (got "<code>${args[4]}</code>").`);
+      }
+      const d = Number(args[4]);
+      if (d > 1440) return reply(chatId, `❌ DRIP_MIN too high (${d}). Max 1440 minutes (24h).`);
+      drip = d;
+    } else {
+      drip = Math.max(0, Math.floor(Number(preset?.drip_minutes) || 0));
+      if (drip > 1440) drip = 1440;
+    }
+
+    // ---------- 4. Place order ----------
     const r = await placeEngagement(userId, link, v, l, c, drip);
-    if (!r.ok) return reply(chatId, `❌ ${r.error ?? "Order failed"}`);
-    return reply(chatId, `✅ Order <code>#${r.order_number}</code> placed\nLink: <code>${link}</code>\nViews:${v} Likes:${l} Comments:${c}${drip ? ` · Drip:${drip}m` : ""}\nCharged: ₹${r.charged_inr}`);
+    if (!r.ok) {
+      const raw = String(r.error ?? "Order failed");
+      let hint = "";
+      if (/insufficient|balance|wallet/i.test(raw)) hint = "\n💡 Top up wallet in the app to continue.";
+      else if (/subscription|plan/i.test(raw)) hint = "\n💡 Activate a plan (Monthly / Lifetime) to place orders.";
+      else if (/service|provider|mapping/i.test(raw)) hint = "\n💡 Service temporarily unavailable — try again in a few minutes.";
+      else if (/rate|limit|too many/i.test(raw)) hint = "\n💡 Slow down — you're hitting the rate limit.";
+      return reply(chatId, `❌ Order failed: ${raw}${hint}`);
+    }
+    const src = `${linkSource === "preset" ? "saved link" : "inline link"} · ${qtySource === "preset" ? "saved qty" : "inline qty"}`;
+    return reply(chatId, `✅ Order <code>#${r.order_number}</code> placed\nLink: <code>${link}</code>\nViews:${v} Likes:${l} Comments:${c}${drip ? ` · Drip:${drip}m` : ""}\nCharged: ₹${r.charged_inr}\n<i>${src}</i>`);
   }
 
 
