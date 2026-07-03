@@ -72,18 +72,18 @@ export default function Dashboard() {
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-[12px] font-medium mb-0.5" style={{ color: '#999' }}>
+            <p className="text-[12px] font-medium mb-0.5" style={{ color: MUTED }}>
               Good {new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 18 ? 'afternoon' : 'evening'},
             </p>
-            <h1 className="text-2xl font-extrabold tracking-tight" style={{ color: '#2a2418', fontFamily: "'Outfit', system-ui, sans-serif" }}>
+            <h1 className="text-2xl font-extrabold tracking-tight" style={{ color: TEXT, fontFamily: "'Outfit', system-ui, sans-serif" }}>
               {profile?.full_name || 'User'}
             </h1>
           </div>
           <div className="flex gap-2">
-            <button onClick={() => navigate('/engagement-order')} className="h-10 px-4 rounded-lg text-[12px] font-semibold flex items-center gap-1.5" style={{ border: '1px solid rgba(0,0,0,.08)', color: '#555' }}>
+            <button onClick={() => navigate('/engagement-order')} className="h-10 px-4 rounded-lg text-[12px] font-semibold flex items-center gap-1.5" style={{ border: '1px solid rgba(255,255,255,.1)', color: TEXT, background: '#1a1614' }}>
               <Sparkles className="w-3.5 h-3.5" style={{ color: '#c97a52' }} /> Engagement
             </button>
-            <button onClick={() => navigate('/mass-order')} className="h-10 px-4 rounded-lg text-[12px] font-semibold text-white flex items-center gap-1.5" style={{ background: '#2a2418' }}>
+            <button onClick={() => navigate('/mass-order')} className="h-10 px-4 rounded-lg text-[12px] font-semibold text-white flex items-center gap-1.5" style={{ background: '#c97a52' }}>
               <Zap className="w-3.5 h-3.5" /> Mass Order
             </button>
           </div>
