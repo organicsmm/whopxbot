@@ -3,6 +3,7 @@
 // If no user_id in body, uses caller JWT.
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { notifyUserTelegram } from "../_shared/notify.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -174,6 +175,17 @@ Deno.serve(async (req) => {
       }).catch((e) => console.error("process-engagement-order bg failed", e));
       // @ts-ignore
       if (typeof EdgeRuntime !== "undefined" && EdgeRuntime.waitUntil) EdgeRuntime.waitUntil(bg);
+    } catch (_) { /* noop */ }
+
+    // Send Telegram confirmation with order id (if user has linked)
+    try {
+      const inr = Number((totalUsd * 83.5).toFixed(2));
+      const parts = orderItems.map((it) => `${it.type}:${it.qty}`).join(" · ");
+      await notifyUserTelegram(
+        admin,
+        userId,
+        `✅ <b>Order placed</b>\nID: <code>#${order.order_number}</code>\nLink: <code>${link}</code>\n${parts}\nCharged: ₹${inr}\nStatus: ⏳ pending`,
+      );
     } catch (_) { /* noop */ }
 
     return new Response(

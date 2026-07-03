@@ -1,5 +1,38 @@
 import { createClient, SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { notifyUserTelegram, statusEmoji } from "../_shared/notify.ts"
+
+// Sends a Telegram message to the order owner if the engagement_orders status just changed
+// to a notify-worthy state. Safe to call multiple times — no-op on unchanged state.
+async function notifyEngagementOrderStatus(supabase: any, engagementOrderId: string, prevStatus: string | null | undefined, newStatus: string) {
+  try {
+    if (!engagementOrderId || !newStatus) return
+    if (prevStatus === newStatus) return
+    const NOTIFY = new Set(['processing', 'completed', 'partial', 'failed', 'cancelled'])
+    if (!NOTIFY.has(newStatus)) return
+    const { data: o } = await supabase
+      .from('engagement_orders')
+      .select('user_id, order_number, link')
+      .eq('id', engagementOrderId)
+      .maybeSingle()
+    if (!o?.user_id) return
+    const label: Record<string, string> = {
+      processing: 'Processing started',
+      completed: 'Delivered ✅',
+      partial: 'Partially delivered',
+      failed: 'Failed',
+      cancelled: 'Cancelled',
+    }
+    await notifyUserTelegram(
+      supabase,
+      o.user_id,
+      `${statusEmoji(newStatus)} <b>Order #${o.order_number}</b>\n${label[newStatus] ?? newStatus}\nLink: <code>${o.link ?? ''}</code>`,
+    )
+  } catch (e) {
+    console.error('notifyEngagementOrderStatus failed', e)
+  }
+}
+
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -522,7 +555,11 @@ async function updateEngagementOrderStatus(supabase: SupabaseClient, engagementO
   else if (activeItems === 0 && completedItems + partialItems + failedItems + cancelledItems === totalItems) orderStatus = completedItems > 0 ? 'partial' : failedItems > 0 ? 'failed' : 'cancelled'
   else if (parentOrder?.status === 'paused') orderStatus = 'paused'
 
+  const prevStatus = parentOrder?.status
   await supabase.from('engagement_orders').update({ status: orderStatus }).eq('id', engagementOrderId).neq('status', 'cancelled')
+  if (prevStatus !== 'cancelled') {
+    await notifyEngagementOrderStatus(supabase, engagementOrderId, prevStatus, orderStatus)
+  }
 }
 
 async function triggerContinuation(executionId: string, reason: string) {
@@ -1661,11 +1698,22 @@ async function processAllRuns(supabase: any, executionId: string, startTime: num
             .eq('id', item.engagement_order_id).not('status', 'in', '("cancelled","paused")'),
         ]
         
+        // Snapshot order status BEFORE we flip it, so we can notify only on the first pending→processing transition
+        let _prevOrderStatus: string | null = null
+        try {
+          const { data: eoPrev } = await supabase.from('engagement_orders').select('status').eq('id', item.engagement_order_id).maybeSingle()
+          _prevOrderStatus = eoPrev?.status ?? null
+        } catch (_) {}
+
         const [runUpdateResult] = await Promise.all(updatePromises)
         
         if (!runUpdateResult.data || runUpdateResult.data.length === 0) {
           skipped++
           continue
+        }
+
+        if (_prevOrderStatus === 'pending') {
+          await notifyEngagementOrderStatus(supabase, item.engagement_order_id, 'pending', 'processing')
         }
 
         if (!executionProviderMap.has(localExecutionKey)) {
