@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, ShoppingCart, Package, Wallet, ListOrdered, Settings, LifeBuoy, Shield, LogOut, Rocket, Sparkles, X, Code2, Droplets } from 'lucide-react';
+import { LayoutDashboard, ShoppingCart, Package, Wallet, ListOrdered, Settings, LifeBuoy, Shield, LogOut, Rocket, Sparkles, X, Code2, Droplets, Instagram, Grid3x3, Send, History } from 'lucide-react';
 import logo from '@/assets/logo.jpg';
 import { useAuth } from '@/hooks/useAuth';
 import { useCurrency } from '@/hooks/useCurrency';
@@ -12,11 +12,16 @@ const userNavItems = [
   { icon: Rocket, label: 'Full Engagement', path: '/engagement-order', highlight: true },
   { icon: Droplets, label: 'Mass Order', path: '/mass-order', highlight: true },
   { icon: Sparkles, label: 'Engagement Orders', path: '/engagement-orders' },
+  { icon: Instagram, label: 'Instagram Accounts', path: '/instagram' },
+  { icon: Grid3x3, label: 'My Posts', path: '/my-posts' },
+  { icon: History, label: 'Order History', path: '/orders' },
   { icon: Wallet, label: 'Wallet', path: '/wallet' },
+  { icon: Send, label: 'Telegram Bot', path: '/telegram-bot' },
   { icon: Code2, label: 'API Access', path: '/api-access' },
   { icon: LifeBuoy, label: 'Support', path: '/support' },
   { icon: Settings, label: 'Settings', path: '/settings' },
 ];
+
 
 const adminNavItems = [{ icon: Shield, label: 'Admin Panel', path: '/admin' }];
 
