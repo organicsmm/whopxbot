@@ -35,6 +35,9 @@ Deno.serve(async (req) => {
     const views = Math.max(0, Math.floor(Number(body.views ?? 0)));
     const likes = Math.max(0, Math.floor(Number(body.likes ?? 0)));
     const comments = Math.max(0, Math.floor(Number(body.comments ?? 0)));
+    const saves = Math.max(0, Math.floor(Number(body.saves ?? 0)));
+    const shares = Math.max(0, Math.floor(Number(body.shares ?? 0)));
+    const reposts = Math.max(0, Math.floor(Number(body.reposts ?? 0)));
     const drip_minutes = Math.max(0, Math.floor(Number(body.drip_minutes ?? 0)));
     const source = String(body.source ?? "web");
 
@@ -43,8 +46,9 @@ Deno.serve(async (req) => {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    if (views + likes + comments === 0) {
-      return new Response(JSON.stringify({ error: "At least one of views/likes/comments must be > 0" }), {
+    const totalReq = views + likes + comments + saves + shares + reposts;
+    if (totalReq === 0) {
+      return new Response(JSON.stringify({ error: "At least one engagement type must be > 0" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -109,15 +113,18 @@ Deno.serve(async (req) => {
     push("views", views);
     push("likes", likes);
     push("comments", comments);
+    push("saves", saves);
+    push("shares", shares);
+    push("reposts", reposts);
 
     if (orderItems.length === 0) {
-      return new Response(JSON.stringify({ error: "No configured services for requested types" }), {
+      return new Response(JSON.stringify({ error: "No configured services for requested types (admin: add bundle_items for saves/shares/reposts)" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     const totalUsd = Number(orderItems.reduce((s, it) => s + it.price_usd, 0).toFixed(4));
-    const baseQty = views + likes + comments;
+    const baseQty = orderItems.reduce((s, it) => s + it.qty, 0);
 
     // Debit wallet (idempotent per link+minute+source)
     const idem = `ig:${extractShortcode(link) ?? link}:${source}:${Math.floor(Date.now() / 60000)}`;
