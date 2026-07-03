@@ -104,7 +104,7 @@ export default function InstagramPage() {
           {accounts.map((a: any) => (
             <div key={a.id} className="rounded-2xl p-4 bg-[#0a0a14]/80 border border-white/10 flex items-center gap-4">
               {a.avatar_url ? (
-                <img src={a.avatar_url} alt={a.username} className="w-14 h-14 rounded-full object-cover ring-2 ring-purple-400/30" />
+                <img src={`https://lvrbhgulxqdsamhdjzkw.supabase.co/functions/v1/ig-image-proxy?url=${encodeURIComponent(a.avatar_url)}`} alt={a.username} referrerPolicy="no-referrer" className="w-14 h-14 rounded-full object-cover ring-2 ring-purple-400/30" />
               ) : (
                 <div className="w-14 h-14 rounded-full bg-gradient-to-br from-fuchsia-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg">
                   {a.username[0]?.toUpperCase()}
