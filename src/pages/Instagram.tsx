@@ -2,13 +2,17 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useSubscription } from '@/hooks/useSubscription';
+import { SubscriptionCheckDialog } from '@/components/subscription/SubscriptionCheckDialog';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { Instagram, Loader2, Plus, Trash2, CheckCircle2, ShieldAlert } from 'lucide-react';
+import { Instagram, Loader2, Plus, Trash2, CheckCircle2, ShieldAlert, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
 
 export default function InstagramPage() {
   const { user } = useAuth();
+  const { hasActiveSubscription, isLoading: subLoading } = useSubscription();
+  const [showSubDialog, setShowSubDialog] = useState(false);
   const qc = useQueryClient();
   const [username, setUsername] = useState('');
 
@@ -75,17 +79,20 @@ export default function InstagramPage() {
               <input
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && username && linkMut.mutate(username)}
+                onKeyDown={(e) => { if (e.key === 'Enter' && username) { if (!hasActiveSubscription) { setShowSubDialog(true); } else { linkMut.mutate(username); } } }}
                 placeholder="your_username"
                 className="w-full h-11 pl-8 pr-3 rounded-xl bg-black/40 border border-white/10 text-white placeholder:text-white/30 focus:outline-none focus:border-purple-400/40"
               />
             </div>
             <button
-              disabled={!username || linkMut.isPending}
-              onClick={() => linkMut.mutate(username)}
+              disabled={!username || linkMut.isPending || subLoading}
+              onClick={() => {
+                if (!hasActiveSubscription) { setShowSubDialog(true); return; }
+                linkMut.mutate(username);
+              }}
               className="h-11 px-5 rounded-xl font-semibold bg-gradient-to-b from-purple-500 to-fuchsia-600 text-white shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 transition-all disabled:opacity-50 flex items-center gap-2"
             >
-              {linkMut.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+              {linkMut.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : (hasActiveSubscription ? <Plus className="w-4 h-4" /> : <Lock className="w-4 h-4" />)}
               Link
             </button>
           </div>
@@ -136,6 +143,7 @@ export default function InstagramPage() {
           ))}
         </div>
       </div>
+      <SubscriptionCheckDialog open={showSubDialog} onOpenChange={setShowSubDialog} />
     </DashboardLayout>
   );
 }
