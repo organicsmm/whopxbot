@@ -38,7 +38,7 @@ export function Sidebar({ onClose }: SidebarProps) {
             <span className="text-[9px] font-semibold uppercase tracking-[0.18em] leading-tight text-purple-300/80">✦ v2.0</span>
           </div>
         </Link>
-        <button onClick={onClose} className="lg:hidden w-8 h-8 flex items-center justify-center rounded-lg text-white/50 hover:text-white hover:bg-white/5">
+        <button onClick={onClose} className="lg:hidden w-8 h-8 flex items-center justify-center rounded-lg text-white/75 hover:text-white hover:bg-white/5">
           <X className="w-4 h-4" />
         </button>
       </div>
@@ -51,7 +51,7 @@ export function Sidebar({ onClose }: SidebarProps) {
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-[12px] font-semibold truncate !text-white">{profile.full_name || 'User'}</p>
-            <p className="text-[10px] truncate text-white/40">{profile.email}</p>
+            <p className="text-[10px] truncate text-white/70">{profile.email}</p>
           </div>
         </div>
       )}
@@ -75,7 +75,7 @@ export function Sidebar({ onClose }: SidebarProps) {
 
       {/* Nav */}
       <nav className="flex-1 overflow-y-auto px-3 pb-3 scrollbar-thin">
-        <p className="px-3 mb-2 text-[9px] font-semibold uppercase tracking-[0.22em] text-white/30">Menu</p>
+        <p className="px-3 mb-2 text-[9px] font-semibold uppercase tracking-[0.22em] text-white/85">Menu</p>
         {userNavItems.map((item) => {
           const isActive = location.pathname === item.path;
           return (
@@ -84,10 +84,10 @@ export function Sidebar({ onClose }: SidebarProps) {
                 'flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] mb-0.5 transition-all duration-150 border',
                 isActive
                   ? 'bg-white/[0.06] border-white/10 text-white font-semibold'
-                  : 'border-transparent text-white/60 hover:text-white hover:bg-white/[0.04]'
+                  : 'border-transparent text-white/85 hover:text-white hover:bg-white/[0.04]'
               )}
             >
-              <item.icon className={cn('w-4 h-4', isActive ? 'text-purple-300' : 'text-white/40')} />
+              <item.icon className={cn('w-4 h-4', isActive ? 'text-purple-300' : 'text-white/70')} />
               <span className="flex-1">{item.label}</span>
               {(item as any).highlight && !isActive && (
                 <span className="text-[8px] px-1.5 py-0.5 rounded-full font-bold bg-purple-500/20 text-purple-200 border border-purple-400/30">HOT</span>
@@ -99,7 +99,7 @@ export function Sidebar({ onClose }: SidebarProps) {
         {isAdmin && (
           <>
             <div className="my-3 mx-3 border-t border-white/5" />
-            <p className="px-3 mb-2 text-[9px] font-semibold uppercase tracking-[0.22em] text-white/30">Admin</p>
+            <p className="px-3 mb-2 text-[9px] font-semibold uppercase tracking-[0.22em] text-white/85">Admin</p>
             {adminNavItems.map((item) => {
               const isActive = location.pathname.startsWith(item.path);
               return (
@@ -108,10 +108,10 @@ export function Sidebar({ onClose }: SidebarProps) {
                     'flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] mb-0.5 transition-all duration-150 border',
                     isActive
                       ? 'bg-fuchsia-500/10 border-fuchsia-400/30 text-fuchsia-200 font-semibold'
-                      : 'border-transparent text-white/60 hover:text-white hover:bg-white/[0.04]'
+                      : 'border-transparent text-white/85 hover:text-white hover:bg-white/[0.04]'
                   )}
                 >
-                  <item.icon className={cn('w-4 h-4', isActive ? 'text-fuchsia-300' : 'text-white/40')} />
+                  <item.icon className={cn('w-4 h-4', isActive ? 'text-fuchsia-300' : 'text-white/70')} />
                   <span>{item.label}</span>
                 </Link>
               );
@@ -122,12 +122,12 @@ export function Sidebar({ onClose }: SidebarProps) {
 
       {/* Currency */}
       <div className="px-3 pb-2">
-        <div className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-xl text-[12px] font-medium bg-white/[0.03] border border-white/10 text-white/60">
+        <div className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-xl text-[12px] font-medium bg-white/[0.03] border border-white/10 text-white/85">
           <div className="flex items-center gap-2">
             <span className="text-base">🇮🇳</span>
             <span className="uppercase tracking-wider">INR</span>
           </div>
-          <span className="text-[10px] text-white/40">₹</span>
+          <span className="text-[10px] text-white/70">₹</span>
         </div>
       </div>
 
@@ -145,7 +145,7 @@ export function Sidebar({ onClose }: SidebarProps) {
 
       {/* Sign out */}
       <div className="p-3 border-t border-white/5">
-        <button onClick={() => signOut()} className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-[12px] font-medium transition-colors text-white/60 hover:text-white hover:bg-red-500/10">
+        <button onClick={() => signOut()} className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-[12px] font-medium transition-colors text-white/85 hover:text-white hover:bg-red-500/10">
           <LogOut className="w-3.5 h-3.5 text-red-400" />
           <span>Sign out</span>
         </button>

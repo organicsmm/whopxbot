@@ -91,7 +91,7 @@ export function MobileBottomNav() {
           <div className="fixed bottom-0 left-0 right-0 z-50 max-h-[88vh] overflow-y-auto rounded-t-3xl bg-[#070710]/98 backdrop-blur-xl border-t border-white/10 pb-[max(1rem,env(safe-area-inset-bottom))]">
             <div className="sticky top-0 flex items-center justify-between px-5 py-3 border-b border-white/5 bg-[#070710]/98">
               <span className="text-[13px] font-bold !text-white">Menu</span>
-              <button onClick={() => setOpen(false)} className="w-8 h-8 rounded-lg flex items-center justify-center text-white/60 hover:text-white hover:bg-white/5">
+              <button onClick={() => setOpen(false)} className="w-8 h-8 rounded-lg flex items-center justify-center text-white/85 hover:text-white hover:bg-white/5">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -103,7 +103,7 @@ export function MobileBottomNav() {
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-[13px] font-semibold truncate !text-white">{profile.full_name || 'User'}</p>
-                  <p className="text-[11px] truncate text-white/40">{profile.email}</p>
+                  <p className="text-[11px] truncate text-white/70">{profile.email}</p>
                 </div>
               </div>
             )}
