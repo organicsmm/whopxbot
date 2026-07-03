@@ -230,7 +230,7 @@ export function AIEngagementChat({ link, platform, engagements, totalQuantity }:
         >
           <Input
             ref={inputRef}
-            placeholder="Apna sawaal likho…"
+            placeholder="Type your question…"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             disabled={loading}
