@@ -64,9 +64,12 @@ Deno.serve(async (req) => {
 
     const resendApiKey = Deno.env.get('RESEND_API_KEY')
     if (!resendApiKey) {
-      console.error('RESEND_API_KEY not configured')
-      return new Response(JSON.stringify({ error: 'Email service not configured' }), {
-        status: 500,
+      console.error('RESEND_API_KEY not configured — skipping admin alert email')
+      // Return 200 so the caller (cron job) does not treat this as a failure
+      // and repeatedly re-trigger alerts. Admin must configure RESEND_API_KEY
+      // to enable alert emails.
+      return new Response(JSON.stringify({ skipped: true, reason: 'RESEND_API_KEY not configured' }), {
+        status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       })
     }
