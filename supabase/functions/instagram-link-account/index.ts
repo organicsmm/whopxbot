@@ -107,8 +107,12 @@ Deno.serve(async (req) => {
       }
     }
 
-    // CACHE: if this user already has this account linked, return cached data — do NOT hit Apify.
-    // User can delete the account and re-add to force a fresh scrape.
+    // STRICT USERNAME-LEVEL DEDUPE
+    // 1. Same user already has this username → return cached row, no Apify.
+    // 2. Any OTHER user has scraped this username before → clone their cached
+    //    profile fields into a new row for this user, no Apify.
+    // Only the very first ever link of a brand-new username triggers a scrape.
+    // Explicit refreshes must go through instagram-refresh-media.
     {
       const usernameLower = username.toLowerCase();
       const { data: cached } = await adminAuth
@@ -118,7 +122,6 @@ Deno.serve(async (req) => {
         .eq('username', usernameLower)
         .maybeSingle();
       if (cached) {
-        // Log cache hit (does NOT count toward 30-day link limit).
         await adminAuth.from('instagram_link_events').insert({
           user_id: userId, username: usernameLower, event_type: 'cache_hit',
         });
@@ -126,7 +129,55 @@ Deno.serve(async (req) => {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
+
+      // Global dedupe: reuse the most-recently-scraped row for this username
+      // from any user in the system.
+      const { data: globalCached } = await adminAuth
+        .from('instagram_accounts')
+        .select('*')
+        .eq('username', usernameLower)
+        .order('last_scraped_at', { ascending: false, nullsFirst: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (globalCached) {
+        const admin = createClient(SUPABASE_URL, SERVICE_KEY);
+        const clonePayload = {
+          user_id: userId,
+          username: usernameLower,
+          ig_user_id: globalCached.ig_user_id,
+          full_name: globalCached.full_name,
+          avatar_url: globalCached.avatar_url,
+          followers: globalCached.followers,
+          following: globalCached.following,
+          posts_count: globalCached.posts_count,
+          is_private: globalCached.is_private,
+          is_verified: globalCached.is_verified,
+          biography: globalCached.biography,
+          status: 'active',
+          last_scraped_at: globalCached.last_scraped_at,
+          last_fetched_at: globalCached.last_fetched_at,
+        };
+        const { data: cloned, error: cloneErr } = await admin
+          .from('instagram_accounts')
+          .upsert(clonePayload, { onConflict: 'user_id,username' })
+          .select()
+          .single();
+        if (cloneErr) throw cloneErr;
+
+        // Count this as a real link (30-day cap) since a new row was created for this user.
+        await admin.from('instagram_link_events').insert({
+          user_id: userId, username: usernameLower, event_type: 'link',
+        });
+
+        return new Response(JSON.stringify({
+          account: cloned, imported: 0, importing: false, cached: true, source: 'global',
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
     }
+
 
 
 
