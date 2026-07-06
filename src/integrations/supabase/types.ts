@@ -1065,6 +1065,60 @@ export type Database = {
           },
         ]
       }
+      oxapay_deposits: {
+        Row: {
+          amount_inr: number | null
+          amount_usd: number
+          created_at: string
+          credited: boolean
+          id: string
+          order_id: string
+          pay_link: string | null
+          plan_type: string | null
+          purpose: string
+          raw_response: Json | null
+          status: string
+          track_id: string | null
+          updated_at: string
+          user_id: string
+          webhook_payload: Json | null
+        }
+        Insert: {
+          amount_inr?: number | null
+          amount_usd: number
+          created_at?: string
+          credited?: boolean
+          id?: string
+          order_id: string
+          pay_link?: string | null
+          plan_type?: string | null
+          purpose?: string
+          raw_response?: Json | null
+          status?: string
+          track_id?: string | null
+          updated_at?: string
+          user_id: string
+          webhook_payload?: Json | null
+        }
+        Update: {
+          amount_inr?: number | null
+          amount_usd?: number
+          created_at?: string
+          credited?: boolean
+          id?: string
+          order_id?: string
+          pay_link?: string | null
+          plan_type?: string | null
+          purpose?: string
+          raw_response?: Json | null
+          status?: string
+          track_id?: string | null
+          updated_at?: string
+          user_id?: string
+          webhook_payload?: Json | null
+        }
+        Relationships: []
+      }
       platform_settings: {
         Row: {
           created_at: string | null
@@ -1844,11 +1898,30 @@ export type Database = {
       }
     }
     Functions: {
+      activate_subscription_oxapay: {
+        Args: {
+          p_amount_usd: number
+          p_order_id: string
+          p_plan: string
+          p_track_id: string
+          p_user_id: string
+        }
+        Returns: Json
+      }
       apply_referral_bonus: {
         Args: { p_deposit_usd: number; p_referee: string }
         Returns: Json
       }
       cleanup_old_completed_engagement_orders: { Args: never; Returns: Json }
+      credit_wallet_oxapay: {
+        Args: {
+          p_amount_usd: number
+          p_order_id: string
+          p_track_id: string
+          p_user_id: string
+        }
+        Returns: Json
+      }
       credit_wallet_razorpay: {
         Args: {
           p_amount_inr: number
@@ -1879,6 +1952,7 @@ export type Database = {
         }
         Returns: Json
       }
+      expire_subscriptions: { Args: never; Returns: number }
       generate_telegram_link_code: { Args: never; Returns: Json }
       get_admin_dashboard_stats: { Args: never; Returns: Json }
       get_admin_users_summary: { Args: never; Returns: Json }

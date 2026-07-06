@@ -4,6 +4,7 @@ import { useWallet } from '@/hooks/useWallet';
 import { useTransactions, type TransactionFilter } from '@/hooks/useTransactions';
 import { useCurrency } from '@/hooks/useCurrency';
 import ZapUpiDepositCard from '@/components/wallet/ZapUpiDepositCard';
+import OxapayDepositCard from '@/components/wallet/OxapayDepositCard';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import {
@@ -204,8 +205,10 @@ export default function Wallet() {
           </div>
         </div>
 
-        {/* Deposit Section — ZapUPI instant auto-credit */}
+        {/* Deposit Section — ZapUPI (INR) + OxaPay (Crypto) */}
         <ZapUpiDepositCard />
+        <OxapayDepositCard />
+
 
         {/* Transaction History */}
         <div className="rounded-2xl p-6" style={{ background: 'white', border: '1px solid rgba(0,0,0,.06)', boxShadow: '0 2px 12px rgba(0,0,0,.04)' }}>

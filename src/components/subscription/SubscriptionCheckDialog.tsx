@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useSubscription } from '@/hooks/useSubscription';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 import {
   Dialog,
   DialogContent,
@@ -18,7 +20,9 @@ import {
   Clock,
   CheckCircle2,
   ArrowRight,
-  Sparkles
+  Sparkles,
+  Bitcoin,
+  Loader2,
 } from 'lucide-react';
 
 interface SubscriptionCheckDialogProps {
@@ -30,6 +34,23 @@ export function SubscriptionCheckDialog({ open, onOpenChange }: SubscriptionChec
   const { hasPendingRequest } = useSubscription();
   const [showRequestDialog, setShowRequestDialog] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'lifetime'>('monthly');
+  const [cryptoLoading, setCryptoLoading] = useState(false);
+
+  async function payWithCrypto() {
+    setCryptoLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('oxapay-create-subscription', {
+        body: { plan: selectedPlan },
+      });
+      if (error) throw error;
+      if (!data?.payment_url) throw new Error(data?.error || 'No payment URL');
+      window.location.href = data.payment_url;
+    } catch (e: any) {
+      console.error(e);
+      toast.error(e?.message || 'Could not start crypto payment');
+      setCryptoLoading(false);
+    }
+  }
 
   return (
     <>
@@ -149,18 +170,32 @@ export function SubscriptionCheckDialog({ open, onOpenChange }: SubscriptionChec
               </div>
             )}
 
-            {/* Action Button */}
+            {/* Action Buttons */}
             {!hasPendingRequest && (
-              <Button
-                className="w-full btn-gradient rounded-xl py-5 text-base"
-                onClick={() => {
-                  onOpenChange(false);
-                  setShowRequestDialog(true);
-                }}
-              >
-                Get {selectedPlan === 'monthly' ? 'Monthly' : 'Lifetime'} Plan
-                <ArrowRight className="h-4 w-4 ml-2" />
-              </Button>
+              <div className="space-y-2">
+                <Button
+                  className="w-full btn-gradient rounded-xl py-5 text-base"
+                  onClick={() => {
+                    onOpenChange(false);
+                    setShowRequestDialog(true);
+                  }}
+                >
+                  Get {selectedPlan === 'monthly' ? 'Monthly' : 'Lifetime'} Plan
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </Button>
+                <Button
+                  variant="outline"
+                  disabled={cryptoLoading}
+                  onClick={payWithCrypto}
+                  className="w-full rounded-xl py-5 text-base border-orange-500/40 hover:bg-orange-500/10"
+                >
+                  {cryptoLoading ? (
+                    <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Opening OxaPay…</>
+                  ) : (
+                    <><Bitcoin className="h-4 w-4 mr-2 text-orange-500" /> Pay with Crypto (Instant)</>
+                  )}
+                </Button>
+              </div>
             )}
 
             {/* Back Link */}
