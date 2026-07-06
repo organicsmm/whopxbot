@@ -12,6 +12,7 @@ const MAX_AMOUNT = 500000;
 
 export default function OxapayDepositCard() {
   const [amount, setAmount] = useState<string>('1000');
+  const { rates } = useCurrency();
   const [loading, setLoading] = useState(false);
   const [polling, setPolling] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
