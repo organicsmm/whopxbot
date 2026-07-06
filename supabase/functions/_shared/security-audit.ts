@@ -39,6 +39,7 @@ const HIGH_SEVERITY: ReadonlySet<AuditCategory> = new Set([
   "webhook_replay",
   "webhook_invalid_signature",
   "webhook_unverified_status",
+  "webhook_processing_failure",
 ]);
 
 // Per-instance throttle so a flood of retries from one attacker doesn't spam
