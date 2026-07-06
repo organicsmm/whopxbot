@@ -187,6 +187,11 @@ Deno.serve(async (req) => {
       .single();
     if (accErr) throw accErr;
 
+    // Persistent audit log: this counts against the 30-day link limit.
+    await admin.from('instagram_link_events').insert({
+      user_id: userId, username: account.username, event_type: 'link',
+    });
+
     // Kick off initial media backfill in background (do NOT await — return fast)
     try {
       const bgPromise = fetch(`${SUPABASE_URL}/functions/v1/instagram-refresh-media`, {
