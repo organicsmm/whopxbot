@@ -52,12 +52,6 @@ Deno.serve(async (req) => {
       .update({ webhook_payload: payload, track_id: trackId ? String(trackId) : dep.track_id })
       .eq("order_id", orderId);
 
-    // Only credit on paid/confirmed
-    const isPaid =
-      status === "paid" ||
-      status === "confirmed" ||
-      status === "confirming" && paidAmount > 0 ? false : (status === "paid" || status === "confirmed");
-
     if (status === "expired") {
       await supabase.from("oxapay_deposits").update({ status: "expired" }).eq("order_id", orderId);
       return json({ ok: true, status: "expired" });
