@@ -9,11 +9,11 @@ const corsHeaders = {
 const OXAPAY_URL = "https://api.oxapay.com/v1/payment/invoice";
 const USD_INR = 83.5;
 
-// Plan pricing (INR) - USD is derived
-const PLANS: Record<string, { inr: number; label: string }> = {
-  monthly:  { inr: 1499,  label: "Monthly Plan (30 days)" },
-  yearly:   { inr: 8999,  label: "Yearly Plan (365 days)" },
-  lifetime: { inr: 14999, label: "Lifetime Plan" },
+// Plan pricing — USD native (OxaPay is USD-based)
+const PLANS: Record<string, { usd: number; label: string }> = {
+  monthly:  { usd: 18,  label: "OrganicSMM Pro — Monthly (30 days)" },
+  yearly:   { usd: 99,  label: "OrganicSMM Pro — Yearly (365 days)" },
+  lifetime: { usd: 179, label: "OrganicSMM Pro — Lifetime Access" },
 };
 
 Deno.serve(async (req) => {
@@ -39,8 +39,8 @@ Deno.serve(async (req) => {
     const plan = String(body?.plan || "").toLowerCase();
     if (!PLANS[plan]) return json({ error: "Invalid plan" }, 400);
 
-    const inr = PLANS[plan].inr;
-    const usd = +(inr / USD_INR).toFixed(2);
+    const usd = PLANS[plan].usd;
+    const inr = Math.round(usd * USD_INR);
 
     const orderId = `oxs_${plan}_${user.id.slice(0, 8)}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 
