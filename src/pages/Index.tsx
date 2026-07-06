@@ -300,17 +300,17 @@ const Index = () => {
               Pricing
             </p>
             <h2 className="!text-white text-3xl sm:text-5xl font-bold tracking-tight leading-[1.1]">
-              Two plans.{' '}
+              Three plans.{' '}
               <span
                 className="italic text-purple-300"
                 style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
               >
-                Both unlock everything.
+                All unlock everything.
               </span>
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {/* Monthly */}
             <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-7 backdrop-blur-sm">
               <div className="flex items-baseline justify-between mb-1">
@@ -318,7 +318,7 @@ const Index = () => {
                 <span className="text-[10px] uppercase tracking-[0.18em] text-white/75">Most flexible</span>
               </div>
               <div className="mt-3 mb-5">
-                <span className="text-5xl font-bold tracking-tight">₹999</span>
+                <span className="text-5xl font-bold tracking-tight">₹1,499</span>
                 <span className="text-white/75 ml-2 text-sm">/ month</span>
               </div>
               <p className="text-sm text-slate-200 mb-6">Full access. Cancel anytime.</p>
@@ -337,6 +337,32 @@ const Index = () => {
               </ul>
             </div>
 
+            {/* Yearly */}
+            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-7 backdrop-blur-sm">
+              <div className="flex items-baseline justify-between mb-1">
+                <h3 className="text-lg font-semibold">Yearly</h3>
+                <span className="text-[10px] uppercase tracking-[0.18em] text-white/75">Save more</span>
+              </div>
+              <div className="mt-3 mb-5">
+                <span className="text-5xl font-bold tracking-tight">₹8,999</span>
+                <span className="text-white/75 ml-2 text-sm">/ year</span>
+              </div>
+              <p className="text-sm text-slate-200 mb-6">12 months of full access.</p>
+              <Link
+                to="/auth"
+                className="inline-flex w-full items-center justify-center px-5 py-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-white font-semibold transition-all"
+              >
+                Start yearly
+              </Link>
+              <ul className="mt-6 space-y-2.5 text-sm text-slate-100">
+                {['Everything in Monthly', 'Best monthly value', 'Priority support', 'Live dashboard'].map((t) => (
+                  <li key={t} className="flex items-center gap-2.5">
+                    <Check className="h-4 w-4 text-purple-300" /> {t}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
             {/* Lifetime */}
             <div className="relative rounded-2xl border border-purple-400/40 bg-gradient-to-b from-purple-600/10 to-white/[0.02] p-7 backdrop-blur-sm overflow-hidden">
               <div className="absolute -top-20 -right-20 w-64 h-64 bg-purple-500/20 blur-[80px] rounded-full pointer-events-none" />
@@ -347,7 +373,7 @@ const Index = () => {
                 </span>
               </div>
               <div className="mt-3 mb-5">
-                <span className="text-5xl font-bold tracking-tight">₹8,250</span>
+                <span className="text-5xl font-bold tracking-tight">₹14,999</span>
                 <span className="text-white/75 ml-2 text-sm line-through">₹19,920</span>
               </div>
               <p className="text-sm text-slate-200 mb-6">One payment. Yours forever.</p>
@@ -359,7 +385,7 @@ const Index = () => {
               </Link>
               <ul className="mt-6 space-y-2.5 text-sm text-slate-200">
                 {[
-                  'Everything in Monthly',
+                  'Everything in Yearly',
                   'No renewals, ever',
                   'Priority support',
                   'Early access to new bundles',
@@ -371,6 +397,7 @@ const Index = () => {
               </ul>
             </div>
           </div>
+
         </div>
       </section>
 
