@@ -134,6 +134,7 @@ Deno.serve(async (req) => {
         let posts: any[] = [];
         try { posts = JSON.parse(attempt.text); } catch { posts = []; }
         if (!Array.isArray(posts)) posts = [];
+        await logApify('posts', postsStart, true, posts.length, null);
 
         for (const p of posts) {
           const mediaId = String(p.id ?? p.shortCode ?? '');
@@ -166,6 +167,7 @@ Deno.serve(async (req) => {
           last_scraped_at: new Date().toISOString(),
           last_fetched_at: new Date().toISOString(),
         };
+        const profStart = Date.now();
         try {
           const profUrl = `https://api.apify.com/v2/acts/apify~instagram-profile-scraper/run-sync-get-dataset-items?token=${APIFY_TOKEN}&timeout=90`;
           const profRes = await fetch(profUrl, {
@@ -183,9 +185,13 @@ Deno.serve(async (req) => {
               if (prof.profilePicUrl || prof.profilePicUrlHD) acctUpdate.avatar_url = prof.profilePicUrlHD ?? prof.profilePicUrl;
               if (prof.fullName) acctUpdate.full_name = prof.fullName;
             }
+            await logApify('profile', profStart, true, prof ? 1 : 0, null);
+          } else {
+            await logApify('profile', profStart, false, 0, `HTTP ${profRes.status}`);
           }
         } catch (e) {
           console.warn('profile refresh failed', e);
+          await logApify('profile', profStart, false, null, (e as Error).message);
         }
         if (acctUpdate.posts_count === undefined && posts.length > 0) {
           acctUpdate.posts_count = posts.length;
