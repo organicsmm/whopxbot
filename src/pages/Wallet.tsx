@@ -104,7 +104,7 @@ export default function Wallet() {
           </div>
 
           {/* Compact Balance Card — landing page style */}
-          <div className="relative rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.06] to-white/[0.02] backdrop-blur-md p-5 shadow-[0_20px_60px_-20px_rgba(124,58,237,0.25)]">
+          <div className="relative rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.06] to-white/[0.02] backdrop-blur-md p-5 shadow-[0_0_40px_rgba(168,85,247,0.08)]">
             <div className="flex items-center justify-between gap-4 flex-wrap">
               {/* Left: balance */}
               <div className="min-w-0">
