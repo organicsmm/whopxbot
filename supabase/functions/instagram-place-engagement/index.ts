@@ -17,16 +17,8 @@ function extractShortcode(link: string): string | null {
   return m ? m[1] : null;
 }
 
-async function isAdmin(userId: string): Promise<boolean> {
-  const { data } = await admin.from("user_roles").select("role").eq("user_id", userId).eq("role", "admin").maybeSingle();
-  return !!data;
-}
 
-async function hasActiveSubscription(userId: string): Promise<boolean> {
-  const { data } = await admin.from("subscriptions").select("plan_type,status").eq("user_id", userId).maybeSingle();
-  if (!data) return false;
-  return data.status === "active" && ["monthly", "lifetime"].includes(String(data.plan_type ?? ""));
-}
+
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
