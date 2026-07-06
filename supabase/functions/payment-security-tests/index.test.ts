@@ -613,6 +613,7 @@ Deno.test("E6 — ZapUPI order_id/txn_id replayed at OxaPay webhook does NOT cre
   assertEquals(txByTxn, 0, `cross-provider replay produced ${txByTxn} txns (txn)`);
 });
 
+// ─── F. End-state audit ────────────────────────────────────────────────────
 
 
 Deno.test("F1 — no active subscription exists for fake user after all attacks", async () => {
