@@ -213,7 +213,7 @@ export default function Wallet() {
                 {displayTransactions.map((tx) => (
                   <div
                     key={tx.id}
-                    className="flex items-center justify-between p-3.5 rounded-2xl bg-[#07040f] border border-white/5 hover:border-violet-500/30 transition-colors"
+                    className="flex items-center justify-between p-3.5 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] hover:border-white/10 transition-colors"
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       <div className={'w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center ' + getIconBg(tx.type)}>
