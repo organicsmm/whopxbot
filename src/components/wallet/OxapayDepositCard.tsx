@@ -18,6 +18,9 @@ export default function OxapayDepositCard() {
   const [searchParams, setSearchParams] = useSearchParams();
   const queryClient = useQueryClient();
   const polledRef = useRef<string | null>(null);
+  const mountedRef = useRef(true);
+
+  useEffect(() => () => { mountedRef.current = false; }, []);
 
   useEffect(() => {
     const deposit = searchParams.get('deposit');
