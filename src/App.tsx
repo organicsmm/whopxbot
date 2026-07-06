@@ -168,6 +168,7 @@ const App = () => {
                     <Route path="/admin/subscriptions" element={<AdminGuard><AdminSubscriptions /></AdminGuard>} />
                     <Route path="/admin/topup-plan" element={<AdminGuard><AdminTopupPlan /></AdminGuard>} />
                     <Route path="/admin/oxapay-log" element={<AdminGuard><AdminOxapayLog /></AdminGuard>} />
+                    <Route path="/admin/security-audit" element={<AdminGuard><AdminSecurityAudit /></AdminGuard>} />
 
                     {/* Legal */}
                     <Route path="/terms" element={<TermsOfService />} />
