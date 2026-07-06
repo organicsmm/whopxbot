@@ -64,15 +64,19 @@ const queryClient = new QueryClient({
       refetchOnWindowFocus: false,
       refetchOnReconnect: false,
       refetchOnMount: false,
+      refetchIntervalInBackground: false, // don't hammer server from background tabs
+      networkMode: "online",
       retry: 2,
       retryDelay: (i) => Math.min(1000 * 2 ** i, 10000),
     },
     mutations: {
       retry: 1,
       retryDelay: 1000,
+      networkMode: "online",
     },
   },
 });
+
 
 const App = () => {
   useEffect(() => {
