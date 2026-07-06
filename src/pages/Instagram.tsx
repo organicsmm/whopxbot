@@ -168,7 +168,40 @@ export default function InstagramPage() {
             <ShieldAlert className="w-3 h-3" /> Read-only. We only fetch public profile info & posts.
           </p>
 
+          {hasActiveSubscription && (() => {
+            const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
+            const recent = (accounts as any[]).filter(a => new Date(a.created_at).getTime() >= cutoff);
+            const used = recent.length;
+            const remaining = Math.max(0, 5 - used);
+            const blocked = remaining === 0;
+            const oldest = recent.reduce<Date | null>((min, a) => {
+              const d = new Date(a.created_at);
+              return !min || d < min ? d : min;
+            }, null);
+            const resetAt = oldest ? new Date(oldest.getTime() + 30 * 24 * 60 * 60 * 1000) : null;
+            const resetStr = resetAt ? resetAt.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }) : null;
+            return (
+              <div className={`mt-3 rounded-xl px-3 py-2 text-[12px] flex items-center gap-2 border ${
+                blocked
+                  ? 'bg-rose-500/10 border-rose-400/30 text-rose-200'
+                  : remaining <= 1
+                    ? 'bg-amber-500/10 border-amber-400/30 text-amber-200'
+                    : 'bg-emerald-500/10 border-emerald-400/30 text-emerald-200'
+              }`}>
+                {blocked ? <Lock className="w-3.5 h-3.5 shrink-0" /> : <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />}
+                <span className="font-semibold">{used}/5 links used</span>
+                <span className="opacity-80">·</span>
+                <span>
+                  {blocked
+                    ? `Monthly limit reached. Slot frees on ${resetStr}, or remove an existing account.`
+                    : `${remaining} more account${remaining === 1 ? '' : 's'} can be linked in this 30-day window${resetStr ? ` · next reset ${resetStr}` : ''}.`}
+                </span>
+              </div>
+            );
+          })()}
+
         </div>
+
 
         <div className="space-y-3">
           {isLoading && <div className="text-center text-white/80 py-8">Loading...</div>}
