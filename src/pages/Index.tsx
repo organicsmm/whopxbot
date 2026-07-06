@@ -325,7 +325,7 @@ const Index = () => {
                 <span className="text-[10px] uppercase tracking-[0.18em] text-white/75">Most flexible</span>
               </div>
               <div className="mt-3 mb-5">
-                <span className="text-5xl font-bold tracking-tight">₹1,499</span>
+                <span className="text-5xl font-bold tracking-tight">$15</span>
                 <span className="text-white/75 ml-2 text-sm">/ month</span>
               </div>
               <p className="text-sm text-slate-200 mb-6">Full access. Cancel anytime.</p>
@@ -333,7 +333,7 @@ const Index = () => {
                 href={monthlyPayHref}
                 className="inline-flex w-full items-center justify-center px-5 py-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-white font-semibold transition-all"
               >
-                {user ? 'Pay ₹1,499 & activate' : 'Start monthly'}
+                {user ? 'Pay $15 & activate' : 'Start monthly'}
               </a>
 
 
