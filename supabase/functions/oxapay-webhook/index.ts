@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { registerWebhookEvent, finalizeWebhookEvent } from "../_shared/webhook-idempotency.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -82,6 +83,30 @@ Deno.serve(async (req) => {
     if (!orderId) {
       await logActivity({ event: "missing_order_id", ok: false, http_status: 400, message: "no order_id in webhook payload", payload });
       return json({ ok: false, error: "missing order_id" }, 400);
+    }
+
+    // === Universal idempotency / replay protection ===
+    // Register this delivery in webhook_events. Duplicate deliveries (same
+    // payload hash OR same provider track_id) short-circuit here before we
+    // touch any wallet / subscription state.
+    let webhookEventId: string | undefined;
+    try {
+      const gate = await registerWebhookEvent(supabase, {
+        provider: "oxapay",
+        orderId,
+        trackId: trackId ? String(trackId) : null,
+        eventStatus: status,
+        payload,
+      });
+      if (gate.duplicate) {
+        await logActivity({ event: "webhook_replay_blocked", order_id: orderId, provider_status: status, message: `duplicate delivery (${gate.reason})`, payload });
+        return json({ ok: true, duplicate: true, reason: gate.reason });
+      }
+      webhookEventId = gate.eventId;
+    } catch (e: any) {
+      // Never crash on the gate — just log and continue; downstream RPC
+      // advisory locks still block double-crediting.
+      console.error("[oxapay-webhook] idempotency gate error", e);
     }
 
     let { data: dep, error: fetchErr } = await supabase
@@ -213,6 +238,7 @@ Deno.serve(async (req) => {
         return json({ ok: false, error: rpcErr.message }, 500);
       }
       await logActivity({ event: "wallet_credited", order_id: orderId, user_id: dep.user_id, purpose: "wallet", amount_usd: creditUsd, provider_status: status, message: "wallet credited", payload: res });
+      await finalizeWebhookEvent(supabase, webhookEventId, { outcome: "wallet_credited", http_status: 200 });
       return json({ ok: true, result: res });
     }
 
@@ -229,6 +255,7 @@ Deno.serve(async (req) => {
         return json({ ok: false, error: rpcErr.message }, 500);
       }
       await logActivity({ event: "subscription_activated", order_id: orderId, user_id: dep.user_id, plan_type: dep.plan_type, purpose: "subscription", amount_usd: creditUsd, provider_status: status, message: "subscription activated", payload: res });
+      await finalizeWebhookEvent(supabase, webhookEventId, { outcome: "subscription_activated", http_status: 200 });
       return json({ ok: true, result: res });
     }
 

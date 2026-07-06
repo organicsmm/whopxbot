@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { registerWebhookEvent, finalizeWebhookEvent } from "../_shared/webhook-idempotency.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -51,6 +52,36 @@ Deno.serve(async (req) => {
     if (!orderId) {
       console.warn("[zapupi-webhook] no order id in payload");
       return ok({ received: true });
+    }
+
+    // === Universal idempotency / replay protection ===
+    // Fast-fail replayed deliveries before touching any wallet / subscription
+    // rows. Duplicate = same (provider, order_id, payload_hash) OR same
+    // (provider, track_id) previously recorded.
+    const trackIdRaw =
+      payload.txn_id ||
+      payload.utr ||
+      payload.upi_txn_id ||
+      payload.data?.txn_id ||
+      payload.data?.utr ||
+      payload.data?.upi_txn_id ||
+      null;
+    let webhookEventId: string | undefined;
+    try {
+      const gate = await registerWebhookEvent(supabase, {
+        provider: "zapupi",
+        orderId: String(orderId),
+        trackId: trackIdRaw ? String(trackIdRaw) : null,
+        eventStatus: String(payload.status || payload.data?.status || "") || null,
+        payload,
+      });
+      if (gate.duplicate) {
+        console.warn(`[zapupi-webhook] duplicate delivery blocked (${gate.reason})`, orderId);
+        return ok({ received: true, duplicate: true, reason: gate.reason });
+      }
+      webhookEventId = gate.eventId;
+    } catch (e) {
+      console.error("[zapupi-webhook] idempotency gate error", e);
     }
 
     const { data: deposit } = await supabase
@@ -141,6 +172,7 @@ Deno.serve(async (req) => {
         .eq("order_id", orderId);
 
       console.log("[zapupi-webhook] subscription activated for", udf1);
+      await finalizeWebhookEvent(supabase, webhookEventId, { outcome: "subscription_activated", http_status: 200 });
       return ok({ received: true, subscription: true, expires_at: expires.toISOString() });
     }
 
@@ -181,6 +213,9 @@ Deno.serve(async (req) => {
 
     if (rpcErr) {
       console.error("[zapupi-webhook] credit rpc error", rpcErr);
+      await finalizeWebhookEvent(supabase, webhookEventId, { outcome: "wallet_credit_failed", http_status: 500, message: rpcErr.message });
+    } else {
+      await finalizeWebhookEvent(supabase, webhookEventId, { outcome: "wallet_credited", http_status: 200 });
     }
 
     return ok({ received: true, credited: !rpcErr });
