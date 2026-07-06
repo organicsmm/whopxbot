@@ -14,6 +14,7 @@ export type AuditCategory =
   | "webhook_invalid_signature"
   | "webhook_unverified_status"
   | "webhook_missing_field"
+  | "webhook_processing_failure"
   | "payment_gate_denied"
   | "rpc_denied"
   | "rls_denied";
