@@ -5,6 +5,7 @@ import { useTransactions, type TransactionFilter } from '@/hooks/useTransactions
 import { useCurrency } from '@/hooks/useCurrency';
 
 import OxapayDepositCard from '@/components/wallet/OxapayDepositCard';
+import ZapUpiDepositCard from '@/components/wallet/ZapUpiDepositCard';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import {
@@ -205,7 +206,8 @@ export default function Wallet() {
           </div>
         </div>
 
-        {/* Deposit Section — OxaPay (Crypto, USD) */}
+        {/* Deposit Sections */}
+        <ZapUpiDepositCard />
         <OxapayDepositCard />
 
 
