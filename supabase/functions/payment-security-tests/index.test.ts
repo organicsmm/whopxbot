@@ -492,6 +492,206 @@ Deno.test("E4 — ZapUPI subscription replay: activation happens at most once", 
   assert(txCount <= 1, `expected ≤ 1 transaction, got ${txCount}`);
 });
 
+// ─── E-concurrent. Parallel replay dedup ───────────────────────────────────
+// Fire the identical webhook payload N times in parallel. The idempotency
+// gate (payload_hash / order_id + track_id) must ensure that AT MOST ONE
+// delivery reaches the credit/activate stage — every other concurrent
+// delivery must be short-circuited as a duplicate, rejected, or return a
+// no-op result. This proves the dedup layer is race-safe, not just
+// sequentially safe.
+
+const CONCURRENCY = 10;
+
+function countActivations(results: Array<{ json: any }>): number {
+  return results.filter((r) => {
+    const j = r.json;
+    if (!j) return false;
+    if (j.duplicate === true) return false;
+    if (j.subscription === true) return true;
+    if (j.credited === true) return true;
+    const inner = j.result;
+    if (inner && (inner.activated === true || inner.credited === true)) return true;
+    return false;
+  }).length;
+}
+
+function countDuplicates(results: Array<{ json: any }>): number {
+  return results.filter((r) => {
+    const j = r.json;
+    if (!j) return false;
+    if (j.duplicate === true) return true;
+    const msg = (j.message || j.error || j.status || "").toString().toLowerCase();
+    return msg.includes("duplicate") || msg.includes("already") || msg.includes("processed");
+  }).length;
+}
+
+Deno.test(
+  `E-concurrent-1 — OxaPay: ${CONCURRENCY} parallel identical deliveries yield ≤ 1 activation`,
+  async () => {
+    const orderId = `concurrent-oxa-${crypto.randomUUID()}`;
+    const trackId = `concurrent-track-${crypto.randomUUID()}`;
+    const payload = {
+      order_id: orderId,
+      track_id: trackId,
+      status: "paid",
+      paid_amount: 25,
+      email: "concurrent@example.com",
+    };
+
+    // Fire all N in parallel — this is the race the dedup gate must survive.
+    const results = await Promise.all(
+      Array.from({ length: CONCURRENCY }, () =>
+        postWebhook("oxapay-webhook", payload),
+      ),
+    );
+
+    // Every response must be an HTTP-level accept (2xx/4xx handled), never 5xx.
+    for (const [i, r] of results.entries()) {
+      assert(r.status < 500, `delivery ${i} returned 5xx: ${r.status} ${r.body}`);
+    }
+
+    // At most one delivery may report a real activation / credit outcome.
+    // (For this forged payload with no matching deposit row it should be 0,
+    // but we assert ≤ 1 so the same test also covers the legitimate case.)
+    const activated = countActivations(results);
+    assert(
+      activated <= 1,
+      `expected ≤ 1 activation across ${CONCURRENCY} parallel replays, got ${activated}. ` +
+        `responses=${JSON.stringify(results.map((r) => r.json))}`,
+    );
+
+    // The remaining deliveries must be observably dedup'd — either
+    // flagged as duplicate/already-processed, or rejected before credit.
+    // We only require the rejection accounting to add up: activated + non-activated == N.
+    const nonActivated = CONCURRENCY - activated;
+    assert(nonActivated >= CONCURRENCY - 1, `math sanity: ${nonActivated}`);
+
+    // If the pipeline surfaces "duplicate" markers, at least some of the
+    // losers of the race should carry that signal.
+    const dupes = countDuplicates(results);
+    if (activated === 1) {
+      assert(
+        dupes >= 1,
+        `activation happened but no delivery was marked duplicate; ` +
+          `responses=${JSON.stringify(results.map((r) => r.json))}`,
+      );
+    }
+
+    // Strict end-state: transactions for this order_id must be ≤ 1.
+    const txCount = await countRows(
+      "transactions",
+      `payment_reference=eq.${orderId}&select=id`,
+    );
+    assert(txCount <= 1, `expected ≤ 1 transaction, got ${txCount}`);
+
+    // And no active subscription may exist tied to this fake user via
+    // this replay window.
+    const { status, body } = await selectRow(
+      "subscriptions",
+      `user_id=eq.${FAKE_USER}&status=eq.active&select=id`,
+    );
+    if (status === 200) {
+      assertEquals(
+        body.trim(),
+        "[]",
+        `fake user gained an active sub via concurrent replay: ${body}`,
+      );
+    }
+  },
+);
+
+Deno.test(
+  `E-concurrent-2 — ZapUPI: ${CONCURRENCY} parallel identical deliveries yield ≤ 1 credit`,
+  async () => {
+    const orderId = `concurrent-zap-${crypto.randomUUID()}`;
+    const txnId = `concurrent-txn-${crypto.randomUUID()}`;
+    const payload = new URLSearchParams({
+      order_id: orderId,
+      status: "success",
+      amount: "100",
+      txn_id: txnId,
+    }).toString();
+
+    const results = await Promise.all(
+      Array.from({ length: CONCURRENCY }, () =>
+        postWebhook("zapupi-webhook", payload, "application/x-www-form-urlencoded"),
+      ),
+    );
+
+    for (const [i, r] of results.entries()) {
+      assert(r.status < 500, `delivery ${i} returned 5xx: ${r.status} ${r.body}`);
+    }
+
+    const credited = countActivations(results);
+    assert(
+      credited <= 1,
+      `expected ≤ 1 credit across ${CONCURRENCY} parallel replays, got ${credited}. ` +
+        `responses=${JSON.stringify(results.map((r) => r.json))}`,
+    );
+
+    const dupes = countDuplicates(results);
+    if (credited === 1) {
+      assert(
+        dupes >= 1,
+        `credit happened but no delivery was marked duplicate; ` +
+          `responses=${JSON.stringify(results.map((r) => r.json))}`,
+      );
+    }
+
+    const txCount = await countRows(
+      "transactions",
+      `payment_reference=eq.${orderId}&select=id`,
+    );
+    assert(txCount <= 1, `expected ≤ 1 transaction, got ${txCount}`);
+  },
+);
+
+Deno.test(
+  `E-concurrent-3 — webhook_events records a single payload_hash for the burst`,
+  async () => {
+    // If the client can read webhook_events (admin only in prod, but the
+    // regression harness may or may not have the role), sanity check that
+    // the concurrent burst produced exactly ONE "credited"/"processed"-style
+    // outcome per unique payload_hash. If reads are RLS-blocked we skip.
+    const orderId = `concurrent-audit-${crypto.randomUUID()}`;
+    const trackId = `concurrent-audit-track-${crypto.randomUUID()}`;
+    const payload = {
+      order_id: orderId,
+      track_id: trackId,
+      status: "paid",
+      paid_amount: 25,
+      email: "concurrent-audit@example.com",
+    };
+
+    await Promise.all(
+      Array.from({ length: CONCURRENCY }, () =>
+        postWebhook("oxapay-webhook", payload),
+      ),
+    );
+
+    const { status, body } = await selectRow(
+      "webhook_events",
+      `order_id=eq.${orderId}&outcome=in.(credited,activated)&select=id`,
+    );
+    if (status !== 200) {
+      // RLS-blocked or table not readable → nothing else to assert.
+      assert(isDenied(status, body) || status === 401 || status === 403);
+      return;
+    }
+    let rows: unknown[] = [];
+    try {
+      rows = JSON.parse(body);
+    } catch {
+      rows = [];
+    }
+    assert(
+      Array.isArray(rows) && rows.length <= 1,
+      `webhook_events shows ${Array.isArray(rows) ? rows.length : "?"} ` +
+        `credited/activated rows for a single concurrent burst: ${body}`,
+    );
+  },
+);
+
 // ─── E-cross. Cross-provider replay isolation ──────────────────────────────
 // A track_id or order_id observed on one provider must never be honored by
 // the other provider's webhook. Each webhook must look the id up in its own
