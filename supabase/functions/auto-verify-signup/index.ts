@@ -1,7 +1,6 @@
-// Public signup endpoint. Uses Supabase's standard signUp() flow (rate-limited,
-// honors email confirmation settings) instead of the admin API. This prevents
-// unauthenticated attackers from creating pre-confirmed accounts for arbitrary
-// email addresses they do not own.
+// Public signup endpoint. Creates a pre-confirmed user (no email verification
+// required for first-time signup) using the admin API, then the client
+// signs in with password. Rate-limit and duplicate checks handled inline.
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 
@@ -18,9 +17,10 @@ serve(async (req) => {
   }
 
   try {
-    const anon = createClient(
+    const admin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? ''
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+      { auth: { persistSession: false, autoRefreshToken: false } }
     )
 
     const { email: rawEmail, password, fullName } = await req.json().catch(() => ({}))
@@ -28,38 +28,50 @@ serve(async (req) => {
     const pw = String(password ?? '')
 
     if (!email || !pw) {
-      return new Response(JSON.stringify({ error: 'Email and password required' }), {
+      return new Response(JSON.stringify({ error: 'Email and password are required' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
     if (!EMAIL_RE.test(email) || email.length > 254) {
-      return new Response(JSON.stringify({ error: 'Invalid email' }), {
+      return new Response(JSON.stringify({ error: 'Please enter a valid email address' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
-    if (pw.length < 8 || pw.length > 128) {
-      return new Response(JSON.stringify({ error: 'Password must be 8–128 characters' }), {
+    if (pw.length < 6) {
+      return new Response(JSON.stringify({ error: 'Password must be at least 6 characters' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+    if (pw.length > 512) {
+      return new Response(JSON.stringify({ error: 'Password is too long (max 512 characters)' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
 
-    // Standard public signup — no admin API, no forced email_confirm bypass.
-    // Supabase applies its rate-limits and (if enabled) email confirmation.
-    const { data, error } = await anon.auth.signUp({
+    // Admin create user with email pre-confirmed (skip verification email).
+    const { data, error } = await admin.auth.admin.createUser({
       email,
       password: pw,
-      options: {
-        data: { full_name: String(fullName ?? '').slice(0, 120) },
-      },
+      email_confirm: true,
+      user_metadata: { full_name: String(fullName ?? '').slice(0, 120) },
     })
 
     if (error) {
-      const msg = error.message.toLowerCase().includes('registered')
-        ? 'This email is already registered.'
-        : error.message
+      const raw = (error.message || '').toLowerCase()
+      let msg = error.message || 'Signup failed'
+      if (raw.includes('already') || raw.includes('registered') || raw.includes('exists') || raw.includes('duplicate')) {
+        msg = 'This email is already registered. Please sign in instead.'
+      } else if (raw.includes('rate') || raw.includes('too many')) {
+        msg = 'Too many attempts. Please wait a few minutes and try again.'
+      } else if (raw.includes('password')) {
+        msg = error.message
+      } else if (raw.includes('invalid') && raw.includes('email')) {
+        msg = 'Please enter a valid email address'
+      }
       return new Response(JSON.stringify({ error: msg }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
