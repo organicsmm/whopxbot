@@ -66,6 +66,7 @@ Deno.serve(async (req) => {
     const isSubscriptionPayload = !deposit && udf2 === "monthly_subscription" && udf1;
 
     if (isSubscriptionPayload) {
+      // Provider must confirm the payment first (blocks forged webhooks).
       const verifiedSub = await verifyOrder(ZAP_KEY, orderId, payload);
       if (!verifiedSub.success) {
         return ok({ received: true, subscription: false, verified: false });
@@ -74,6 +75,39 @@ Deno.serve(async (req) => {
       if (paidInr < 1000) {
         console.warn("[zapupi-webhook] subscription amount too low", paidInr);
         return ok({ received: true, subscription: false, reason: "amount_low" });
+      }
+
+      // Validate udf1 is a real user in this project (prevents random UUIDs
+      // creating orphan subscription rows).
+      const { data: prof } = await supabase
+        .from("profiles")
+        .select("user_id")
+        .eq("user_id", udf1)
+        .maybeSingle();
+      if (!prof?.user_id) {
+        console.warn("[zapupi-webhook] subscription udf1 not a real user", udf1);
+        return ok({ received: true, subscription: false, reason: "unknown_user" });
+      }
+
+      // Idempotency: refuse to activate twice from the same provider order_id.
+      // We piggyback on zapupi_deposits with a synthetic subscription row so
+      // replays of the same webhook can never grant repeated benefits.
+      const { data: existing } = await supabase
+        .from("zapupi_deposits")
+        .select("order_id, credited")
+        .eq("order_id", orderId)
+        .maybeSingle();
+      if (existing?.credited) {
+        return ok({ received: true, subscription: true, duplicate: true });
+      }
+      if (!existing) {
+        await supabase.from("zapupi_deposits").insert({
+          user_id: udf1,
+          order_id: orderId,
+          amount_inr: paidInr,
+          status: "subscription",
+          credited: false,
+        });
       }
 
       const now = new Date();
@@ -100,9 +134,16 @@ Deno.serve(async (req) => {
         return ok({ received: true, subscription: false, error: subErr.message });
       }
 
+      // Mark the synthetic deposit row as credited so replays short-circuit.
+      await supabase
+        .from("zapupi_deposits")
+        .update({ credited: true, status: "subscription_activated" })
+        .eq("order_id", orderId);
+
       console.log("[zapupi-webhook] subscription activated for", udf1);
       return ok({ received: true, subscription: true, expires_at: expires.toISOString() });
     }
+
 
     if (!deposit) {
       console.warn("[zapupi-webhook] deposit not found for", orderId);

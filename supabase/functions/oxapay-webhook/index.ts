@@ -6,6 +6,29 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, hmac",
 };
 
+const OXAPAY_INFO = "https://api.oxapay.com/v1/payment/";
+
+async function verifyWithProvider(apiKey: string, trackId: string) {
+  try {
+    const resp = await fetch(`${OXAPAY_INFO}${encodeURIComponent(trackId)}`, {
+      headers: { "merchant_api_key": apiKey },
+    });
+    const raw = await resp.text();
+    let data: any = null;
+    try { data = JSON.parse(raw); } catch { data = { raw }; }
+    const inner = data?.data || data;
+    return {
+      ok: resp.ok,
+      status: String(inner?.status || "").toLowerCase(),
+      paidAmount: Number(inner?.paid_amount ?? inner?.paidAmount ?? inner?.amount ?? 0),
+      email: inner?.email || inner?.payer_email || null,
+      raw: data,
+    };
+  } catch (e: any) {
+    return { ok: false, status: "", paidAmount: 0, email: null, raw: { error: e?.message } };
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -13,6 +36,7 @@ Deno.serve(async (req) => {
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
   );
+  const OXA_API_KEY = Deno.env.get("OXAPAY_MERCHANT_API_KEY") || "";
 
   async function logActivity(entry: {
     event: string;
@@ -148,7 +172,34 @@ Deno.serve(async (req) => {
       return json({ ok: true, duplicate: true });
     }
 
-    const creditUsd = Number(dep.amount_usd);
+    // === SECURITY: never trust the webhook payload. Always re-verify with
+    // OxaPay's own API using the track_id before crediting anything.
+    // This blocks forged webhook POSTs from crediting a wallet or activating
+    // a subscription without a real payment.
+    const verifyTrackId = trackId ? String(trackId) : (dep.track_id ? String(dep.track_id) : "");
+    if (!verifyTrackId) {
+      await logActivity({ event: "verify_no_track_id", ok: false, order_id: orderId, user_id: dep.user_id, purpose: dep.purpose, http_status: 400, message: "no track_id to verify", payload });
+      return json({ ok: false, error: "missing track_id" }, 400);
+    }
+    if (!OXA_API_KEY) {
+      await logActivity({ event: "verify_no_api_key", ok: false, order_id: orderId, user_id: dep.user_id, http_status: 500, message: "OXAPAY_MERCHANT_API_KEY not configured" });
+      return json({ ok: false, error: "server misconfigured" }, 500);
+    }
+    const verified = await verifyWithProvider(OXA_API_KEY, verifyTrackId);
+    if (!verified.ok || !(verified.status === "paid" || verified.status === "confirmed")) {
+      await logActivity({ event: "verify_failed", ok: false, order_id: orderId, user_id: dep.user_id, purpose: dep.purpose, provider_status: verified.status, http_status: 400, message: `provider did not confirm payment (got '${verified.status}')`, payload: verified.raw });
+      return json({ ok: false, error: "provider did not confirm payment", provider_status: verified.status }, 400);
+    }
+
+    const expectedUsd = Number(dep.amount_usd);
+    // Provider must have received at least ~99% of the invoice amount.
+    if (verified.paidAmount > 0 && verified.paidAmount < expectedUsd * 0.99) {
+      await logActivity({ event: "verify_underpaid", ok: false, order_id: orderId, user_id: dep.user_id, purpose: dep.purpose, amount_usd: expectedUsd, http_status: 400, message: `underpaid: expected ${expectedUsd}, got ${verified.paidAmount}`, payload: verified.raw });
+      return json({ ok: false, error: "underpaid" }, 400);
+    }
+
+    const creditUsd = expectedUsd;
+
 
     if (dep.purpose === "wallet") {
       const { data: res, error: rpcErr } = await supabase.rpc("credit_wallet_oxapay", {
