@@ -180,9 +180,6 @@ export function SubscriptionGuard({ children }: SubscriptionGuardProps) {
               )}
             </div>
           )}
-              </Button>
-            </div>
-          )}
 
           {/* Back Link */}
           <div className="text-center mt-4">
@@ -193,11 +190,12 @@ export function SubscriptionGuard({ children }: SubscriptionGuardProps) {
         </CardContent>
       </Card>
 
-      <SubscriptionRequestDialog 
+      <SubscriptionRequestDialog
         open={showDialog}
         onOpenChange={setShowDialog}
-        planType={selectedPlan}
+        planType={selectedPlan === 'yearly' ? 'lifetime' : selectedPlan}
       />
+
     </div>
   );
 }
