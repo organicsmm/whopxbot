@@ -75,38 +75,49 @@ export default function OxapayDepositCard() {
   const usd = (Number(amount || 0) / 83.5).toFixed(2);
 
   return (
-    <div className="bg-[#161022] rounded-3xl border border-violet-500/10 p-6 shadow-xl">
-      <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.6)]" />
-          OxaPay Crypto
-        </h3>
-        <div className="flex gap-1.5">
-          <div className="w-5 h-5 bg-[#26a17b]/20 rounded-full flex items-center justify-center"><div className="w-2.5 h-2.5 bg-[#26a17b] rounded-full" /></div>
-          <div className="w-5 h-5 bg-[#f7931a]/20 rounded-full flex items-center justify-center"><div className="w-2.5 h-2.5 bg-[#f7931a] rounded-full" /></div>
-          <div className="w-5 h-5 bg-[#627eea]/20 rounded-full flex items-center justify-center"><div className="w-2.5 h-2.5 bg-[#627eea] rounded-full" /></div>
+    <div className="relative rounded-3xl bg-gradient-to-br from-[#0b0a2e] to-[#0f0824] border border-indigo-500/15 p-6 shadow-2xl shadow-indigo-950/40 overflow-hidden">
+      <div aria-hidden className="pointer-events-none absolute -top-16 -right-10 w-56 h-56 bg-indigo-500/20 blur-[100px] rounded-full" />
+
+      <div className="relative flex items-center justify-between mb-5">
+        <div className="flex items-center gap-3">
+          <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center shadow-lg shadow-indigo-900/50">
+            <Bitcoin className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <h3 className="text-base font-bold text-white leading-tight">Pay with Crypto</h3>
+            <p className="text-[11px] text-indigo-300/60 mt-0.5">USDT · BTC · LTC · TRX · ETH</p>
+          </div>
+        </div>
+        <div className="flex -space-x-1.5">
+          <div className="w-6 h-6 rounded-full bg-[#26a17b] border-2 border-[#0f0824] flex items-center justify-center text-[8px] font-bold text-white">T</div>
+          <div className="w-6 h-6 rounded-full bg-[#f7931a] border-2 border-[#0f0824] flex items-center justify-center text-[8px] font-bold text-white">B</div>
+          <div className="w-6 h-6 rounded-full bg-[#627eea] border-2 border-[#0f0824] flex items-center justify-center text-[8px] font-bold text-white">E</div>
         </div>
       </div>
 
-      <div className="space-y-4">
-        <div className="relative">
-          <input
-            type="number"
-            inputMode="numeric"
-            min={MIN_AMOUNT}
-            max={MAX_AMOUNT}
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            placeholder="Enter Amount"
-            className="w-full bg-[#0b0712] border border-violet-500/20 rounded-2xl py-4 pl-5 pr-24 text-xl font-medium text-white outline-none focus:border-indigo-500 transition-all placeholder:text-slate-600"
-          />
-          <div className="absolute right-5 top-1/2 -translate-y-1/2 flex flex-col items-end">
-            <span className="text-slate-500 font-medium leading-none text-sm">INR</span>
-            <span className="text-[10px] text-indigo-400 mt-1">≈ ${usd}</span>
+      <div className="relative space-y-4">
+        <div>
+          <div className="flex items-center justify-between mb-1.5 ml-1">
+            <label className="text-[10px] font-bold uppercase tracking-[0.18em] text-indigo-300/60">Amount</label>
+            <span className="text-[11px] font-semibold text-indigo-400">≈ ${usd} USD</span>
+          </div>
+          <div className="relative">
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-2xl font-bold text-indigo-400/70">₹</span>
+            <input
+              type="number"
+              inputMode="numeric"
+              min={MIN_AMOUNT}
+              max={MAX_AMOUNT}
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              placeholder="0"
+              className="w-full bg-[#07040f] border border-indigo-500/20 rounded-2xl py-4 pl-11 pr-16 text-2xl font-extrabold tracking-tight text-white outline-none focus:border-indigo-500 focus:shadow-[0_0_0_3px_rgba(99,102,241,0.15)] transition-all placeholder:text-slate-700"
+            />
+            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[11px] font-bold text-indigo-300/50 tracking-wider">INR</span>
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-2">
+        <div className="grid grid-cols-4 gap-2">
           {QUICK_AMOUNTS.map((q) => {
             const active = Number(amount) === q;
             return (
@@ -114,10 +125,10 @@ export default function OxapayDepositCard() {
                 key={q}
                 onClick={() => setAmount(String(q))}
                 className={
-                  'flex-1 py-2 rounded-xl text-xs transition-all border ' +
+                  'py-2.5 rounded-xl text-xs font-bold transition-all border ' +
                   (active
-                    ? 'bg-indigo-500/20 border-indigo-500/40 text-indigo-100'
-                    : 'bg-violet-500/5 border-violet-500/10 text-indigo-200 hover:bg-indigo-500/20 hover:border-indigo-500/30')
+                    ? 'bg-indigo-500/25 border-indigo-400/50 text-white shadow-[0_0_15px_rgba(99,102,241,0.25)]'
+                    : 'bg-white/[0.03] border-white/5 text-indigo-200/80 hover:bg-indigo-500/15 hover:border-indigo-500/30 hover:text-white')
                 }
               >
                 ₹{q >= 1000 ? `${q / 1000}k` : q}
@@ -126,21 +137,22 @@ export default function OxapayDepositCard() {
           })}
         </div>
 
-        <div className="flex justify-center gap-4 py-1">
-          {['USDT-TRC20', 'BTC', 'LTC', 'TRX', 'ETH'].map((c) => (
-            <span key={c} className="text-[10px] font-medium text-slate-500">{c}</span>
-          ))}
-        </div>
-
         <button
           onClick={handlePay}
           disabled={loading || polling}
-          className="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-4 rounded-2xl font-bold shadow-lg shadow-indigo-900/40 transition-all active:scale-[0.98] disabled:opacity-60 flex items-center justify-center gap-2"
+          className="relative w-full py-4 rounded-2xl font-bold text-white flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-60 overflow-hidden bg-gradient-to-r from-indigo-600 via-indigo-500 to-indigo-600 shadow-lg shadow-indigo-900/50 hover:shadow-indigo-900/70"
         >
-          {loading ? (<><Loader2 className="h-4 w-4 animate-spin" /> Opening OxaPay…</>)
-            : polling ? (<><Loader2 className="h-4 w-4 animate-spin" /> Verifying payment…</>)
-            : (<><Bitcoin className="h-4 w-4" /> Pay with Crypto</>)}
+          <span aria-hidden className="absolute inset-0 opacity-30 pointer-events-none"
+            style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,.6), transparent)', backgroundSize: '200% 100%', animation: 'vault-shine 2.5s linear infinite' }} />
+          {loading ? (<><Loader2 className="w-4 h-4 animate-spin relative" /> <span className="relative">Opening OxaPay…</span></>)
+            : polling ? (<><Loader2 className="w-4 h-4 animate-spin relative" /> <span className="relative">Verifying payment…</span></>)
+            : (<><Bitcoin className="w-4 h-4 relative" /> <span className="relative">Pay ≈ ${usd} in Crypto</span></>)}
         </button>
+
+        <div className="flex items-center justify-center gap-1.5 pt-1">
+          <div className="w-1 h-1 rounded-full bg-emerald-400 animate-pulse" />
+          <p className="text-[10px] text-slate-500 font-medium">Auto-credit after blockchain confirmation</p>
+        </div>
       </div>
     </div>
   );

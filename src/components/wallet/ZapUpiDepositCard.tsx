@@ -80,31 +80,44 @@ export default function ZapUpiDepositCard() {
   }
 
   return (
-    <div className="bg-[#161022] rounded-3xl border border-violet-500/10 p-6 shadow-xl">
-      <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-violet-500 shadow-[0_0_8px_rgba(139,92,246,0.6)]" />
-          ZapUPI Deposit
-        </h3>
-        <span className="px-2 py-0.5 rounded-full bg-violet-500/10 text-violet-400 text-[10px] font-bold uppercase tracking-tight">INR · Instant</span>
+    <div className="relative rounded-3xl bg-gradient-to-br from-[#160b2e] to-[#0f0824] border border-violet-500/15 p-6 shadow-2xl shadow-violet-950/40 overflow-hidden">
+      <div aria-hidden className="pointer-events-none absolute -top-16 -right-10 w-56 h-56 bg-violet-500/20 blur-[100px] rounded-full" />
+
+      <div className="relative flex items-center justify-between mb-5">
+        <div className="flex items-center gap-3">
+          <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-violet-500 to-violet-700 flex items-center justify-center shadow-lg shadow-violet-900/50">
+            <Zap className="w-5 h-5 text-white" fill="white" />
+          </div>
+          <div>
+            <h3 className="text-base font-bold text-white leading-tight">Pay with UPI</h3>
+            <p className="text-[11px] text-violet-300/60 mt-0.5">GPay · PhonePe · Paytm · BHIM</p>
+          </div>
+        </div>
+        <span className="px-2 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/25 text-emerald-300 text-[9px] font-bold uppercase tracking-wider">
+          Instant
+        </span>
       </div>
 
-      <div className="space-y-4">
-        <div className="relative">
-          <input
-            type="number"
-            inputMode="numeric"
-            min={MIN_AMOUNT}
-            max={MAX_AMOUNT}
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            placeholder="Enter Amount"
-            className="w-full bg-[#0b0712] border border-violet-500/20 rounded-2xl py-4 pl-5 pr-16 text-xl font-medium text-white outline-none focus:border-violet-500 transition-all placeholder:text-slate-600"
-          />
-          <span className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-500 font-medium">INR</span>
+      <div className="relative space-y-4">
+        <div>
+          <label className="text-[10px] font-bold uppercase tracking-[0.18em] text-violet-300/60 ml-1">Amount</label>
+          <div className="mt-1.5 relative">
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-2xl font-bold text-violet-400/70">₹</span>
+            <input
+              type="number"
+              inputMode="numeric"
+              min={MIN_AMOUNT}
+              max={MAX_AMOUNT}
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              placeholder="0"
+              className="w-full bg-[#07040f] border border-violet-500/20 rounded-2xl py-4 pl-11 pr-16 text-2xl font-extrabold tracking-tight text-white outline-none focus:border-violet-500 focus:shadow-[0_0_0_3px_rgba(139,92,246,0.15)] transition-all placeholder:text-slate-700"
+            />
+            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[11px] font-bold text-violet-300/50 tracking-wider">INR</span>
+          </div>
         </div>
 
-        <div className="flex flex-wrap gap-2">
+        <div className="grid grid-cols-4 gap-2">
           {QUICK_AMOUNTS.map((q) => {
             const active = Number(amount) === q;
             return (
@@ -112,10 +125,10 @@ export default function ZapUpiDepositCard() {
                 key={q}
                 onClick={() => setAmount(String(q))}
                 className={
-                  'flex-1 py-2 rounded-xl text-xs transition-all border ' +
+                  'py-2.5 rounded-xl text-xs font-bold transition-all border ' +
                   (active
-                    ? 'bg-violet-500/20 border-violet-500/40 text-violet-100'
-                    : 'bg-violet-500/5 border-violet-500/10 text-violet-200 hover:bg-violet-500/20 hover:border-violet-500/30')
+                    ? 'bg-violet-500/25 border-violet-400/50 text-white shadow-[0_0_15px_rgba(139,92,246,0.25)]'
+                    : 'bg-white/[0.03] border-white/5 text-violet-200/80 hover:bg-violet-500/15 hover:border-violet-500/30 hover:text-white')
                 }
               >
                 ₹{q >= 1000 ? `${q / 1000}k` : q}
@@ -127,16 +140,19 @@ export default function ZapUpiDepositCard() {
         <button
           onClick={handlePay}
           disabled={loading || polling}
-          className="w-full bg-violet-600 hover:bg-violet-500 text-white py-4 rounded-2xl font-bold shadow-lg shadow-violet-900/40 transition-all active:scale-[0.98] disabled:opacity-60 flex items-center justify-center gap-2"
+          className="relative w-full py-4 rounded-2xl font-bold text-white flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-60 overflow-hidden bg-gradient-to-r from-violet-600 via-violet-500 to-violet-600 shadow-lg shadow-violet-900/50 hover:shadow-violet-900/70"
         >
-          {loading ? (<><Loader2 className="h-4 w-4 animate-spin" /> Opening UPI…</>)
-            : polling ? (<><Loader2 className="h-4 w-4 animate-spin" /> Verifying…</>)
-            : (<><Zap className="h-4 w-4" fill="white" /> Pay via UPI</>)}
+          <span aria-hidden className="absolute inset-0 opacity-30 pointer-events-none"
+            style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,.6), transparent)', backgroundSize: '200% 100%', animation: 'vault-shine 2.5s linear infinite' }} />
+          {loading ? (<><Loader2 className="w-4 h-4 animate-spin relative" /> <span className="relative">Opening UPI…</span></>)
+            : polling ? (<><Loader2 className="w-4 h-4 animate-spin relative" /> <span className="relative">Verifying…</span></>)
+            : (<><Zap className="w-4 h-4 relative" fill="white" /> <span className="relative">Pay ₹{Math.floor(Number(amount) || 0)} via UPI</span></>)}
         </button>
 
-        <p className="text-[10px] text-center text-slate-500">
-          GPay · PhonePe · Paytm · BHIM — auto wallet credit
-        </p>
+        <div className="flex items-center justify-center gap-1.5 pt-1">
+          <div className="w-1 h-1 rounded-full bg-emerald-400 animate-pulse" />
+          <p className="text-[10px] text-slate-500 font-medium">Auto-credit in seconds · No manual approval</p>
+        </div>
       </div>
     </div>
   );
