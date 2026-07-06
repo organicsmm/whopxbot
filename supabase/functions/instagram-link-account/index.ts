@@ -118,6 +118,10 @@ Deno.serve(async (req) => {
         .eq('username', usernameLower)
         .maybeSingle();
       if (cached) {
+        // Log cache hit (does NOT count toward 30-day link limit).
+        await adminAuth.from('instagram_link_events').insert({
+          user_id: userId, username: usernameLower, event_type: 'cache_hit',
+        });
         return new Response(JSON.stringify({ account: cached, imported: 0, importing: false, cached: true }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
