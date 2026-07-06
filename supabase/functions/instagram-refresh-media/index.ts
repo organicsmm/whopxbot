@@ -24,6 +24,7 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const accountId = String(body.account_id ?? '');
     const resultsLimit = Math.min(Math.max(Number(body.results_limit ?? 12), 1), 50);
+    const source = String(body.source ?? 'refresh'); // 'refresh' | 'cron' | 'admin' | ...
     if (!accountId) {
       return new Response(JSON.stringify({ error: 'account_id required' }), {
         status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -78,6 +79,29 @@ Deno.serve(async (req) => {
     // and doesn't hit the 150s edge idle timeout.
     const backgroundTask = (async () => {
       try {
+        const logApify = async (
+          scrape_type: 'posts' | 'profile',
+          started: number,
+          success: boolean,
+          results_count: number | null,
+          error_message: string | null,
+        ) => {
+          try {
+            await admin.from('apify_call_log').insert({
+              user_id: account.user_id,
+              username: account.username,
+              scrape_type,
+              source,
+              results_count,
+              success,
+              error_message,
+              duration_ms: Date.now() - started,
+            });
+          } catch (e) {
+            console.warn('apify_call_log insert failed', e);
+          }
+        };
+
         const runScrape = async (limit: number, timeoutSec: number) => {
           const url = `https://api.apify.com/v2/acts/apify~instagram-scraper/run-sync-get-dataset-items?token=${APIFY_TOKEN}&timeout=${timeoutSec}`;
           const res = await fetch(url, {
@@ -95,6 +119,7 @@ Deno.serve(async (req) => {
         };
 
         // First attempt with requested limit + 300s timeout
+        const postsStart = Date.now();
         let attempt = await runScrape(resultsLimit, 300);
         // Retry once with smaller limit if timed out
         if (!attempt.ok && attempt.text.includes('TIMED-OUT')) {
@@ -103,6 +128,7 @@ Deno.serve(async (req) => {
         }
         if (!attempt.ok) {
           console.error(`Apify posts failed [${attempt.status}]: ${attempt.text.slice(0, 300)}`);
+          await logApify('posts', postsStart, false, null, `HTTP ${attempt.status}: ${attempt.text.slice(0, 200)}`);
           return;
         }
         let posts: any[] = [];
