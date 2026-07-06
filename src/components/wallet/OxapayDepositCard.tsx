@@ -4,6 +4,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Bitcoin, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { useCurrency } from '@/hooks/useCurrency';
 
 const QUICK_AMOUNTS = [500, 1000, 5000, 10000];
 const MIN_AMOUNT = 100;
