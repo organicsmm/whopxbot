@@ -17,16 +17,21 @@ export function AdminGuard({ children }: AdminGuardProps) {
   const [verified, setVerified] = useState<boolean | null>(null);
 
   useEffect(() => {
+    // Wait for auth to resolve before deciding
+    if (isLoading) return;
+
     if (!user) {
       setVerified(false);
       return;
     }
 
     let cancelled = false;
+    // Reset to loading state while we re-verify against the DB, so we don't
+    // briefly render the "Access Denied" screen from a stale previous check.
+    setVerified(null);
 
     const verify = async () => {
       try {
-        // Direct DB check — not from cached state
         const { data, error } = await supabase
           .from('user_roles')
           .select('role')
@@ -44,7 +49,7 @@ export function AdminGuard({ children }: AdminGuardProps) {
 
     verify();
     return () => { cancelled = true; };
-  }, [user?.id]);
+  }, [user?.id, isLoading]);
 
   if (isLoading || verified === null) {
     return (
