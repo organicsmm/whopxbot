@@ -1071,6 +1071,7 @@ export type Database = {
           amount_usd: number
           created_at: string
           credited: boolean
+          email: string | null
           id: string
           order_id: string
           pay_link: string | null
@@ -1088,6 +1089,7 @@ export type Database = {
           amount_usd: number
           created_at?: string
           credited?: boolean
+          email?: string | null
           id?: string
           order_id: string
           pay_link?: string | null
@@ -1105,6 +1107,7 @@ export type Database = {
           amount_usd?: number
           created_at?: string
           credited?: boolean
+          email?: string | null
           id?: string
           order_id?: string
           pay_link?: string | null
