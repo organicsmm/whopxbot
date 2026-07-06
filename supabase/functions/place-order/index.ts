@@ -37,7 +37,7 @@ Deno.serve(async (req) => {
 
     // Payment-eligibility gate: admin OR active verified subscription OR
     // at least one completed deposit from a real gateway.
-    const eligibility = await assertPaymentEligible(supabaseAdmin, user.id);
+    const eligibility = await assertPaymentEligible(supabaseAdmin, user.id, { source: "place-order", request: req });
     if (!eligibility.ok) {
       return new Response(JSON.stringify({ error: eligibility.error }), {
         status: eligibility.status,
