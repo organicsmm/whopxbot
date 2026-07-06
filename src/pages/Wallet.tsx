@@ -29,24 +29,24 @@ export default function Wallet() {
     switch (type) {
       case 'deposit': return <ArrowDownLeft className="h-4 w-4 text-emerald-400" />;
       case 'order': return <ArrowUpRight className="h-4 w-4 text-rose-400" />;
-      case 'refund': return <RefreshCw className="h-4 w-4 text-violet-300" />;
-      default: return <WalletIcon className="h-4 w-4 text-slate-400" />;
+      case 'refund': return <RefreshCw className="h-4 w-4 text-sky-300" />;
+      default: return <WalletIcon className="h-4 w-4 text-white/50" />;
     }
   };
   const getIconBg = (type: string) => {
     switch (type) {
-      case 'deposit': return 'bg-emerald-500/15';
-      case 'order': return 'bg-rose-500/15';
-      case 'refund': return 'bg-violet-500/15';
-      default: return 'bg-white/5';
+      case 'deposit': return 'bg-emerald-500/10 border border-emerald-500/20';
+      case 'order': return 'bg-rose-500/10 border border-rose-500/20';
+      case 'refund': return 'bg-sky-500/10 border border-sky-500/20';
+      default: return 'bg-white/[0.04] border border-white/10';
     }
   };
   const getAmountColor = (type: string) => {
     switch (type) {
       case 'deposit': return 'text-emerald-400';
       case 'order': return 'text-rose-400';
-      case 'refund': return 'text-violet-300';
-      default: return 'text-slate-200';
+      case 'refund': return 'text-sky-300';
+      default: return 'text-white/80';
     }
   };
   const fmtDate = (d: string) =>
