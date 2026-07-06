@@ -78,6 +78,18 @@ Deno.serve(async (req) => {
       });
       if (gate.duplicate) {
         console.warn(`[zapupi-webhook] duplicate delivery blocked (${gate.reason})`, orderId);
+        await recordSecurityEvent(supabase, {
+          category: "webhook_replay",
+          source: "zapupi-webhook",
+          reason: `duplicate delivery (${gate.reason})`,
+          provider: "zapupi",
+          order_id: String(orderId),
+          track_id: trackIdRaw ? String(trackIdRaw) : null,
+          http_status: 200,
+          request: req,
+          payload,
+          metadata: { gate_reason: gate.reason },
+        });
         return ok({ received: true, duplicate: true, reason: gate.reason });
       }
       webhookEventId = gate.eventId;
