@@ -6,7 +6,9 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
-const APIFY_TOKEN = Deno.env.get('APIFY_API_TOKEN');
+// NOTE: Apify is intentionally NOT called from this function. Only
+// instagram-refresh-media hits Apify. Linking always uses cached DB data
+// or creates a placeholder row.
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
@@ -14,7 +16,7 @@ const ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   try {
-    if (!APIFY_TOKEN) throw new Error('APIFY_API_TOKEN not configured');
+    // (Apify token not needed here — link never calls Apify.)
 
     const authHeader = req.headers.get('Authorization') ?? '';
     const token = authHeader.replace(/^Bearer\s+/i, '').trim();
@@ -181,59 +183,27 @@ Deno.serve(async (req) => {
 
 
 
-    // Apify: profile scraper (sync) — retry once on timeout/empty
-    const fetchProfile = async (timeoutSec: number) => {
-      const url = `https://api.apify.com/v2/acts/apify~instagram-profile-scraper/run-sync-get-dataset-items?token=${APIFY_TOKEN}&timeout=${timeoutSec}`;
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ usernames: [username] }),
-      });
-      const text = await res.text();
-      return { ok: res.ok, status: res.status, text };
-    };
-
-    let attempt = await fetchProfile(240);
-    if (!attempt.ok || attempt.text.trim() === '' || attempt.text === '[]') {
-      console.warn(`Profile scrape attempt 1 failed/empty for @${username}, retrying. status=${attempt.status} body=${attempt.text.slice(0, 200)}`);
-      await new Promise(r => setTimeout(r, 1500));
-      attempt = await fetchProfile(240);
-    }
-    if (!attempt.ok) {
-      return new Response(JSON.stringify({ error: `Apify profile fetch failed [${attempt.status}]: ${attempt.text.slice(0, 300)}` }), {
-        status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-    let profileArr: any[] = [];
-    try { profileArr = JSON.parse(attempt.text); } catch { profileArr = []; }
-    const profile = Array.isArray(profileArr) ? profileArr[0] : null;
-    if (!profile || profile.error || (!profile.username && !profile.id && !profile.fullName)) {
-      const detail = profile?.error ? ` (${JSON.stringify(profile.error).slice(0, 150)})` : '';
-      console.error(`Profile not found for @${username}. Apify returned: ${attempt.text.slice(0, 300)}`);
-      return new Response(JSON.stringify({ error: `Instagram profile not found for @${username}${detail}. Check username spelling or try again — the profile may be private or Apify timed out.` }), {
-        status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
+    // NO GLOBAL CACHE HIT → create a placeholder row. Apify is NEVER called
+    // from this endpoint. User must explicitly click "Refresh" (which calls
+    // instagram-refresh-media) to fetch profile + posts from Apify.
     const admin = createClient(SUPABASE_URL, SERVICE_KEY);
-    const upsertPayload = {
+    const placeholderPayload = {
       user_id: userId,
-      username: (profile.username || username).toLowerCase(),
-      ig_user_id: profile.id ? String(profile.id) : null,
-      full_name: profile.fullName ?? null,
-      avatar_url: profile.profilePicUrl ?? profile.profilePicUrlHD ?? null,
-      followers: profile.followersCount ?? 0,
-      following: profile.followsCount ?? 0,
-      posts_count: profile.postsCount ?? 0,
-      is_private: !!profile.private,
-      is_verified: !!profile.verified,
-      biography: profile.biography ?? null,
-      status: 'active',
-      last_scraped_at: new Date().toISOString(),
+      username: username.toLowerCase(),
+      ig_user_id: null,
+      full_name: null,
+      avatar_url: null,
+      followers: 0,
+      following: 0,
+      posts_count: 0,
+      is_private: false,
+      is_verified: false,
+      biography: null,
+      status: 'pending_refresh',
     };
     const { data: account, error: accErr } = await admin
       .from('instagram_accounts')
-      .upsert(upsertPayload, { onConflict: 'user_id,username' })
+      .upsert(placeholderPayload, { onConflict: 'user_id,username' })
       .select()
       .single();
     if (accErr) throw accErr;
@@ -243,29 +213,17 @@ Deno.serve(async (req) => {
       user_id: userId, username: account.username, event_type: 'link',
     });
 
-    // Kick off initial media backfill in background (do NOT await — return fast)
-    try {
-      const bgPromise = fetch(`${SUPABASE_URL}/functions/v1/instagram-refresh-media`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${SERVICE_KEY}`,
-          'apikey': SERVICE_KEY,
-        },
-        body: JSON.stringify({ account_id: account.id, results_limit: 50 }),
-      }).catch((e) => console.error('bg refresh-media failed', e));
-      // @ts-ignore EdgeRuntime background task
-      if (typeof EdgeRuntime !== 'undefined' && EdgeRuntime.waitUntil) {
-        // @ts-ignore
-        EdgeRuntime.waitUntil(bgPromise);
-      }
-    } catch (e) {
-      console.error('refresh-media invocation failed', e);
-    }
-
-    return new Response(JSON.stringify({ account, imported: 0, importing: true }), {
+    return new Response(JSON.stringify({
+      account,
+      imported: 0,
+      importing: false,
+      cached: false,
+      pending_refresh: true,
+      message: 'Account linked. Click Refresh to fetch profile + posts.',
+    }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
+
 
   } catch (e) {
     console.error('instagram-link-account error', e);
