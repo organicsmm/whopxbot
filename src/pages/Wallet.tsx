@@ -182,16 +182,16 @@ export default function Wallet() {
           </div>
 
           {/* Transaction History */}
-          <div className="relative rounded-3xl bg-[#0f0824] border border-violet-500/10 p-6 shadow-xl">
+          <div className="relative rounded-2xl bg-gradient-to-br from-white/[0.06] to-white/[0.02] border border-white/10 p-6 backdrop-blur-md">
             <div className="flex items-center justify-between mb-5">
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-violet-300/70">Activity</p>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/50">Activity</p>
                 <h3 className="text-lg font-bold text-white mt-0.5">Transaction History</h3>
               </div>
-              <span className="text-[11px] text-slate-500">{displayTransactions.length} total</span>
+              <span className="text-[11px] text-white/40">{displayTransactions.length} total</span>
             </div>
 
-            <div className="flex gap-1 p-1 bg-[#07040f] rounded-xl mb-5 border border-white/5">
+            <div className="flex gap-1 p-1 bg-white/[0.03] rounded-xl mb-5 border border-white/10">
               {(['all', 'deposit', 'order', 'refund'] as const).map((f) => (
                 <button
                   key={f}
@@ -199,8 +199,8 @@ export default function Wallet() {
                   className={
                     'flex-1 py-2 rounded-lg text-xs font-semibold transition-all ' +
                     (filter === f
-                      ? 'bg-violet-500/20 text-violet-200 shadow-[inset_0_0_0_1px_rgba(139,92,246,0.3)]'
-                      : 'text-slate-500 hover:text-slate-300')
+                      ? 'bg-white/[0.08] text-white border border-white/10'
+                      : 'text-white/40 hover:text-white/70')
                   }
                 >
                   {f === 'all' ? 'All' : f === 'deposit' ? 'Deposits' : f === 'order' ? 'Orders' : 'Refunds'}
