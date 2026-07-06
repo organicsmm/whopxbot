@@ -90,11 +90,28 @@ const App = () => {
     };
     window.addEventListener("unhandledrejection", handleRejection);
     window.addEventListener("error", handleError);
+
+    // Warm up heavy lazy routes during browser idle time so the first
+    // navigation feels instant. Failures are ignored — this is best-effort.
+    const idle = (cb: () => void) => {
+      const w = window as unknown as { requestIdleCallback?: (cb: () => void) => number };
+      if (typeof w.requestIdleCallback === "function") w.requestIdleCallback(cb);
+      else setTimeout(cb, 1500);
+    };
+    idle(() => {
+      import("./pages/Services").catch(() => {});
+      import("./pages/Settings").catch(() => {});
+      import("./pages/EngagementOrderDetail").catch(() => {});
+      import("./pages/MyPosts").catch(() => {});
+      import("./pages/Instagram").catch(() => {});
+    });
+
     return () => {
       window.removeEventListener("unhandledrejection", handleRejection);
       window.removeEventListener("error", handleError);
     };
   }, []);
+
 
   return (
     <QueryClientProvider client={queryClient}>
