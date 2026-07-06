@@ -594,6 +594,7 @@ export type Database = {
           ig_user_id: string | null
           is_private: boolean | null
           is_verified: boolean | null
+          last_fetched_at: string | null
           last_scraped_at: string | null
           posts_count: number | null
           status: string
@@ -614,6 +615,7 @@ export type Database = {
           ig_user_id?: string | null
           is_private?: boolean | null
           is_verified?: boolean | null
+          last_fetched_at?: string | null
           last_scraped_at?: string | null
           posts_count?: number | null
           status?: string
@@ -634,6 +636,7 @@ export type Database = {
           ig_user_id?: string | null
           is_private?: boolean | null
           is_verified?: boolean | null
+          last_fetched_at?: string | null
           last_scraped_at?: string | null
           posts_count?: number | null
           status?: string
