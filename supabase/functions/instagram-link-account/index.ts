@@ -57,6 +57,29 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Monthly link cap: max 5 distinct Instagram accounts per rolling 30 days (non-admins).
+    // Re-linking an already-linked username does not count (it's a refresh).
+    if (!roleRow) {
+      const usernameLower = username.toLowerCase();
+      const { data: existing } = await adminAuth
+        .from('instagram_accounts').select('id').eq('user_id', userId).eq('username', usernameLower).maybeSingle();
+      if (!existing) {
+        const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+        const { count: monthCount } = await adminAuth
+          .from('instagram_accounts')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', userId)
+          .gte('created_at', since);
+        if ((monthCount ?? 0) >= 5) {
+          return new Response(JSON.stringify({
+            error: 'Monthly limit reached: you can link up to 5 Instagram accounts per 30 days. Please try again later or remove an existing account.',
+          }), {
+            status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+      }
+    }
+
     // Apify: profile scraper (sync) — retry once on timeout/empty
     const fetchProfile = async (timeoutSec: number) => {
       const url = `https://api.apify.com/v2/acts/apify~instagram-profile-scraper/run-sync-get-dataset-items?token=${APIFY_TOKEN}&timeout=${timeoutSec}`;
@@ -123,7 +146,7 @@ Deno.serve(async (req) => {
           'Authorization': `Bearer ${SERVICE_KEY}`,
           'apikey': SERVICE_KEY,
         },
-        body: JSON.stringify({ account_id: account.id, results_limit: 12 }),
+        body: JSON.stringify({ account_id: account.id, results_limit: 50 }),
       }).catch((e) => console.error('bg refresh-media failed', e));
       // @ts-ignore EdgeRuntime background task
       if (typeof EdgeRuntime !== 'undefined' && EdgeRuntime.waitUntil) {
