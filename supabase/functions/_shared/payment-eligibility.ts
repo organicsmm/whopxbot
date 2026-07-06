@@ -18,6 +18,7 @@
 // with a 403 before we touch the wallet or the orders tables.
 
 import { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { recordSecurityEvent } from "./security-audit.ts";
 
 export type PaymentEligibility =
   | { ok: true; reason: "admin" | "subscription" | "verified_deposit" }
@@ -29,6 +30,7 @@ const VALID_ACTIVE_PLANS = ["monthly", "yearly", "lifetime"];
 export async function assertPaymentEligible(
   admin: SupabaseClient,
   userId: string,
+  ctx?: { source: string; request?: Request },
 ): Promise<PaymentEligibility> {
   if (!userId) {
     return { ok: false, status: 403, error: "Not authenticated" };
