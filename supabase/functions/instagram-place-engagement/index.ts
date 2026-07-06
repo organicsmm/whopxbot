@@ -76,7 +76,7 @@ Deno.serve(async (req) => {
 
     // Payment-eligibility gate: admin OR active verified subscription OR
     // at least one completed deposit from a real gateway.
-    const eligibility = await assertPaymentEligible(admin, userId);
+    const eligibility = await assertPaymentEligible(admin, userId, { source: "instagram-place-engagement", request: req });
     if (!eligibility.ok) {
       return new Response(JSON.stringify({ error: eligibility.error }), {
         status: eligibility.status,

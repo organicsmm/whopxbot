@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { registerWebhookEvent, finalizeWebhookEvent } from "../_shared/webhook-idempotency.ts";
+import { recordSecurityEvent } from "../_shared/security-audit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -77,6 +78,18 @@ Deno.serve(async (req) => {
       });
       if (gate.duplicate) {
         console.warn(`[zapupi-webhook] duplicate delivery blocked (${gate.reason})`, orderId);
+        await recordSecurityEvent(supabase, {
+          category: "webhook_replay",
+          source: "zapupi-webhook",
+          reason: `duplicate delivery (${gate.reason})`,
+          provider: "zapupi",
+          order_id: String(orderId),
+          track_id: trackIdRaw ? String(trackIdRaw) : null,
+          http_status: 200,
+          request: req,
+          payload,
+          metadata: { gate_reason: gate.reason },
+        });
         return ok({ received: true, duplicate: true, reason: gate.reason });
       }
       webhookEventId = gate.eventId;
@@ -100,16 +113,38 @@ Deno.serve(async (req) => {
       // Provider must confirm the payment first (blocks forged webhooks).
       const verifiedSub = await verifyOrder(ZAP_KEY, orderId, payload);
       if (!verifiedSub.success) {
+        await recordSecurityEvent(supabase, {
+          category: "webhook_forgery",
+          source: "zapupi-webhook",
+          reason: "subscription webhook could not be verified with provider",
+          provider: "zapupi",
+          order_id: String(orderId),
+          user_id: udf1 ? String(udf1) : null,
+          http_status: 200,
+          request: req,
+          payload,
+          metadata: { flow: "subscription", provider_raw: verifiedSub.raw },
+        });
         return ok({ received: true, subscription: false, verified: false });
       }
       const paidInr = Number(verifiedSub.amount || 0);
       if (paidInr < 1000) {
         console.warn("[zapupi-webhook] subscription amount too low", paidInr);
+        await recordSecurityEvent(supabase, {
+          category: "webhook_forgery",
+          source: "zapupi-webhook",
+          reason: `subscription amount too low: ${paidInr}`,
+          provider: "zapupi",
+          order_id: String(orderId),
+          user_id: udf1 ? String(udf1) : null,
+          http_status: 200,
+          request: req,
+          payload,
+          metadata: { flow: "subscription", paid_inr: paidInr },
+        });
         return ok({ received: true, subscription: false, reason: "amount_low" });
       }
 
-      // Validate udf1 is a real user in this project (prevents random UUIDs
-      // creating orphan subscription rows).
       const { data: prof } = await supabase
         .from("profiles")
         .select("user_id")
@@ -117,8 +152,21 @@ Deno.serve(async (req) => {
         .maybeSingle();
       if (!prof?.user_id) {
         console.warn("[zapupi-webhook] subscription udf1 not a real user", udf1);
+        await recordSecurityEvent(supabase, {
+          category: "webhook_forgery",
+          source: "zapupi-webhook",
+          reason: "subscription webhook udf1 does not match any real user",
+          provider: "zapupi",
+          order_id: String(orderId),
+          user_id: udf1 ? String(udf1) : null,
+          http_status: 200,
+          request: req,
+          payload,
+          metadata: { flow: "subscription", spoofed_udf1: udf1 },
+        });
         return ok({ received: true, subscription: false, reason: "unknown_user" });
       }
+
 
       // Idempotency: refuse to activate twice from the same provider order_id.
       // We piggyback on zapupi_deposits with a synthetic subscription row so
@@ -196,8 +244,21 @@ Deno.serve(async (req) => {
           .update({ status: "failed", raw_response: verified.raw })
           .eq("order_id", orderId);
       }
+      await recordSecurityEvent(supabase, {
+        category: "webhook_forgery",
+        source: "zapupi-webhook",
+        reason: "wallet-credit webhook could not be verified with provider",
+        provider: "zapupi",
+        order_id: String(orderId),
+        user_id: deposit.user_id,
+        http_status: 200,
+        request: req,
+        payload,
+        metadata: { flow: "wallet", provider_raw: verified.raw, failed: !!verified.failed },
+      });
       return ok({ received: true, verified: false });
     }
+
 
     const inr = Number(verified.amount || deposit.amount_inr) || Number(deposit.amount_inr);
     const usd = Number((inr / USD_RATE).toFixed(4));
