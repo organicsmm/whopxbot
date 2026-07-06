@@ -10,14 +10,14 @@ import logo from '@/assets/logo.jpg';
 import { PageMeta } from '@/components/seo/PageMeta';
 
 const loginSchema = z.object({
-  email: z.string().trim().email('Invalid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  email: z.string().trim().email('Please enter a valid email address'),
+  password: z.string().min(6, 'Password must be at least 6 characters').max(512, 'Password is too long'),
 });
 
 const signupSchema = z.object({
-  email: z.string().trim().email('Invalid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
-  fullName: z.string().trim().min(2, 'Name must be at least 2 characters'),
+  email: z.string().trim().email('Please enter a valid email address'),
+  password: z.string().min(6, 'Password must be at least 6 characters').max(512, 'Password is too long (max 512 characters)'),
+  fullName: z.string().trim().min(2, 'Name must be at least 2 characters').max(120, 'Name is too long'),
 });
 
 export default function Auth() {
