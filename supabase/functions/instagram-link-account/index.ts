@@ -66,10 +66,14 @@ Deno.serve(async (req) => {
       if (!existing) {
         const windowMs = 30 * 24 * 60 * 60 * 1000;
         const sinceDate = new Date(Date.now() - windowMs);
+        // Count from the persistent audit log (instagram_link_events) so deleting
+        // an account does NOT free up a slot — the 30-day cap is consistent
+        // across devices and across delete/re-add cycles.
         const { data: recent } = await adminAuth
-          .from('instagram_accounts')
+          .from('instagram_link_events')
           .select('username, created_at')
           .eq('user_id', userId)
+          .eq('event_type', 'link')
           .gte('created_at', sinceDate.toISOString())
           .order('created_at', { ascending: true });
         const used = recent?.length ?? 0;
