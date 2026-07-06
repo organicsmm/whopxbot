@@ -327,6 +327,15 @@ Deno.serve(async (req) => {
         message: e?.message || "Internal error",
       });
     } catch {}
+    await recordSecurityEvent(supabase, {
+      category: "webhook_processing_failure",
+      source: "oxapay-webhook",
+      reason: `unhandled exception: ${e?.message || "Internal error"}`,
+      provider: "oxapay",
+      http_status: 500,
+      request: req,
+      metadata: { stack: e?.stack?.slice(0, 500) },
+    });
     return json({ ok: false, error: e?.message || "Internal error" }, 500);
   }
 });
