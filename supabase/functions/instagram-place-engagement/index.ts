@@ -82,12 +82,16 @@ Deno.serve(async (req) => {
       }
     }
 
-    const admin_bypass = await isAdmin(userId);
-    if (!admin_bypass && !(await hasActiveSubscription(userId))) {
-      return new Response(JSON.stringify({ error: "Active subscription required" }), {
-        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    // Payment-eligibility gate: admin OR active verified subscription OR
+    // at least one completed deposit from a real gateway.
+    const eligibility = await assertPaymentEligible(admin, userId);
+    if (!eligibility.ok) {
+      return new Response(JSON.stringify({ error: eligibility.error }), {
+        status: eligibility.status,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
 
     // Load active IG bundle + items
     const { data: bundle } = await admin
