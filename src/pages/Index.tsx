@@ -330,12 +330,15 @@ const Index = () => {
                 <span className="text-white/75 ml-2 text-sm">/ month</span>
               </div>
               <p className="text-sm text-slate-200 mb-6">Full access. Cancel anytime.</p>
-              <Link
-                to="/auth"
+              <a
+                href={monthlyPayHref}
+                target={user ? '_blank' : undefined}
+                rel={user ? 'noopener noreferrer' : undefined}
                 className="inline-flex w-full items-center justify-center px-5 py-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-white font-semibold transition-all"
               >
-                Start monthly
-              </Link>
+                {user ? 'Pay ₹1,499 & activate' : 'Start monthly'}
+              </a>
+
               <ul className="mt-6 space-y-2.5 text-sm text-slate-100">
                 {['Unlimited orders', 'All platforms', 'Multi-provider failover', 'Live dashboard'].map((t) => (
                   <li key={t} className="flex items-center gap-2.5">
