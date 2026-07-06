@@ -1915,6 +1915,54 @@ export type Database = {
         }
         Relationships: []
       }
+      webhook_events: {
+        Row: {
+          created_at: string
+          event_status: string | null
+          first_seen_at: string
+          http_status: number | null
+          id: string
+          message: string | null
+          order_id: string
+          outcome: string
+          payload: Json | null
+          payload_hash: string
+          processed_at: string | null
+          provider: string
+          track_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_status?: string | null
+          first_seen_at?: string
+          http_status?: number | null
+          id?: string
+          message?: string | null
+          order_id: string
+          outcome?: string
+          payload?: Json | null
+          payload_hash: string
+          processed_at?: string | null
+          provider: string
+          track_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_status?: string | null
+          first_seen_at?: string
+          http_status?: number | null
+          id?: string
+          message?: string | null
+          order_id?: string
+          outcome?: string
+          payload?: Json | null
+          payload_hash?: string
+          processed_at?: string | null
+          provider?: string
+          track_id?: string | null
+        }
+        Relationships: []
+      }
       zapupi_deposits: {
         Row: {
           amount_inr: number
