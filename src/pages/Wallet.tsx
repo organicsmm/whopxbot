@@ -3,7 +3,7 @@ import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { useWallet } from '@/hooks/useWallet';
 import { useTransactions, type TransactionFilter } from '@/hooks/useTransactions';
 import { useCurrency } from '@/hooks/useCurrency';
-import ZapUpiDepositCard from '@/components/wallet/ZapUpiDepositCard';
+
 import OxapayDepositCard from '@/components/wallet/OxapayDepositCard';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
