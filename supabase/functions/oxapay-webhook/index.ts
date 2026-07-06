@@ -14,6 +14,30 @@ Deno.serve(async (req) => {
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
   );
 
+  async function logActivity(entry: {
+    event: string;
+    order_id?: string | null;
+    user_id?: string | null;
+    plan_type?: string | null;
+    purpose?: string | null;
+    amount_usd?: number | null;
+    provider_status?: string | null;
+    http_status?: number | null;
+    ok?: boolean;
+    message?: string | null;
+    payload?: any;
+  }) {
+    try {
+      await supabase.from("oxapay_activity_log").insert({
+        source: "webhook",
+        ok: true,
+        ...entry,
+      });
+    } catch (e) {
+      console.error("log insert failed", e);
+    }
+  }
+
   try {
     const raw = await req.text();
     let payload: any = null;
@@ -21,7 +45,6 @@ Deno.serve(async (req) => {
 
     console.log("[oxapay-webhook] payload:", JSON.stringify(payload).slice(0, 800));
 
-    // OxaPay v1 webhook fields (fallback across variants)
     const inner = payload?.data || payload;
     const orderId: string | undefined =
       inner?.order_id || inner?.orderId || payload?.order_id;
@@ -33,21 +56,19 @@ Deno.serve(async (req) => {
       inner?.email || inner?.payer_email || payload?.email || inner?.buyer_email;
 
     if (!orderId) {
-      console.error("no order_id in webhook");
+      await logActivity({ event: "missing_order_id", ok: false, http_status: 400, message: "no order_id in webhook payload", payload });
       return json({ ok: false, error: "missing order_id" }, 400);
     }
 
-    // Find deposit
     let { data: dep, error: fetchErr } = await supabase
       .from("oxapay_deposits")
       .select("*")
       .eq("order_id", orderId)
       .maybeSingle();
 
-    // Fallback: static payment link (no deposit row). Auto-create using email → user match.
+    // Static-link fallback
     if ((!dep || !dep.user_id) && (status === "paid" || status === "confirmed") && payerEmail) {
       const amt = paidAmount || 0;
-      // Match amount → plan (small tolerance)
       const plans: Array<{ plan: string; usd: number }> = [
         { plan: "monthly", usd: 15 },
         { plan: "yearly", usd: 99 },
@@ -55,11 +76,10 @@ Deno.serve(async (req) => {
       ];
       const matched = plans.find((p) => Math.abs(amt - p.usd) <= Math.max(1, p.usd * 0.05));
       if (!matched) {
-        console.error("static-link: no plan matches amount", amt);
+        await logActivity({ event: "static_link_no_plan_match", ok: false, order_id: orderId, provider_status: status, amount_usd: amt, http_status: 400, message: `no plan for amount ${amt}`, payload });
         return json({ ok: false, error: "amount does not match any plan" }, 400);
       }
 
-      // Find user by email
       const { data: prof } = await supabase
         .from("profiles")
         .select("user_id, email")
@@ -67,8 +87,6 @@ Deno.serve(async (req) => {
         .maybeSingle();
 
       if (!prof?.user_id) {
-        console.error("static-link: user not found for email", payerEmail);
-        // Still store an unlinked deposit for admin visibility
         await supabase.from("oxapay_deposits").upsert({
           order_id: orderId,
           purpose: "subscription",
@@ -80,10 +98,10 @@ Deno.serve(async (req) => {
           status: "unmatched_email",
           credited: false,
         }, { onConflict: "order_id" });
+        await logActivity({ event: "static_link_email_not_found", ok: false, order_id: orderId, plan_type: matched.plan, purpose: "subscription", amount_usd: matched.usd, provider_status: status, http_status: 404, message: `no user for email ${payerEmail}`, payload });
         return json({ ok: false, error: "user email not found" }, 404);
       }
 
-      // Upsert a deposit row so activate RPC works
       const { data: upserted, error: upErr } = await supabase.from("oxapay_deposits").upsert({
         order_id: orderId,
         user_id: prof.user_id,
@@ -98,37 +116,38 @@ Deno.serve(async (req) => {
       }, { onConflict: "order_id" }).select("*").maybeSingle();
 
       if (upErr || !upserted) {
-        console.error("static-link: upsert failed", upErr);
+        await logActivity({ event: "static_link_upsert_failed", ok: false, order_id: orderId, user_id: prof.user_id, http_status: 500, message: upErr?.message || "upsert failed", payload });
         return json({ ok: false, error: upErr?.message || "upsert failed" }, 500);
       }
       dep = upserted;
+      await logActivity({ event: "static_link_matched", order_id: orderId, user_id: prof.user_id, plan_type: matched.plan, purpose: "subscription", amount_usd: matched.usd, provider_status: status, message: `matched by email ${payerEmail}` });
     }
 
     if (fetchErr || !dep) {
-      console.error("deposit not found", orderId, fetchErr);
+      await logActivity({ event: "deposit_not_found", ok: false, order_id: orderId, provider_status: status, http_status: 404, message: fetchErr?.message || "deposit row missing", payload });
       return json({ ok: false, error: "deposit not found" }, 404);
     }
 
-    // Store webhook payload always
     await supabase.from("oxapay_deposits")
       .update({ webhook_payload: payload, track_id: trackId ? String(trackId) : dep.track_id })
       .eq("order_id", orderId);
 
     if (status === "expired") {
       await supabase.from("oxapay_deposits").update({ status: "expired" }).eq("order_id", orderId);
+      await logActivity({ event: "invoice_expired", order_id: orderId, user_id: dep.user_id, plan_type: dep.plan_type, purpose: dep.purpose, amount_usd: Number(dep.amount_usd), provider_status: status, message: "invoice expired" });
       return json({ ok: true, status: "expired" });
     }
 
     if (!(status === "paid" || status === "confirmed")) {
-      // waiting / confirming
+      await logActivity({ event: "status_update", order_id: orderId, user_id: dep.user_id, plan_type: dep.plan_type, purpose: dep.purpose, amount_usd: Number(dep.amount_usd), provider_status: status, message: `waiting/confirming: ${status}` });
       return json({ ok: true, status });
     }
 
     if (dep.credited) {
+      await logActivity({ event: "duplicate_paid_webhook", order_id: orderId, user_id: dep.user_id, plan_type: dep.plan_type, purpose: dep.purpose, amount_usd: Number(dep.amount_usd), provider_status: status, message: "already credited" });
       return json({ ok: true, duplicate: true });
     }
 
-    // Amount safety: use dep.amount_usd (declared at creation)
     const creditUsd = Number(dep.amount_usd);
 
     if (dep.purpose === "wallet") {
@@ -139,9 +158,10 @@ Deno.serve(async (req) => {
         p_track_id: trackId || null,
       });
       if (rpcErr) {
-        console.error("credit_wallet_oxapay err", rpcErr);
+        await logActivity({ event: "wallet_credit_failed", ok: false, order_id: orderId, user_id: dep.user_id, purpose: "wallet", amount_usd: creditUsd, provider_status: status, http_status: 500, message: rpcErr.message, payload });
         return json({ ok: false, error: rpcErr.message }, 500);
       }
+      await logActivity({ event: "wallet_credited", order_id: orderId, user_id: dep.user_id, purpose: "wallet", amount_usd: creditUsd, provider_status: status, message: "wallet credited", payload: res });
       return json({ ok: true, result: res });
     }
 
@@ -154,15 +174,26 @@ Deno.serve(async (req) => {
         p_track_id: trackId || null,
       });
       if (rpcErr) {
-        console.error("activate_subscription_oxapay err", rpcErr);
+        await logActivity({ event: "subscription_activate_failed", ok: false, order_id: orderId, user_id: dep.user_id, plan_type: dep.plan_type, purpose: "subscription", amount_usd: creditUsd, provider_status: status, http_status: 500, message: rpcErr.message, payload });
         return json({ ok: false, error: rpcErr.message }, 500);
       }
+      await logActivity({ event: "subscription_activated", order_id: orderId, user_id: dep.user_id, plan_type: dep.plan_type, purpose: "subscription", amount_usd: creditUsd, provider_status: status, message: "subscription activated", payload: res });
       return json({ ok: true, result: res });
     }
 
+    await logActivity({ event: "unknown_purpose", ok: false, order_id: orderId, user_id: dep.user_id, purpose: dep.purpose, provider_status: status, message: "purpose not recognized" });
     return json({ ok: true, ignored: true });
   } catch (e: any) {
     console.error("oxapay-webhook error", e);
+    try {
+      await supabase.from("oxapay_activity_log").insert({
+        source: "webhook",
+        event: "unhandled_exception",
+        ok: false,
+        http_status: 500,
+        message: e?.message || "Internal error",
+      });
+    } catch {}
     return json({ ok: false, error: e?.message || "Internal error" }, 500);
   }
 });

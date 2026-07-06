@@ -1107,6 +1107,57 @@ export type Database = {
           },
         ]
       }
+      oxapay_activity_log: {
+        Row: {
+          amount_usd: number | null
+          created_at: string
+          event: string
+          http_status: number | null
+          id: string
+          message: string | null
+          ok: boolean
+          order_id: string | null
+          payload: Json | null
+          plan_type: string | null
+          provider_status: string | null
+          purpose: string | null
+          source: string
+          user_id: string | null
+        }
+        Insert: {
+          amount_usd?: number | null
+          created_at?: string
+          event: string
+          http_status?: number | null
+          id?: string
+          message?: string | null
+          ok?: boolean
+          order_id?: string | null
+          payload?: Json | null
+          plan_type?: string | null
+          provider_status?: string | null
+          purpose?: string | null
+          source: string
+          user_id?: string | null
+        }
+        Update: {
+          amount_usd?: number | null
+          created_at?: string
+          event?: string
+          http_status?: number | null
+          id?: string
+          message?: string | null
+          ok?: boolean
+          order_id?: string | null
+          payload?: Json | null
+          plan_type?: string | null
+          provider_status?: string | null
+          purpose?: string | null
+          source?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       oxapay_deposits: {
         Row: {
           amount_inr: number | null

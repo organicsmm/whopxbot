@@ -11,14 +11,29 @@ const OXAPAY_INFO = "https://api.oxapay.com/v1/payment/";
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
+  const supabase = createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+  );
+
+  async function logActivity(entry: Record<string, any>) {
+    try {
+      await supabase.from("oxapay_activity_log").insert({
+        source: "poller",
+        ok: true,
+        ...entry,
+      });
+    } catch (e) {
+      console.error("log insert failed", e);
+    }
+  }
+
   try {
     const API_KEY = Deno.env.get("OXAPAY_MERCHANT_API_KEY");
-    if (!API_KEY) return json({ error: "OxaPay not configured" }, 500);
-
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-    );
+    if (!API_KEY) {
+      await logActivity({ event: "missing_api_key", ok: false, http_status: 500, message: "OXAPAY_MERCHANT_API_KEY not configured" });
+      return json({ error: "OxaPay not configured" }, 500);
+    }
 
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) return json({ error: "Unauthorized" }, 401);
@@ -37,11 +52,16 @@ Deno.serve(async (req) => {
       .eq("order_id", orderId)
       .eq("user_id", user.id)
       .maybeSingle();
-    if (fErr || !dep) return json({ error: "deposit not found" }, 404);
+    if (fErr || !dep) {
+      await logActivity({ event: "deposit_not_found", ok: false, order_id: orderId, user_id: user.id, http_status: 404, message: fErr?.message || "not found" });
+      return json({ error: "deposit not found" }, 404);
+    }
 
-    if (dep.credited) return json({ credited: true, status: "success" });
+    if (dep.credited) {
+      await logActivity({ event: "already_credited", order_id: orderId, user_id: user.id, purpose: dep.purpose, plan_type: dep.plan_type, amount_usd: Number(dep.amount_usd), message: "poll after credit" });
+      return json({ credited: true, status: "success" });
+    }
 
-    // Try to fetch invoice details from OxaPay
     if (dep.track_id) {
       const resp = await fetch(`${OXAPAY_INFO}${dep.track_id}`, {
         headers: { "merchant_api_key": API_KEY },
@@ -53,35 +73,56 @@ Deno.serve(async (req) => {
       const status = String(inner?.status || "").toLowerCase();
 
       if (status === "paid" || status === "confirmed") {
-        // Credit now
         if (dep.purpose === "wallet") {
-          await supabase.rpc("credit_wallet_oxapay", {
+          const { error: rpcErr } = await supabase.rpc("credit_wallet_oxapay", {
             p_user_id: dep.user_id,
             p_order_id: orderId,
             p_amount_usd: Number(dep.amount_usd),
             p_track_id: dep.track_id,
           });
+          if (rpcErr) {
+            await logActivity({ event: "wallet_credit_failed", ok: false, order_id: orderId, user_id: user.id, purpose: "wallet", amount_usd: Number(dep.amount_usd), provider_status: status, http_status: 500, message: rpcErr.message });
+            return json({ error: rpcErr.message }, 500);
+          }
+          await logActivity({ event: "wallet_credited", order_id: orderId, user_id: user.id, purpose: "wallet", amount_usd: Number(dep.amount_usd), provider_status: status, message: "poller credited wallet" });
         } else if (dep.purpose === "subscription") {
-          await supabase.rpc("activate_subscription_oxapay", {
+          const { error: rpcErr } = await supabase.rpc("activate_subscription_oxapay", {
             p_user_id: dep.user_id,
             p_order_id: orderId,
             p_plan: dep.plan_type,
             p_amount_usd: Number(dep.amount_usd),
             p_track_id: dep.track_id,
           });
+          if (rpcErr) {
+            await logActivity({ event: "subscription_activate_failed", ok: false, order_id: orderId, user_id: user.id, plan_type: dep.plan_type, purpose: "subscription", amount_usd: Number(dep.amount_usd), provider_status: status, http_status: 500, message: rpcErr.message });
+            return json({ error: rpcErr.message }, 500);
+          }
+          await logActivity({ event: "subscription_activated", order_id: orderId, user_id: user.id, plan_type: dep.plan_type, purpose: "subscription", amount_usd: Number(dep.amount_usd), provider_status: status, message: "poller activated subscription" });
         }
         return json({ credited: true, status: "success" });
       }
       if (status === "expired") {
         await supabase.from("oxapay_deposits").update({ status: "expired" }).eq("order_id", orderId);
+        await logActivity({ event: "invoice_expired", order_id: orderId, user_id: user.id, plan_type: dep.plan_type, purpose: dep.purpose, provider_status: status, message: "expired via poller" });
         return json({ status: "failed" });
       }
+      await logActivity({ event: "poll_status", order_id: orderId, user_id: user.id, plan_type: dep.plan_type, purpose: dep.purpose, provider_status: status, message: `still ${status}` });
       return json({ status: "pending", provider_status: status });
     }
 
+    await logActivity({ event: "no_track_id", ok: false, order_id: orderId, user_id: user.id, message: "deposit missing track_id" });
     return json({ status: dep.status });
   } catch (e: any) {
     console.error("oxapay-sync-deposit error", e);
+    try {
+      await supabase.from("oxapay_activity_log").insert({
+        source: "poller",
+        event: "unhandled_exception",
+        ok: false,
+        http_status: 500,
+        message: e?.message || "Internal error",
+      });
+    } catch {}
     return json({ error: e?.message || "Internal error" }, 500);
   }
 });
