@@ -80,6 +80,25 @@ Deno.serve(async (req) => {
       }
     }
 
+    // CACHE: if this user already has this account linked, return cached data — do NOT hit Apify.
+    // User can delete the account and re-add to force a fresh scrape.
+    {
+      const usernameLower = username.toLowerCase();
+      const { data: cached } = await adminAuth
+        .from('instagram_accounts')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('username', usernameLower)
+        .maybeSingle();
+      if (cached) {
+        return new Response(JSON.stringify({ account: cached, imported: 0, importing: false, cached: true }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+    }
+
+
+
     // Apify: profile scraper (sync) — retry once on timeout/empty
     const fetchProfile = async (timeoutSec: number) => {
       const url = `https://api.apify.com/v2/acts/apify~instagram-profile-scraper/run-sync-get-dataset-items?token=${APIFY_TOKEN}&timeout=${timeoutSec}`;
