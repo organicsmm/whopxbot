@@ -112,7 +112,7 @@ export function SubscriptionCheckDialog({ open, onOpenChange }: SubscriptionChec
                   </div>
                   <h3 className="font-semibold text-xs mb-0.5 text-foreground">Monthly</h3>
                   <div className="flex items-baseline gap-1 mb-1.5">
-                    <span className="text-lg font-[1000] text-foreground">$18</span>
+                    <span className="text-lg font-[1000] text-foreground">$15</span>
                     <span className="text-[10px] font-bold text-muted-foreground">/mo</span>
                   </div>
                   <p className="text-[10px] text-muted-foreground/80">30 days access</p>
@@ -166,7 +166,7 @@ export function SubscriptionCheckDialog({ open, onOpenChange }: SubscriptionChec
                   </div>
                   <h3 className="font-semibold text-xs mb-0.5 text-foreground">Lifetime</h3>
                   <div className="flex items-baseline gap-1 mb-1.5">
-                    <span className="text-lg font-[1000] text-foreground">$179</span>
+                    <span className="text-lg font-[1000] text-foreground">$250</span>
                     <span className="text-[10px] font-bold text-muted-foreground">1x</span>
                   </div>
                   <p className="text-[10px] text-amber-600 font-semibold">Forever</p>
@@ -185,22 +185,9 @@ export function SubscriptionCheckDialog({ open, onOpenChange }: SubscriptionChec
                   {cryptoLoading ? (
                     <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Opening OxaPay…</>
                   ) : (
-                    <><Bitcoin className="h-4 w-4 mr-2" /> Pay with Crypto — {selectedPlan === 'monthly' ? '$18' : selectedPlan === 'yearly' ? '$99' : '$179'}</>
+                    <><Bitcoin className="h-4 w-4 mr-2" /> Pay with Crypto — {selectedPlan === 'monthly' ? '$15' : selectedPlan === 'yearly' ? '$99' : '$250'}</>
                   )}
                 </Button>
-                {selectedPlan !== 'yearly' && (
-                  <Button
-                    variant="outline"
-                    className="w-full rounded-xl py-4 text-sm"
-                    onClick={() => {
-                      onOpenChange(false);
-                      setShowRequestDialog(true);
-                    }}
-                  >
-                    Request via WhatsApp / UPI
-                    <ArrowRight className="h-4 w-4 ml-2" />
-                  </Button>
-                )}
               </div>
             )}
 
