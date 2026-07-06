@@ -92,8 +92,8 @@ export default function Wallet() {
           <div className="flex items-center justify-between">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <div className="h-1.5 w-1.5 rounded-full bg-purple-400" style={{ animation: 'vault-pulse 2s ease-in-out infinite' }} />
-                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/50">Vault</p>
+                <div className="h-1.5 w-1.5 rounded-full bg-purple-300 shadow-[0_0_10px_rgba(216,180,254,0.7)]" style={{ animation: 'vault-pulse 2s ease-in-out infinite' }} />
+                <p className="text-[11px] font-medium tracking-[0.18em] uppercase text-purple-200/70">Vault</p>
               </div>
               <h1 className="text-3xl font-bold text-white tracking-tight">Wallet</h1>
             </div>
