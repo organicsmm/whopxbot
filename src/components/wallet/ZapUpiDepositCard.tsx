@@ -16,6 +16,9 @@ export default function ZapUpiDepositCard() {
   const [searchParams, setSearchParams] = useSearchParams();
   const queryClient = useQueryClient();
   const polledRef = useRef<string | null>(null);
+  const mountedRef = useRef(true);
+
+  useEffect(() => () => { mountedRef.current = false; }, []);
 
   useEffect(() => {
     const deposit = searchParams.get('deposit');
@@ -43,9 +46,11 @@ export default function ZapUpiDepositCard() {
     const MAX_MS = 60_000; const INTERVAL = 3_000;
     toast.loading('Verifying payment…', { id: `zap-${orderId}` });
     while (Date.now() - start < MAX_MS) {
+      if (!mountedRef.current) { toast.dismiss(`zap-${orderId}`); return; }
       try {
         const { data, error } = await supabase.functions.invoke('zapupi-sync-deposit', { body: { order_id: orderId } });
         if (error) throw error;
+        if (!mountedRef.current) { toast.dismiss(`zap-${orderId}`); return; }
         if (data?.status === 'success' || data?.credited) {
           toast.success('🎉 Wallet credited successfully!', { id: `zap-${orderId}` });
           queryClient.invalidateQueries({ queryKey: ['wallet'] });
@@ -56,6 +61,7 @@ export default function ZapUpiDepositCard() {
       } catch (e) { console.error('sync error', e); }
       await new Promise((r) => setTimeout(r, INTERVAL));
     }
+    if (!mountedRef.current) { toast.dismiss(`zap-${orderId}`); return; }
     toast.error('Could not confirm payment in time. If deducted, credit will follow automatically.', { id: `zap-${orderId}` });
     queryClient.invalidateQueries({ queryKey: ['wallet'] });
     queryClient.invalidateQueries({ queryKey: ['transactions'] });

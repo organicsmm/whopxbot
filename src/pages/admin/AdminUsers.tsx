@@ -149,7 +149,7 @@ export default function AdminUsers() {
 
       const { error: txError } = await supabase.from('transactions').insert({
         user_id: selectedUser.user_id,
-        type: balanceAction === 'add' ? 'deposit' : 'refund',
+        type: balanceAction === 'add' ? 'deposit' : 'withdrawal',
         amount: balanceAction === 'add' ? amount : -amount,
         balance_after: newBalance,
         description: `Admin ${balanceAction === 'add' ? 'deposit' : 'withdrawal'} — ₹${inrAmount.toFixed(2)}`,

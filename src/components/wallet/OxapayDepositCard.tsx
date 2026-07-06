@@ -4,6 +4,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Bitcoin, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { useCurrency } from '@/hooks/useCurrency';
 
 const QUICK_AMOUNTS = [500, 1000, 5000, 10000];
 const MIN_AMOUNT = 100;
@@ -11,11 +12,15 @@ const MAX_AMOUNT = 500000;
 
 export default function OxapayDepositCard() {
   const [amount, setAmount] = useState<string>('1000');
+  const { rates } = useCurrency();
   const [loading, setLoading] = useState(false);
   const [polling, setPolling] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const queryClient = useQueryClient();
   const polledRef = useRef<string | null>(null);
+  const mountedRef = useRef(true);
+
+  useEffect(() => () => { mountedRef.current = false; }, []);
 
   useEffect(() => {
     const deposit = searchParams.get('deposit');
@@ -38,8 +43,10 @@ export default function OxapayDepositCard() {
     const start = Date.now(); const MAX_MS = 120_000; const INTERVAL = 4_000;
     toast.loading('Verifying crypto payment…', { id: `ox-${orderId}` });
     while (Date.now() - start < MAX_MS) {
+      if (!mountedRef.current) { toast.dismiss(`ox-${orderId}`); return; }
       try {
         const { data } = await supabase.functions.invoke('oxapay-sync-deposit', { body: { order_id: orderId } });
+        if (!mountedRef.current) { toast.dismiss(`ox-${orderId}`); return; }
         if (data?.credited || data?.status === 'success') {
           toast.success('🎉 Wallet credited!', { id: `ox-${orderId}` });
           queryClient.invalidateQueries({ queryKey: ['wallet'] });
@@ -50,6 +57,7 @@ export default function OxapayDepositCard() {
       } catch (e) { console.error('sync error', e); }
       await new Promise((r) => setTimeout(r, INTERVAL));
     }
+    if (!mountedRef.current) { toast.dismiss(`ox-${orderId}`); return; }
     toast.dismiss(`ox-${orderId}`);
     toast.message('Still waiting for blockchain confirmation. It will credit automatically.');
     clearParams(); setPolling(false);
@@ -72,7 +80,7 @@ export default function OxapayDepositCard() {
     }
   }
 
-  const usd = (Number(amount || 0) / 83.5).toFixed(2);
+  const usd = (Number(amount || 0) / (rates.INR || 83.5)).toFixed(2);
 
   return (
     <div className="relative rounded-2xl bg-gradient-to-br from-white/[0.06] to-white/[0.02] border border-white/10 p-6 backdrop-blur-md shadow-[0_20px_60px_-20px_rgba(124,58,237,0.2)]">

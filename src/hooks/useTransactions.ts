@@ -27,5 +27,6 @@ export function useTransactions(filter: TransactionFilter = 'all') {
     },
     enabled: !!user?.id,
     staleTime: 15000,
+    refetchOnMount: 'always',
   });
 }

@@ -18,6 +18,8 @@ export function useWallet() {
     },
     enabled: !!user?.id,
     staleTime: 10000,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
   });
 
   return { wallet, isLoading, error };
