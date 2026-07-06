@@ -49,8 +49,9 @@ export default function OxapaySubscriptionPoller() {
             clearParams();
             return;
           }
-        } catch (e) {
+        } catch (e: any) {
           console.error('sub sync error', e);
+          toast.error(`Verification error: ${e?.message || 'network issue'}. Retrying…`, { id: toastId });
         }
         await new Promise((r) => setTimeout(r, INTERVAL));
         setTick((t) => t + 1);
