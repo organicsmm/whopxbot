@@ -199,14 +199,13 @@ export default function Wallet() {
 
               <div className="text-right">
                 <p className="text-[9px] font-semibold tracking-[0.2em] text-white/85">CURRENCY</p>
-                <p className="text-base font-extrabold italic tracking-wide">INR</p>
+                <p className="text-base font-extrabold italic tracking-wide">USD</p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Deposit Section — ZapUPI (INR) + OxaPay (Crypto) */}
-        <ZapUpiDepositCard />
+        {/* Deposit Section — OxaPay (Crypto, USD) */}
         <OxapayDepositCard />
 
 
