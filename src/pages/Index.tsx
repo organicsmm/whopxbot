@@ -382,12 +382,12 @@ const Index = () => {
                 </span>
               </div>
               <div className="mt-3 mb-5">
-                <span className="text-5xl font-bold tracking-tight">₹14,999</span>
-                <span className="text-white/75 ml-2 text-sm line-through">₹19,920</span>
+                <span className="text-5xl font-bold tracking-tight">$250</span>
+                <span className="text-white/75 ml-2 text-sm line-through">$399</span>
               </div>
               <p className="text-sm text-slate-200 mb-6">One payment. Yours forever.</p>
               <Link
-                to="/auth"
+                to={lifetimePayHref}
                 className="inline-flex w-full items-center justify-center px-5 py-3 rounded-xl bg-white text-black font-semibold hover:bg-purple-50 transition-all shadow-[0_0_24px_rgba(255,255,255,0.15)] active:scale-[0.98]"
               >
                 Get lifetime
