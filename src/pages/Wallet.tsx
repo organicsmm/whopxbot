@@ -220,21 +220,21 @@ export default function Wallet() {
                         {getIcon(tx.type)}
                       </div>
                       <div className="min-w-0">
-                        <p className="font-medium text-[13px] leading-tight truncate max-w-[240px] text-slate-100">
+                        <p className="font-medium text-[13px] leading-tight truncate max-w-[240px] text-white/90">
                           {tx.displayDescription}
                         </p>
                         <div className="flex items-center flex-wrap gap-x-2 gap-y-0.5 mt-1">
                           {tx.payment_method && (
-                            <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-white/5 text-violet-300/70">
+                            <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-white/[0.05] border border-white/10 text-white/60">
                               {tx.payment_method.replace(/_/g, ' ').toUpperCase()}
                             </span>
                           )}
-                          <span className={'text-[9px] font-semibold px-1.5 py-0.5 rounded ' + (tx.status === 'pending' ? 'bg-amber-500/15 text-amber-300' : tx.status === 'completed' ? 'bg-emerald-500/15 text-emerald-300' : 'bg-rose-500/15 text-rose-300')}>
+                          <span className={'text-[9px] font-semibold px-1.5 py-0.5 rounded ' + (tx.status === 'pending' ? 'bg-amber-500/10 text-amber-300 border border-amber-500/20' : tx.status === 'completed' ? 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-300 border border-rose-500/20')}>
                             {tx.status}
                           </span>
-                          <span className="text-[11px] text-slate-500">{fmtDate(tx.created_at!)}</span>
+                          <span className="text-[11px] text-white/40">{fmtDate(tx.created_at!)}</span>
                           {tx.payment_reference && tx.payment_method === 'usdt_bep20' && (
-                            <a href={`https://bscscan.com/tx/${tx.payment_reference}`} target="_blank" rel="noopener noreferrer" className="text-[11px] flex items-center gap-0.5 hover:underline text-violet-300">
+                            <a href={`https://bscscan.com/tx/${tx.payment_reference}`} target="_blank" rel="noopener noreferrer" className="text-[11px] flex items-center gap-0.5 hover:underline text-white/70 hover:text-white">
                               BSCScan <ExternalLink className="h-3 w-3" />
                             </a>
                           )}
