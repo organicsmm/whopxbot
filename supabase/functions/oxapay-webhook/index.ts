@@ -172,7 +172,34 @@ Deno.serve(async (req) => {
       return json({ ok: true, duplicate: true });
     }
 
-    const creditUsd = Number(dep.amount_usd);
+    // === SECURITY: never trust the webhook payload. Always re-verify with
+    // OxaPay's own API using the track_id before crediting anything.
+    // This blocks forged webhook POSTs from crediting a wallet or activating
+    // a subscription without a real payment.
+    const verifyTrackId = trackId ? String(trackId) : (dep.track_id ? String(dep.track_id) : "");
+    if (!verifyTrackId) {
+      await logActivity({ event: "verify_no_track_id", ok: false, order_id: orderId, user_id: dep.user_id, purpose: dep.purpose, http_status: 400, message: "no track_id to verify", payload });
+      return json({ ok: false, error: "missing track_id" }, 400);
+    }
+    if (!OXA_API_KEY) {
+      await logActivity({ event: "verify_no_api_key", ok: false, order_id: orderId, user_id: dep.user_id, http_status: 500, message: "OXAPAY_MERCHANT_API_KEY not configured" });
+      return json({ ok: false, error: "server misconfigured" }, 500);
+    }
+    const verified = await verifyWithProvider(OXA_API_KEY, verifyTrackId);
+    if (!verified.ok || !(verified.status === "paid" || verified.status === "confirmed")) {
+      await logActivity({ event: "verify_failed", ok: false, order_id: orderId, user_id: dep.user_id, purpose: dep.purpose, provider_status: verified.status, http_status: 400, message: `provider did not confirm payment (got '${verified.status}')`, payload: verified.raw });
+      return json({ ok: false, error: "provider did not confirm payment", provider_status: verified.status }, 400);
+    }
+
+    const expectedUsd = Number(dep.amount_usd);
+    // Provider must have received at least ~99% of the invoice amount.
+    if (verified.paidAmount > 0 && verified.paidAmount < expectedUsd * 0.99) {
+      await logActivity({ event: "verify_underpaid", ok: false, order_id: orderId, user_id: dep.user_id, purpose: dep.purpose, amount_usd: expectedUsd, http_status: 400, message: `underpaid: expected ${expectedUsd}, got ${verified.paidAmount}`, payload: verified.raw });
+      return json({ ok: false, error: "underpaid" }, 400);
+    }
+
+    const creditUsd = expectedUsd;
+
 
     if (dep.purpose === "wallet") {
       const { data: res, error: rpcErr } = await supabase.rpc("credit_wallet_oxapay", {
