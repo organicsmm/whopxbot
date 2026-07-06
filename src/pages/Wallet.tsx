@@ -246,7 +246,7 @@ export default function Wallet() {
                         {tx.type === 'order' ? '−' : '+'}{formatPrice(Math.abs(Number(tx.displayAmount)))}
                       </p>
                       {tx.displayBalanceAfter != null && (
-                        <p className="text-[11px] mt-0.5 text-slate-500">Bal: {formatPrice(Number(tx.displayBalanceAfter))}</p>
+                        <p className="text-[11px] mt-0.5 text-white/40">Bal: {formatPrice(Number(tx.displayBalanceAfter))}</p>
                       )}
                     </div>
                   </div>
@@ -254,12 +254,11 @@ export default function Wallet() {
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center py-14 text-center">
-                <div className="relative w-16 h-16 rounded-2xl bg-violet-500/10 flex items-center justify-center mb-4 border border-violet-500/20">
-                  <WalletIcon className="w-7 h-7 text-violet-400/60" />
-                  <div className="absolute inset-0 rounded-2xl bg-violet-500/20 blur-xl -z-10" />
+                <div className="relative w-14 h-14 rounded-2xl bg-white/[0.04] flex items-center justify-center mb-4 border border-white/10">
+                  <WalletIcon className="w-6 h-6 text-white/40" />
                 </div>
-                <p className="text-slate-300 text-sm font-medium">No transactions yet</p>
-                <p className="text-slate-500 text-xs mt-1">Your deposits and spending will appear here</p>
+                <p className="text-white/80 text-sm font-medium">No transactions yet</p>
+                <p className="text-white/40 text-xs mt-1">Your deposits and spending will appear here</p>
               </div>
             )}
           </div>
