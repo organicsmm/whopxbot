@@ -189,7 +189,7 @@ export default function InstagramPage() {
 
           {hasActiveSubscription && (() => {
             const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
-            const recent = (accounts as any[]).filter(a => new Date(a.created_at).getTime() >= cutoff);
+            const recent = (linkEvents as any[]).filter(e => new Date(e.created_at).getTime() >= cutoff);
             const used = recent.length;
             const remaining = Math.max(0, 5 - used);
             const blocked = remaining === 0;
