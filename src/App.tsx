@@ -48,6 +48,7 @@ const AdminSubscriptions = lazy(() => import("./pages/admin/AdminSubscriptions")
 const AdminTopupPlan = lazy(() => import("./pages/admin/AdminTopupPlan"));
 const AdminOxapayLog = lazy(() => import("./pages/admin/AdminOxapayLog"));
 const AdminSecurityAudit = lazy(() => import("./pages/admin/AdminSecurityAudit"));
+const AdminWebhookEvents = lazy(() => import("./pages/admin/AdminWebhookEvents"));
 
 const TermsOfService = lazy(() => import("./pages/legal/TermsOfService"));
 const PrivacyPolicy = lazy(() => import("./pages/legal/PrivacyPolicy"));
@@ -169,6 +170,7 @@ const App = () => {
                     <Route path="/admin/topup-plan" element={<AdminGuard><AdminTopupPlan /></AdminGuard>} />
                     <Route path="/admin/oxapay-log" element={<AdminGuard><AdminOxapayLog /></AdminGuard>} />
                     <Route path="/admin/security-audit" element={<AdminGuard><AdminSecurityAudit /></AdminGuard>} />
+                    <Route path="/admin/webhook-events" element={<AdminGuard><AdminWebhookEvents /></AdminGuard>} />
 
                     {/* Legal */}
                     <Route path="/terms" element={<TermsOfService />} />
