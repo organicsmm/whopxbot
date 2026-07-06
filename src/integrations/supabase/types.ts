@@ -651,6 +651,30 @@ export type Database = {
           },
         ]
       }
+      instagram_link_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          user_id: string
+          username: string
+        }
+        Insert: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          user_id: string
+          username: string
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          user_id?: string
+          username?: string
+        }
+        Relationships: []
+      }
       instagram_media: {
         Row: {
           account_id: string

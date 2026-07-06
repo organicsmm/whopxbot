@@ -66,10 +66,14 @@ Deno.serve(async (req) => {
       if (!existing) {
         const windowMs = 30 * 24 * 60 * 60 * 1000;
         const sinceDate = new Date(Date.now() - windowMs);
+        // Count from the persistent audit log (instagram_link_events) so deleting
+        // an account does NOT free up a slot — the 30-day cap is consistent
+        // across devices and across delete/re-add cycles.
         const { data: recent } = await adminAuth
-          .from('instagram_accounts')
+          .from('instagram_link_events')
           .select('username, created_at')
           .eq('user_id', userId)
+          .eq('event_type', 'link')
           .gte('created_at', sinceDate.toISOString())
           .order('created_at', { ascending: true });
         const used = recent?.length ?? 0;
@@ -114,6 +118,10 @@ Deno.serve(async (req) => {
         .eq('username', usernameLower)
         .maybeSingle();
       if (cached) {
+        // Log cache hit (does NOT count toward 30-day link limit).
+        await adminAuth.from('instagram_link_events').insert({
+          user_id: userId, username: usernameLower, event_type: 'cache_hit',
+        });
         return new Response(JSON.stringify({ account: cached, imported: 0, importing: false, cached: true }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
@@ -178,6 +186,11 @@ Deno.serve(async (req) => {
       .select()
       .single();
     if (accErr) throw accErr;
+
+    // Persistent audit log: this counts against the 30-day link limit.
+    await admin.from('instagram_link_events').insert({
+      user_id: userId, username: account.username, event_type: 'link',
+    });
 
     // Kick off initial media backfill in background (do NOT await — return fast)
     try {

@@ -28,6 +28,24 @@ export default function InstagramPage() {
     enabled: !!user?.id,
   });
 
+  // Persistent 30-day link usage from audit log (survives account deletion).
+  const { data: linkEvents = [] } = useQuery({
+    queryKey: ['ig-link-events', user?.id],
+    queryFn: async () => {
+      const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+      const { data, error } = await supabase
+        .from('instagram_link_events')
+        .select('username, created_at')
+        .eq('user_id', user!.id)
+        .eq('event_type', 'link')
+        .gte('created_at', since)
+        .order('created_at', { ascending: true });
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+
   const linkMut = useMutation({
     mutationFn: async (u: string) => {
       const { data, error } = await supabase.functions.invoke('instagram-link-account', { body: { username: u } });
@@ -47,8 +65,9 @@ export default function InstagramPage() {
     onSuccess: (d) => {
       toast.success(`Linked @${d.account.username} · ${d.imported} posts imported`);
       setUsername('');
-      qc.invalidateQueries({ queryKey: ['ig-accounts'] });
-      qc.invalidateQueries({ queryKey: ['ig-posts-summary'] });
+     qc.invalidateQueries({ queryKey: ['ig-accounts'] });
+     qc.invalidateQueries({ queryKey: ['ig-link-events'] });
+     qc.invalidateQueries({ queryKey: ['ig-posts-summary'] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -170,7 +189,7 @@ export default function InstagramPage() {
 
           {hasActiveSubscription && (() => {
             const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
-            const recent = (accounts as any[]).filter(a => new Date(a.created_at).getTime() >= cutoff);
+            const recent = (linkEvents as any[]).filter(e => new Date(e.created_at).getTime() >= cutoff);
             const used = recent.length;
             const remaining = Math.max(0, 5 - used);
             const blocked = remaining === 0;
