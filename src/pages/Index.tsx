@@ -13,13 +13,12 @@ import { useAuth } from '@/hooks/useAuth';
  * Dark canvas, fine grid, violet aurora glows, display headline with serif italic accent.
  */
 
-const ZAPUPI_MONTHLY_LINK = 'https://pay.zapupi.com/instent-pay-WkFQVVBJNDFGQkZBRjE5QTgzOTkzNA';
-
 const Index = () => {
   const { user } = useAuth();
-  const monthlyPayHref = user
-    ? `${ZAPUPI_MONTHLY_LINK}?udf1=${encodeURIComponent(user.id)}&udf2=monthly_subscription`
-    : '/auth?next=subscribe';
+  const monthlyPayHref = user ? '/wallet?subscribe=monthly' : '/auth?next=subscribe';
+  const yearlyPayHref = user ? '/wallet?subscribe=yearly' : '/auth?next=subscribe';
+  const lifetimePayHref = user ? '/wallet?subscribe=lifetime' : '/auth?next=subscribe';
+
 
   return (
     <div className="min-h-screen w-full bg-[#030303] text-white overflow-x-hidden selection:bg-purple-500/30 antialiased">
@@ -326,7 +325,7 @@ const Index = () => {
                 <span className="text-[10px] uppercase tracking-[0.18em] text-white/75">Most flexible</span>
               </div>
               <div className="mt-3 mb-5">
-                <span className="text-5xl font-bold tracking-tight">₹1,499</span>
+                <span className="text-5xl font-bold tracking-tight">$15</span>
                 <span className="text-white/75 ml-2 text-sm">/ month</span>
               </div>
               <p className="text-sm text-slate-200 mb-6">Full access. Cancel anytime.</p>
@@ -334,7 +333,7 @@ const Index = () => {
                 href={monthlyPayHref}
                 className="inline-flex w-full items-center justify-center px-5 py-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-white font-semibold transition-all"
               >
-                {user ? 'Pay ₹1,499 & activate' : 'Start monthly'}
+                {user ? 'Pay $15 & activate' : 'Start monthly'}
               </a>
 
 
@@ -354,12 +353,12 @@ const Index = () => {
                 <span className="text-[10px] uppercase tracking-[0.18em] text-white/75">Save more</span>
               </div>
               <div className="mt-3 mb-5">
-                <span className="text-5xl font-bold tracking-tight">₹8,999</span>
+                <span className="text-5xl font-bold tracking-tight">$99</span>
                 <span className="text-white/75 ml-2 text-sm">/ year</span>
               </div>
               <p className="text-sm text-slate-200 mb-6">12 months of full access.</p>
               <Link
-                to="/auth"
+                to={yearlyPayHref}
                 className="inline-flex w-full items-center justify-center px-5 py-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-white font-semibold transition-all"
               >
                 Start yearly
@@ -383,12 +382,12 @@ const Index = () => {
                 </span>
               </div>
               <div className="mt-3 mb-5">
-                <span className="text-5xl font-bold tracking-tight">₹14,999</span>
-                <span className="text-white/75 ml-2 text-sm line-through">₹19,920</span>
+                <span className="text-5xl font-bold tracking-tight">$250</span>
+                <span className="text-white/75 ml-2 text-sm line-through">$399</span>
               </div>
               <p className="text-sm text-slate-200 mb-6">One payment. Yours forever.</p>
               <Link
-                to="/auth"
+                to={lifetimePayHref}
                 className="inline-flex w-full items-center justify-center px-5 py-3 rounded-xl bg-white text-black font-semibold hover:bg-purple-50 transition-all shadow-[0_0_24px_rgba(255,255,255,0.15)] active:scale-[0.98]"
               >
                 Get lifetime
