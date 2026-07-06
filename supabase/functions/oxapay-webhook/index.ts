@@ -83,13 +83,19 @@ Deno.serve(async (req) => {
 
     if (!orderId) {
       await logActivity({ event: "missing_order_id", ok: false, http_status: 400, message: "no order_id in webhook payload", payload });
+      await recordSecurityEvent(supabase, {
+        category: "webhook_missing_field",
+        source: "oxapay-webhook",
+        reason: "missing order_id in webhook payload",
+        provider: "oxapay",
+        http_status: 400,
+        request: req,
+        payload,
+      });
       return json({ ok: false, error: "missing order_id" }, 400);
     }
 
     // === Universal idempotency / replay protection ===
-    // Register this delivery in webhook_events. Duplicate deliveries (same
-    // payload hash OR same provider track_id) short-circuit here before we
-    // touch any wallet / subscription state.
     let webhookEventId: string | undefined;
     try {
       const gate = await registerWebhookEvent(supabase, {
@@ -101,14 +107,25 @@ Deno.serve(async (req) => {
       });
       if (gate.duplicate) {
         await logActivity({ event: "webhook_replay_blocked", order_id: orderId, provider_status: status, message: `duplicate delivery (${gate.reason})`, payload });
+        await recordSecurityEvent(supabase, {
+          category: "webhook_replay",
+          source: "oxapay-webhook",
+          reason: `duplicate delivery (${gate.reason})`,
+          provider: "oxapay",
+          order_id: orderId,
+          track_id: trackId ? String(trackId) : null,
+          http_status: 200,
+          request: req,
+          payload,
+          metadata: { gate_reason: gate.reason },
+        });
         return json({ ok: true, duplicate: true, reason: gate.reason });
       }
       webhookEventId = gate.eventId;
     } catch (e: any) {
-      // Never crash on the gate — just log and continue; downstream RPC
-      // advisory locks still block double-crediting.
       console.error("[oxapay-webhook] idempotency gate error", e);
     }
+
 
     let { data: dep, error: fetchErr } = await supabase
       .from("oxapay_deposits")
