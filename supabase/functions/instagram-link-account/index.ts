@@ -6,7 +6,9 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
-const APIFY_TOKEN = Deno.env.get('APIFY_API_TOKEN');
+// NOTE: Apify is intentionally NOT called from this function. Only
+// instagram-refresh-media hits Apify. Linking always uses cached DB data
+// or creates a placeholder row.
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
@@ -14,7 +16,7 @@ const ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   try {
-    if (!APIFY_TOKEN) throw new Error('APIFY_API_TOKEN not configured');
+    // (Apify token not needed here — link never calls Apify.)
 
     const authHeader = req.headers.get('Authorization') ?? '';
     const token = authHeader.replace(/^Bearer\s+/i, '').trim();
