@@ -178,27 +178,29 @@ export function SubscriptionCheckDialog({ open, onOpenChange }: SubscriptionChec
             {!hasPendingRequest && (
               <div className="space-y-2">
                 <Button
-                  className="w-full btn-gradient rounded-xl py-5 text-base"
-                  onClick={() => {
-                    onOpenChange(false);
-                    setShowRequestDialog(true);
-                  }}
-                >
-                  Get {selectedPlan === 'monthly' ? 'Monthly' : 'Lifetime'} Plan
-                  <ArrowRight className="h-4 w-4 ml-2" />
-                </Button>
-                <Button
-                  variant="outline"
                   disabled={cryptoLoading}
                   onClick={payWithCrypto}
-                  className="w-full rounded-xl py-5 text-base border-orange-500/40 hover:bg-orange-500/10"
+                  className="w-full btn-gradient rounded-xl py-5 text-base"
                 >
                   {cryptoLoading ? (
                     <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Opening OxaPay…</>
                   ) : (
-                    <><Bitcoin className="h-4 w-4 mr-2 text-orange-500" /> Pay with Crypto (Instant)</>
+                    <><Bitcoin className="h-4 w-4 mr-2" /> Pay with Crypto — {selectedPlan === 'monthly' ? '$18' : selectedPlan === 'yearly' ? '$99' : '$179'}</>
                   )}
                 </Button>
+                {selectedPlan !== 'yearly' && (
+                  <Button
+                    variant="outline"
+                    className="w-full rounded-xl py-4 text-sm"
+                    onClick={() => {
+                      onOpenChange(false);
+                      setShowRequestDialog(true);
+                    }}
+                  >
+                    Request via WhatsApp / UPI
+                    <ArrowRight className="h-4 w-4 ml-2" />
+                  </Button>
+                )}
               </div>
             )}
 
@@ -218,7 +220,7 @@ export function SubscriptionCheckDialog({ open, onOpenChange }: SubscriptionChec
       <SubscriptionRequestDialog
         open={showRequestDialog}
         onOpenChange={setShowRequestDialog}
-        planType={selectedPlan}
+        planType={selectedPlan === 'yearly' ? 'lifetime' : selectedPlan}
       />
     </>
   );
