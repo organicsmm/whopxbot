@@ -70,6 +70,15 @@ export async function assertPaymentEligible(
 
   if (verifiedDeposit) return { ok: true, reason: "verified_deposit" };
 
+  await recordSecurityEvent(admin, {
+    category: "payment_gate_denied",
+    source: ctx?.source ?? "payment-eligibility",
+    reason: "no active subscription and no verified deposit",
+    user_id: userId,
+    http_status: 403,
+    request: ctx?.request,
+  });
+
   return {
     ok: false,
     status: 403,
