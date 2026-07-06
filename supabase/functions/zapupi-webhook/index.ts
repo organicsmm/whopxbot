@@ -213,6 +213,9 @@ Deno.serve(async (req) => {
 
     if (rpcErr) {
       console.error("[zapupi-webhook] credit rpc error", rpcErr);
+      await finalizeWebhookEvent(supabase, webhookEventId, { outcome: "wallet_credit_failed", http_status: 500, message: rpcErr.message });
+    } else {
+      await finalizeWebhookEvent(supabase, webhookEventId, { outcome: "wallet_credited", http_status: 200 });
     }
 
     return ok({ received: true, credited: !rpcErr });
