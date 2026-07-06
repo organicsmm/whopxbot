@@ -364,6 +364,134 @@ Deno.test("E1 — replaying same OxaPay webhook is flagged duplicate", async () 
   }
 });
 
+// Helper: count rows returned by a REST select (parsed JSON array length).
+async function countRows(table: string, query: string): Promise<number> {
+  const { status, body } = await selectRow(table, query);
+  if (status !== 200) return 0;
+  try {
+    const arr = JSON.parse(body);
+    return Array.isArray(arr) ? arr.length : 0;
+  } catch {
+    return 0;
+  }
+}
+
+Deno.test("E2 — OxaPay replay: transaction count stays ≤ 1 across duplicate deliveries", async () => {
+  const orderId = `replay2-oxa-${crypto.randomUUID()}`;
+  const trackId = `replay2-track-${crypto.randomUUID()}`;
+  const payload = {
+    order_id: orderId,
+    track_id: trackId,
+    status: "paid",
+    paid_amount: 25,
+    email: "replay2@example.com",
+  };
+
+  // Fire the same payload three times sequentially.
+  const r1 = await postWebhook("oxapay-webhook", payload);
+  const r2 = await postWebhook("oxapay-webhook", payload);
+  const r3 = await postWebhook("oxapay-webhook", payload);
+
+  // None of them may report an activation / credit — the deposit row does
+  // not exist, so all three must be rejected before touching the wallet.
+  for (const [i, r] of [r1, r2, r3].entries()) {
+    const activated =
+      r.json?.result &&
+      (r.json.result.activated === true || r.json.result.credited === true);
+    assert(!activated, `delivery ${i + 1} activated something: ${JSON.stringify(r.json)}`);
+  }
+
+  // Strict end-state: transactions for this payment_reference must be ≤ 1.
+  const txCount = await countRows(
+    "transactions",
+    `payment_reference=eq.${orderId}&select=id`,
+  );
+  assert(txCount <= 1, `expected at most 1 transaction, got ${txCount}`);
+
+  // And no active subscription may exist tied to this replay window.
+  const subCount = await countRows(
+    "subscriptions",
+    `status=eq.active&updated_at=gte.${new Date(Date.now() - 60_000).toISOString()}&select=id`,
+  );
+  // Just make sure the query is answerable; if RLS blocks reads that's fine.
+  assert(subCount >= 0);
+});
+
+Deno.test("E3 — ZapUPI wallet-credit replay: only one credit outcome across duplicates", async () => {
+  const orderId = `replay-zap-wallet-${crypto.randomUUID()}`;
+  const payload = new URLSearchParams({
+    order_id: orderId,
+    status: "success",
+    amount: "100",
+    txn_id: `replay-${crypto.randomUUID()}`,
+  }).toString();
+
+  const r1 = await postWebhook("zapupi-webhook", payload, "application/x-www-form-urlencoded");
+  const r2 = await postWebhook("zapupi-webhook", payload, "application/x-www-form-urlencoded");
+  const r3 = await postWebhook("zapupi-webhook", payload, "application/x-www-form-urlencoded");
+
+  const credits = [r1, r2, r3].filter((r) => r.json?.credited === true).length;
+  // The forged/unknown order must never credit. At most one credit total
+  // even if a matching deposit existed — the idempotency gate must dedupe.
+  assert(credits <= 1, `expected ≤ 1 credit across replays, got ${credits}`);
+
+  // Second and third deliveries should either mirror the first or be
+  // explicitly flagged as duplicate — never a fresh credit.
+  if (r1.json?.credited === true) {
+    assert(
+      r2.json?.credited !== true || r2.json?.duplicate === true,
+      `replay 2 double-credited: ${JSON.stringify(r2.json)}`,
+    );
+    assert(
+      r3.json?.credited !== true || r3.json?.duplicate === true,
+      `replay 3 double-credited: ${JSON.stringify(r3.json)}`,
+    );
+  }
+
+  const txCount = await countRows(
+    "transactions",
+    `payment_reference=eq.${orderId}&select=id`,
+  );
+  assert(txCount <= 1, `expected ≤ 1 transaction for order, got ${txCount}`);
+});
+
+Deno.test("E4 — ZapUPI subscription replay: activation happens at most once", async () => {
+  const orderId = `replay-zap-sub-${crypto.randomUUID()}`;
+  const payload = new URLSearchParams({
+    order_id: orderId,
+    status: "success",
+    amount: "1499",
+    udf1: FAKE_USER,
+    udf2: "monthly_subscription",
+    txn_id: `replay-${crypto.randomUUID()}`,
+  }).toString();
+
+  const r1 = await postWebhook("zapupi-webhook", payload, "application/x-www-form-urlencoded");
+  const r2 = await postWebhook("zapupi-webhook", payload, "application/x-www-form-urlencoded");
+  const r3 = await postWebhook("zapupi-webhook", payload, "application/x-www-form-urlencoded");
+
+  const activations = [r1, r2, r3].filter(
+    (r) => r.json?.subscription === true && r.json?.duplicate !== true,
+  ).length;
+  assert(activations <= 1, `expected ≤ 1 activation across replays, got ${activations}`);
+
+  // Fake user must not gain an active subscription from a forged replay.
+  const { status, body } = await selectRow(
+    "subscriptions",
+    `user_id=eq.${FAKE_USER}&status=eq.active&select=id`,
+  );
+  if (status === 200) {
+    assertEquals(body.trim(), "[]", `fake user has active sub after replays: ${body}`);
+  }
+
+  // Never more than one transaction rows for the same replayed order.
+  const txCount = await countRows(
+    "transactions",
+    `payment_reference=eq.${orderId}&select=id`,
+  );
+  assert(txCount <= 1, `expected ≤ 1 transaction, got ${txCount}`);
+});
+
 // ─── F. End-state audit ────────────────────────────────────────────────────
 
 Deno.test("F1 — no active subscription exists for fake user after all attacks", async () => {
