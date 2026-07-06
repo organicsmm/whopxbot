@@ -165,19 +165,9 @@ export function SubscriptionGuard({ children }: SubscriptionGuardProps) {
                 {cryptoLoading ? (
                   <><Loader2 className="h-5 w-5 mr-2 animate-spin" /> Opening OxaPay…</>
                 ) : (
-                  <><Bitcoin className="h-5 w-5 mr-2" /> Pay with Crypto — {selectedPlan === 'monthly' ? '$18' : selectedPlan === 'yearly' ? '$99' : '$179'}</>
+                  <><Bitcoin className="h-5 w-5 mr-2" /> Pay with Crypto — {selectedPlan === 'monthly' ? '$15' : selectedPlan === 'yearly' ? '$99' : '$250'}</>
                 )}
               </Button>
-              {selectedPlan !== 'yearly' && (
-                <Button
-                  variant="outline"
-                  className="w-full rounded-full py-5 text-sm"
-                  onClick={() => setShowDialog(true)}
-                >
-                  Request via WhatsApp / UPI
-                  <ArrowRight className="h-4 w-4 ml-2" />
-                </Button>
-              )}
             </div>
           )}
 
