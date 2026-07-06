@@ -106,65 +106,70 @@ export default function Wallet() {
             </div>
           </div>
 
-          {/* Premium Balance Card */}
-          <div className="relative overflow-hidden rounded-[28px] p-[1px] shadow-2xl shadow-violet-950/50"
-            style={{ background: 'linear-gradient(135deg, rgba(167,139,250,.5), rgba(139,92,246,.15) 40%, rgba(217,70,239,.35) 100%)' }}>
-            <div className="relative rounded-[27px] bg-gradient-to-br from-[#1a0b3e] via-[#160829] to-[#0f0620] p-7 overflow-hidden">
-              {/* Animated aurora blobs */}
-              <div aria-hidden className="pointer-events-none absolute -top-24 -right-16 w-72 h-72 bg-violet-500/30 blur-[110px] rounded-full" style={{ animation: 'vault-aurora 8s ease-in-out infinite' }} />
-              <div aria-hidden className="pointer-events-none absolute -bottom-24 -left-16 w-72 h-72 bg-fuchsia-500/20 blur-[110px] rounded-full" style={{ animation: 'vault-aurora 10s ease-in-out infinite reverse' }} />
-              {/* Grid texture */}
-              <div aria-hidden className="absolute inset-0 opacity-[0.06] pointer-events-none"
-                style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,.6) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.6) 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
+          {/* Compact Vault Balance Strip */}
+          <div className="relative group">
+            {/* Outer glow */}
+            <div aria-hidden className="absolute -inset-px rounded-2xl opacity-70 blur-md transition-opacity group-hover:opacity-100"
+              style={{ background: 'linear-gradient(120deg, rgba(139,92,246,.45), rgba(217,70,239,.35), rgba(99,102,241,.4))' }} />
 
-              <div className="relative flex justify-between items-start">
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <WalletIcon className="w-3 h-3 text-violet-300/80" />
-                    <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-violet-200/80">Available Balance</p>
+            <div className="relative flex items-stretch rounded-2xl overflow-hidden bg-gradient-to-br from-[#150829] via-[#0f0620] to-[#0a0416] border border-violet-400/15 shadow-xl shadow-violet-950/40">
+              {/* Left vertical accent rail */}
+              <div className="relative w-1.5 shrink-0 overflow-hidden">
+                <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, #a78bfa, #d946ef 55%, #6366f1)' }} />
+                <div className="absolute inset-0 opacity-60" style={{ background: 'linear-gradient(180deg, transparent, rgba(255,255,255,.5), transparent)', backgroundSize: '100% 200%', animation: 'vault-shine 3s linear infinite' }} />
+              </div>
+
+              {/* Ambient blob */}
+              <div aria-hidden className="pointer-events-none absolute -top-16 right-10 w-56 h-56 bg-violet-500/25 blur-[90px] rounded-full" style={{ animation: 'vault-aurora 9s ease-in-out infinite' }} />
+              <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.05]"
+                style={{ backgroundImage: 'radial-gradient(rgba(255,255,255,.7) 1px, transparent 1px)', backgroundSize: '14px 14px' }} />
+
+              <div className="relative flex-1 flex items-center justify-between gap-4 px-5 py-4">
+                {/* Left: balance */}
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <span className="h-1 w-1 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,.9)]" style={{ animation: 'vault-pulse 1.8s ease-in-out infinite' }} />
+                    <p className="text-[9px] font-bold uppercase tracking-[0.28em] text-violet-200/70">Balance · Live</p>
                   </div>
-                  <h2 className="text-[46px] leading-none font-extrabold tracking-tight text-white" style={{
-                    background: 'linear-gradient(180deg, #ffffff 0%, #e9d5ff 100%)',
-                    WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-                  }}>{formatPrice(wallet?.balance || 0)}</h2>
-                  <div className="flex items-center gap-1.5 mt-2">
-                    <Sparkles className="w-3 h-3 text-violet-300/70" />
-                    <p className="text-[11px] text-violet-300/70 font-medium">Live · USD wallet</p>
+                  <div className="flex items-baseline gap-2">
+                    <h2 className="text-[30px] leading-none font-extrabold tracking-tight" style={{
+                      background: 'linear-gradient(180deg, #ffffff 0%, #e9d5ff 100%)',
+                      WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+                    }}>{formatPrice(wallet?.balance || 0)}</h2>
+                    <span className="text-[10px] font-semibold text-violet-300/60 uppercase tracking-widest">USD</span>
                   </div>
                 </div>
-                {/* EMV chip */}
-                <div className="relative w-12 h-9 rounded-md overflow-hidden" style={{
-                  background: 'linear-gradient(135deg, #fde68a 0%, #d97706 50%, #78350f 100%)',
-                  boxShadow: 'inset 0 0 0 1px rgba(255,255,255,.35), 0 4px 10px rgba(0,0,0,.4)',
-                }}>
-                  <div className="grid grid-cols-3 gap-px h-full w-full p-1 opacity-70">
-                    {Array.from({ length: 6 }).map((_, i) => (<span key={i} className="bg-amber-900/50 rounded-[1px]" />))}
+
+                {/* Divider */}
+                <div aria-hidden className="hidden sm:block h-10 w-px bg-gradient-to-b from-transparent via-violet-400/30 to-transparent" />
+
+                {/* Right: mini stats stacked */}
+                <div className="flex items-center gap-3 shrink-0">
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-lg bg-emerald-500/15 border border-emerald-400/20 flex items-center justify-center">
+                      <ArrowDownLeft className="w-3.5 h-3.5 text-emerald-400" />
+                    </div>
+                    <div className="leading-tight">
+                      <p className="text-[8px] font-bold uppercase tracking-[0.18em] text-emerald-300/70">In</p>
+                      <p className="text-[11px] font-bold text-white">{formatPrice(wallet?.total_deposited || 0)}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-lg bg-rose-500/15 border border-rose-400/20 flex items-center justify-center">
+                      <ArrowUpRight className="w-3.5 h-3.5 text-rose-400" />
+                    </div>
+                    <div className="leading-tight">
+                      <p className="text-[8px] font-bold uppercase tracking-[0.18em] text-rose-300/70">Out</p>
+                      <p className="text-[11px] font-bold text-white">{formatPrice(wallet?.total_spent || 0)}</p>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* Dotted separator */}
-              <div className="relative my-6 h-px border-t border-dashed border-violet-300/20" />
-
-              <div className="relative grid grid-cols-2 gap-4">
-                <div className="flex items-center gap-3 rounded-2xl bg-white/[0.03] border border-white/5 px-3 py-2.5 backdrop-blur">
-                  <div className="w-9 h-9 rounded-xl bg-emerald-500/20 flex items-center justify-center">
-                    <ArrowDownLeft className="w-4 h-4 text-emerald-400" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-emerald-300/70">Inflow</p>
-                    <p className="text-sm font-bold text-white truncate">{formatPrice(wallet?.total_deposited || 0)}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 rounded-2xl bg-white/[0.03] border border-white/5 px-3 py-2.5 backdrop-blur">
-                  <div className="w-9 h-9 rounded-xl bg-rose-500/20 flex items-center justify-center">
-                    <ArrowUpRight className="w-4 h-4 text-rose-400" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-rose-300/70">Outflow</p>
-                    <p className="text-sm font-bold text-white truncate">{formatPrice(wallet?.total_spent || 0)}</p>
-                  </div>
-                </div>
+              {/* Right notch — ticket style */}
+              <div aria-hidden className="hidden md:flex flex-col items-center justify-center px-3 border-l border-dashed border-violet-300/15 bg-white/[0.02]">
+                <Sparkles className="w-3.5 h-3.5 text-violet-300/70 mb-1" />
+                <p className="text-[8px] font-bold uppercase tracking-[0.22em] text-violet-300/60 writing-mode-vertical" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>Vault · Secure</p>
               </div>
             </div>
           </div>
