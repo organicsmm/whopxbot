@@ -138,7 +138,7 @@ export default function OxapayDepositCard() {
         <button
           onClick={handlePay}
           disabled={loading || polling}
-          className="relative w-full py-3.5 rounded-xl font-semibold text-white flex items-center justify-center gap-2 transition-all active:scale-[0.99] disabled:opacity-60 bg-white/[0.08] border border-white/15 hover:bg-white/[0.12] hover:border-white/25"
+          className="relative w-full py-3.5 rounded-xl font-semibold text-black flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-60 bg-white hover:bg-purple-50 shadow-[0_0_24px_rgba(255,255,255,0.15)]"
         >
           {loading ? (<><Loader2 className="w-4 h-4 animate-spin" /> <span>Opening OxaPay…</span></>)
             : polling ? (<><Loader2 className="w-4 h-4 animate-spin" /> <span>Verifying payment…</span></>)
