@@ -43,8 +43,10 @@ export default function OxapayDepositCard() {
     const start = Date.now(); const MAX_MS = 120_000; const INTERVAL = 4_000;
     toast.loading('Verifying crypto payment…', { id: `ox-${orderId}` });
     while (Date.now() - start < MAX_MS) {
+      if (!mountedRef.current) { toast.dismiss(`ox-${orderId}`); return; }
       try {
         const { data } = await supabase.functions.invoke('oxapay-sync-deposit', { body: { order_id: orderId } });
+        if (!mountedRef.current) { toast.dismiss(`ox-${orderId}`); return; }
         if (data?.credited || data?.status === 'success') {
           toast.success('🎉 Wallet credited!', { id: `ox-${orderId}` });
           queryClient.invalidateQueries({ queryKey: ['wallet'] });
@@ -55,6 +57,7 @@ export default function OxapayDepositCard() {
       } catch (e) { console.error('sync error', e); }
       await new Promise((r) => setTimeout(r, INTERVAL));
     }
+    if (!mountedRef.current) { toast.dismiss(`ox-${orderId}`); return; }
     toast.dismiss(`ox-${orderId}`);
     toast.message('Still waiting for blockchain confirmation. It will credit automatically.');
     clearParams(); setPolling(false);
