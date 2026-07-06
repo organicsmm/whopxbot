@@ -136,7 +136,10 @@ Deno.serve(async (req) => {
           if (upErr) { console.error('upsert media err', upErr); continue; }
         }
 
-        const acctUpdate: Record<string, any> = { last_scraped_at: new Date().toISOString() };
+        const acctUpdate: Record<string, any> = {
+          last_scraped_at: new Date().toISOString(),
+          last_fetched_at: new Date().toISOString(),
+        };
         try {
           const profUrl = `https://api.apify.com/v2/acts/apify~instagram-profile-scraper/run-sync-get-dataset-items?token=${APIFY_TOKEN}&timeout=90`;
           const profRes = await fetch(profUrl, {
