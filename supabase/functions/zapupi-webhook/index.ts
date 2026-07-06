@@ -275,6 +275,16 @@ Deno.serve(async (req) => {
     if (rpcErr) {
       console.error("[zapupi-webhook] credit rpc error", rpcErr);
       await finalizeWebhookEvent(supabase, webhookEventId, { outcome: "wallet_credit_failed", http_status: 500, message: rpcErr.message });
+      await recordSecurityEvent(supabase, {
+        category: "webhook_processing_failure",
+        source: "zapupi-webhook",
+        reason: `wallet credit RPC failed: ${rpcErr.message}`,
+        provider: "zapupi",
+        order_id: orderId,
+        http_status: 500,
+        request: req,
+        metadata: { stage: "credit_wallet_zapupi" },
+      });
     } else {
       await finalizeWebhookEvent(supabase, webhookEventId, { outcome: "wallet_credited", http_status: 200 });
     }
@@ -282,6 +292,15 @@ Deno.serve(async (req) => {
     return ok({ received: true, credited: !rpcErr });
   } catch (e: any) {
     console.error("[zapupi-webhook] error", e);
+    await recordSecurityEvent(supabase, {
+      category: "webhook_processing_failure",
+      source: "zapupi-webhook",
+      reason: `unhandled exception: ${e?.message || "Internal error"}`,
+      provider: "zapupi",
+      http_status: 500,
+      request: req,
+      metadata: { stack: e?.stack?.slice(0, 500) },
+    });
     return ok({ received: true, error: e?.message });
   }
 });
