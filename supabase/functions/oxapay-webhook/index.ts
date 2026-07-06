@@ -6,6 +6,29 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, hmac",
 };
 
+const OXAPAY_INFO = "https://api.oxapay.com/v1/payment/";
+
+async function verifyWithProvider(apiKey: string, trackId: string) {
+  try {
+    const resp = await fetch(`${OXAPAY_INFO}${encodeURIComponent(trackId)}`, {
+      headers: { "merchant_api_key": apiKey },
+    });
+    const raw = await resp.text();
+    let data: any = null;
+    try { data = JSON.parse(raw); } catch { data = { raw }; }
+    const inner = data?.data || data;
+    return {
+      ok: resp.ok,
+      status: String(inner?.status || "").toLowerCase(),
+      paidAmount: Number(inner?.paid_amount ?? inner?.paidAmount ?? inner?.amount ?? 0),
+      email: inner?.email || inner?.payer_email || null,
+      raw: data,
+    };
+  } catch (e: any) {
+    return { ok: false, status: "", paidAmount: 0, email: null, raw: { error: e?.message } };
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -13,6 +36,7 @@ Deno.serve(async (req) => {
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
   );
+  const OXA_API_KEY = Deno.env.get("OXAPAY_MERCHANT_API_KEY") || "";
 
   async function logActivity(entry: {
     event: string;
