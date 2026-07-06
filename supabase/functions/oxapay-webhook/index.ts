@@ -85,6 +85,30 @@ Deno.serve(async (req) => {
       return json({ ok: false, error: "missing order_id" }, 400);
     }
 
+    // === Universal idempotency / replay protection ===
+    // Register this delivery in webhook_events. Duplicate deliveries (same
+    // payload hash OR same provider track_id) short-circuit here before we
+    // touch any wallet / subscription state.
+    let webhookEventId: string | undefined;
+    try {
+      const gate = await registerWebhookEvent(supabase, {
+        provider: "oxapay",
+        orderId,
+        trackId: trackId ? String(trackId) : null,
+        eventStatus: status,
+        payload,
+      });
+      if (gate.duplicate) {
+        await logActivity({ event: "webhook_replay_blocked", order_id: orderId, provider_status: status, message: `duplicate delivery (${gate.reason})`, payload });
+        return json({ ok: true, duplicate: true, reason: gate.reason });
+      }
+      webhookEventId = gate.eventId;
+    } catch (e: any) {
+      // Never crash on the gate — just log and continue; downstream RPC
+      // advisory locks still block double-crediting.
+      console.error("[oxapay-webhook] idempotency gate error", e);
+    }
+
     let { data: dep, error: fetchErr } = await supabase
       .from("oxapay_deposits")
       .select("*")
