@@ -54,6 +54,36 @@ Deno.serve(async (req) => {
       return ok({ received: true });
     }
 
+    // === Universal idempotency / replay protection ===
+    // Fast-fail replayed deliveries before touching any wallet / subscription
+    // rows. Duplicate = same (provider, order_id, payload_hash) OR same
+    // (provider, track_id) previously recorded.
+    const trackIdRaw =
+      payload.txn_id ||
+      payload.utr ||
+      payload.upi_txn_id ||
+      payload.data?.txn_id ||
+      payload.data?.utr ||
+      payload.data?.upi_txn_id ||
+      null;
+    let webhookEventId: string | undefined;
+    try {
+      const gate = await registerWebhookEvent(supabase, {
+        provider: "zapupi",
+        orderId: String(orderId),
+        trackId: trackIdRaw ? String(trackIdRaw) : null,
+        eventStatus: String(payload.status || payload.data?.status || "") || null,
+        payload,
+      });
+      if (gate.duplicate) {
+        console.warn(`[zapupi-webhook] duplicate delivery blocked (${gate.reason})`, orderId);
+        return ok({ received: true, duplicate: true, reason: gate.reason });
+      }
+      webhookEventId = gate.eventId;
+    } catch (e) {
+      console.error("[zapupi-webhook] idempotency gate error", e);
+    }
+
     const { data: deposit } = await supabase
       .from("zapupi_deposits")
       .select("*")
