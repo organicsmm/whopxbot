@@ -74,7 +74,7 @@ export default function OxapayDepositCard() {
     }
   }
 
-  const usd = (Number(amount || 0) / 83.5).toFixed(2);
+  const usd = (Number(amount || 0) / (rates.INR || 83.5)).toFixed(2);
 
   return (
     <div className="relative rounded-2xl bg-gradient-to-br from-white/[0.06] to-white/[0.02] border border-white/10 p-6 backdrop-blur-md shadow-[0_20px_60px_-20px_rgba(124,58,237,0.2)]">
