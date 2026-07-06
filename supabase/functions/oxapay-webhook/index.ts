@@ -255,6 +255,7 @@ Deno.serve(async (req) => {
         return json({ ok: false, error: rpcErr.message }, 500);
       }
       await logActivity({ event: "subscription_activated", order_id: orderId, user_id: dep.user_id, plan_type: dep.plan_type, purpose: "subscription", amount_usd: creditUsd, provider_status: status, message: "subscription activated", payload: res });
+      await finalizeWebhookEvent(supabase, webhookEventId, { outcome: "subscription_activated", http_status: 200 });
       return json({ ok: true, result: res });
     }
 
