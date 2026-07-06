@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      apify_call_log: {
+        Row: {
+          created_at: string
+          duration_ms: number | null
+          error_message: string | null
+          id: string
+          results_count: number | null
+          scrape_type: string
+          source: string
+          success: boolean
+          user_id: string | null
+          username: string
+        }
+        Insert: {
+          created_at?: string
+          duration_ms?: number | null
+          error_message?: string | null
+          id?: string
+          results_count?: number | null
+          scrape_type: string
+          source?: string
+          success?: boolean
+          user_id?: string | null
+          username: string
+        }
+        Update: {
+          created_at?: string
+          duration_ms?: number | null
+          error_message?: string | null
+          id?: string
+          results_count?: number | null
+          scrape_type?: string
+          source?: string
+          success?: boolean
+          user_id?: string | null
+          username?: string
+        }
+        Relationships: []
+      }
       bundle_items: {
         Row: {
           bundle_id: string
