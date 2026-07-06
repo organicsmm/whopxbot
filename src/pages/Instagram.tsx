@@ -28,6 +28,24 @@ export default function InstagramPage() {
     enabled: !!user?.id,
   });
 
+  // Persistent 30-day link usage from audit log (survives account deletion).
+  const { data: linkEvents = [] } = useQuery({
+    queryKey: ['ig-link-events', user?.id],
+    queryFn: async () => {
+      const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+      const { data, error } = await supabase
+        .from('instagram_link_events')
+        .select('username, created_at')
+        .eq('user_id', user!.id)
+        .eq('event_type', 'link')
+        .gte('created_at', since)
+        .order('created_at', { ascending: true });
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+
   const linkMut = useMutation({
     mutationFn: async (u: string) => {
       const { data, error } = await supabase.functions.invoke('instagram-link-account', { body: { username: u } });
