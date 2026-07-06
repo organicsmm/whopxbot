@@ -48,6 +48,7 @@ const AdminSubscriptions = lazy(() => import("./pages/admin/AdminSubscriptions")
 const AdminTopupPlan = lazy(() => import("./pages/admin/AdminTopupPlan"));
 const AdminOxapayLog = lazy(() => import("./pages/admin/AdminOxapayLog"));
 const AdminSecurityAudit = lazy(() => import("./pages/admin/AdminSecurityAudit"));
+const AdminWebhookEvents = lazy(() => import("./pages/admin/AdminWebhookEvents"));
 
 const TermsOfService = lazy(() => import("./pages/legal/TermsOfService"));
 const PrivacyPolicy = lazy(() => import("./pages/legal/PrivacyPolicy"));
