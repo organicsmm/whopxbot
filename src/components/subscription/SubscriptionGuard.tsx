@@ -102,7 +102,7 @@ export function SubscriptionGuard({ children }: SubscriptionGuardProps) {
                 </div>
                 <h3 className="font-semibold mb-1">Monthly</h3>
                 <div className="flex items-baseline gap-1 mb-1">
-                  <span className="text-2xl font-bold">$18</span>
+                  <span className="text-2xl font-bold">$15</span>
                   <span className="text-xs text-muted-foreground">/mo</span>
                 </div>
                 <p className="text-xs text-muted-foreground">30 days access</p>
@@ -146,7 +146,7 @@ export function SubscriptionGuard({ children }: SubscriptionGuardProps) {
                 </div>
                 <h3 className="font-semibold mb-1">Lifetime</h3>
                 <div className="flex items-baseline gap-1 mb-1">
-                  <span className="text-2xl font-bold">$179</span>
+                  <span className="text-2xl font-bold">$250</span>
                   <span className="text-xs text-muted-foreground">1x</span>
                 </div>
                 <p className="text-xs text-amber-600 font-semibold">Forever</p>
@@ -165,19 +165,9 @@ export function SubscriptionGuard({ children }: SubscriptionGuardProps) {
                 {cryptoLoading ? (
                   <><Loader2 className="h-5 w-5 mr-2 animate-spin" /> Opening OxaPay…</>
                 ) : (
-                  <><Bitcoin className="h-5 w-5 mr-2" /> Pay with Crypto — {selectedPlan === 'monthly' ? '$18' : selectedPlan === 'yearly' ? '$99' : '$179'}</>
+                  <><Bitcoin className="h-5 w-5 mr-2" /> Pay with Crypto — {selectedPlan === 'monthly' ? '$15' : selectedPlan === 'yearly' ? '$99' : '$250'}</>
                 )}
               </Button>
-              {selectedPlan !== 'yearly' && (
-                <Button
-                  variant="outline"
-                  className="w-full rounded-full py-5 text-sm"
-                  onClick={() => setShowDialog(true)}
-                >
-                  Request via WhatsApp / UPI
-                  <ArrowRight className="h-4 w-4 ml-2" />
-                </Button>
-              )}
             </div>
           )}
 
