@@ -172,6 +172,7 @@ Deno.serve(async (req) => {
         .eq("order_id", orderId);
 
       console.log("[zapupi-webhook] subscription activated for", udf1);
+      await finalizeWebhookEvent(supabase, webhookEventId, { outcome: "subscription_activated", http_status: 200 });
       return ok({ received: true, subscription: true, expires_at: expires.toISOString() });
     }
 
