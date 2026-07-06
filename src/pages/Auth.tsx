@@ -69,10 +69,11 @@ export default function Auth() {
         const { error } = await signIn(email, password);
         if (error) {
           const msg = error.message.toLowerCase();
-          if (msg.includes('invalid login credentials')) setError('Incorrect email or password.');
-          else if (msg.includes('email not confirmed')) setError('Please verify your email first.');
-          else if (msg.includes('rate limit')) setError('Too many attempts. Try again in 5 mins.');
-          else setError('Login failed.');
+          if (msg.includes('invalid login credentials') || msg.includes('invalid_credentials')) setError('Incorrect email or password. Please try again.');
+          else if (msg.includes('email not confirmed')) setError('Please verify your email first, or sign up again.');
+          else if (msg.includes('rate limit') || msg.includes('too many')) setError('Too many attempts. Please wait a few minutes and try again.');
+          else if (msg.includes('user not found') || msg.includes('no user')) setError('No account found with this email. Please sign up first.');
+          else setError(error.message || 'Unable to sign in. Please try again.');
           setIsSubmitting(false); return;
         }
         navigate(postAuthTarget, { replace: true });
@@ -81,14 +82,11 @@ export default function Auth() {
         if (!v.success) { setError(v.error.errors[0].message); setIsSubmitting(false); return; }
         const { error } = await signUp(email, password, fullName);
         if (error) {
-          const msg = error.message.toLowerCase();
-          if (msg.includes('already registered')) setError('This email is already registered.');
-          else if (msg.includes('rate limit')) setError('Too many attempts. Wait 5 minutes.');
-          else setError(error.message || 'Signup failed.');
+          // Show the real reason from the backend instead of a generic message.
+          setError(error.message || 'Unable to create your account. Please try again.');
           setIsSubmitting(false); return;
         }
-        setSuccessMessage('Account created successfully!');
-        setTimeout(() => setIsLogin(true), 2000);
+        setSuccessMessage('Account created successfully! Signing you in…');
       }
     } catch (err: any) {
       if (!err?.message?.includes('abort')) setError('Something went wrong. Please try again.');
