@@ -358,8 +358,27 @@ export default function Admin() {
             </Card>
           </Link>
 
-
-
+          <Link to="/admin/webhook-events">
+            <Card className="glass-card h-full hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10 transition-all cursor-pointer group">
+              <CardContent className="p-5">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Webhook className="h-6 w-6 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold group-hover:text-primary transition-colors">
+                        Webhook Events
+                      </h3>
+                      <Badge className="text-[10px] h-4 px-1.5 bg-primary text-primary-foreground">NEW</Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground">Debug failed &amp; duplicate deliveries</p>
+                  </div>
+                  <ArrowUpRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
 
 
           <Link to="/admin/chat">
