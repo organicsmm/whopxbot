@@ -65,8 +65,9 @@ export default function InstagramPage() {
     onSuccess: (d) => {
       toast.success(`Linked @${d.account.username} · ${d.imported} posts imported`);
       setUsername('');
-      qc.invalidateQueries({ queryKey: ['ig-accounts'] });
-      qc.invalidateQueries({ queryKey: ['ig-posts-summary'] });
+     qc.invalidateQueries({ queryKey: ['ig-accounts'] });
+     qc.invalidateQueries({ queryKey: ['ig-link-events'] });
+     qc.invalidateQueries({ queryKey: ['ig-posts-summary'] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
