@@ -353,12 +353,12 @@ const Index = () => {
                 <span className="text-[10px] uppercase tracking-[0.18em] text-white/75">Save more</span>
               </div>
               <div className="mt-3 mb-5">
-                <span className="text-5xl font-bold tracking-tight">₹8,999</span>
+                <span className="text-5xl font-bold tracking-tight">$99</span>
                 <span className="text-white/75 ml-2 text-sm">/ year</span>
               </div>
               <p className="text-sm text-slate-200 mb-6">12 months of full access.</p>
               <Link
-                to="/auth"
+                to={yearlyPayHref}
                 className="inline-flex w-full items-center justify-center px-5 py-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-white font-semibold transition-all"
               >
                 Start yearly
