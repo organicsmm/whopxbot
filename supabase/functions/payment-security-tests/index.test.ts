@@ -692,6 +692,117 @@ Deno.test(
   },
 );
 
+// ─── E-concurrent-cross. Cross-provider concurrent replay isolation ────────
+// Fire the SAME order_id + track_id in parallel to BOTH oxapay-webhook and
+// zapupi-webhook. Each provider must dedup its own bucket independently:
+//   - No delivery on either provider may activate/credit (payloads are forged).
+//   - No 5xx from either provider under the race.
+//   - webhook_events rows are scoped by (provider, order_id, payload_hash),
+//     so the same order_id showing up on two providers must NOT collide —
+//     one provider's dedup gate must never suppress the other provider.
+
+Deno.test(
+  `E-concurrent-cross-1 — same order_id fired in parallel at BOTH providers dedups per-provider`,
+  async () => {
+    const sharedOrderId = `xprov-conc-${crypto.randomUUID()}`;
+    const sharedTrackId = `xprov-conc-track-${crypto.randomUUID()}`;
+
+    const oxaPayload = {
+      order_id: sharedOrderId,
+      track_id: sharedTrackId,
+      status: "paid",
+      paid_amount: 25,
+      email: "xprov-conc@example.com",
+    };
+    const zapPayload = new URLSearchParams({
+      order_id: sharedOrderId,
+      status: "success",
+      amount: "100",
+      txn_id: sharedTrackId,
+    }).toString();
+
+    // Interleave N deliveries per provider, fired all at once.
+    const half = CONCURRENCY;
+    const tasks: Array<Promise<{ provider: string; status: number; body: string; json: any }>> = [];
+    for (let i = 0; i < half; i++) {
+      tasks.push(
+        postWebhook("oxapay-webhook", oxaPayload).then((r) => ({ provider: "oxapay", ...r })),
+      );
+      tasks.push(
+        postWebhook("zapupi-webhook", zapPayload, "application/x-www-form-urlencoded").then(
+          (r) => ({ provider: "zapupi", ...r }),
+        ),
+      );
+    }
+    const results = await Promise.all(tasks);
+
+    // No 5xx on either provider.
+    for (const [i, r] of results.entries()) {
+      assert(r.status < 500, `${r.provider} delivery ${i} returned 5xx: ${r.status} ${r.body}`);
+    }
+
+    const oxaResults = results.filter((r) => r.provider === "oxapay");
+    const zapResults = results.filter((r) => r.provider === "zapupi");
+
+    // Neither provider may activate/credit — payloads are forged and have no
+    // matching deposit row on EITHER side.
+    const oxaActivated = countActivations(oxaResults);
+    const zapActivated = countActivations(zapResults);
+    assertEquals(oxaActivated, 0, `oxapay activated ${oxaActivated} despite forged payload`);
+    assertEquals(zapActivated, 0, `zapupi credited ${zapActivated} despite forged payload`);
+
+    // Zero transactions on this shared id from either side.
+    const txCount = await countRows(
+      "transactions",
+      `payment_reference=eq.${sharedOrderId}&select=id`,
+    );
+    assertEquals(txCount, 0, `cross-provider concurrent replay produced ${txCount} txns`);
+
+    // Audit table (if readable): dedup MUST be scoped per provider — the
+    // same order_id/payload should NOT be collapsed across providers. We
+    // expect at least one webhook_events row per provider (independent
+    // buckets), and never zero on one side because the other side "won"
+    // the race.
+    const { status: oxaStatus, body: oxaBody } = await selectRow(
+      "webhook_events",
+      `order_id=eq.${sharedOrderId}&provider=eq.oxapay&select=id`,
+    );
+    const { status: zapStatus, body: zapBody } = await selectRow(
+      "webhook_events",
+      `order_id=eq.${sharedOrderId}&provider=eq.zapupi&select=id`,
+    );
+    if (oxaStatus === 200 && zapStatus === 200) {
+      let oxaRows: unknown[] = [];
+      let zapRows: unknown[] = [];
+      try { oxaRows = JSON.parse(oxaBody); } catch { /* noop */ }
+      try { zapRows = JSON.parse(zapBody); } catch { /* noop */ }
+      assert(
+        Array.isArray(oxaRows) && oxaRows.length >= 1,
+        `oxapay dedup was suppressed by zapupi's row (cross-provider bleed): ${oxaBody}`,
+      );
+      assert(
+        Array.isArray(zapRows) && zapRows.length >= 1,
+        `zapupi dedup was suppressed by oxapay's row (cross-provider bleed): ${zapBody}`,
+      );
+      // And per provider the burst should collapse to a single row.
+      assert(
+        (oxaRows as unknown[]).length <= 1,
+        `oxapay recorded ${(oxaRows as unknown[]).length} rows for a single concurrent burst`,
+      );
+      assert(
+        (zapRows as unknown[]).length <= 1,
+        `zapupi recorded ${(zapRows as unknown[]).length} rows for a single concurrent burst`,
+      );
+    } else {
+      // RLS-blocked → skip audit assertions.
+      assert(
+        isDenied(oxaStatus, oxaBody) || oxaStatus === 401 || oxaStatus === 403 ||
+        isDenied(zapStatus, zapBody) || zapStatus === 401 || zapStatus === 403,
+      );
+    }
+  },
+);
+
 // ─── E-cross. Cross-provider replay isolation ──────────────────────────────
 // A track_id or order_id observed on one provider must never be honored by
 // the other provider's webhook. Each webhook must look the id up in its own
