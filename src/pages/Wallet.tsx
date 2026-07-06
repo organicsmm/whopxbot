@@ -29,24 +29,24 @@ export default function Wallet() {
     switch (type) {
       case 'deposit': return <ArrowDownLeft className="h-4 w-4 text-emerald-400" />;
       case 'order': return <ArrowUpRight className="h-4 w-4 text-rose-400" />;
-      case 'refund': return <RefreshCw className="h-4 w-4 text-violet-300" />;
-      default: return <WalletIcon className="h-4 w-4 text-slate-400" />;
+      case 'refund': return <RefreshCw className="h-4 w-4 text-sky-300" />;
+      default: return <WalletIcon className="h-4 w-4 text-white/50" />;
     }
   };
   const getIconBg = (type: string) => {
     switch (type) {
-      case 'deposit': return 'bg-emerald-500/15';
-      case 'order': return 'bg-rose-500/15';
-      case 'refund': return 'bg-violet-500/15';
-      default: return 'bg-white/5';
+      case 'deposit': return 'bg-emerald-500/10 border border-emerald-500/20';
+      case 'order': return 'bg-rose-500/10 border border-rose-500/20';
+      case 'refund': return 'bg-sky-500/10 border border-sky-500/20';
+      default: return 'bg-white/[0.04] border border-white/10';
     }
   };
   const getAmountColor = (type: string) => {
     switch (type) {
       case 'deposit': return 'text-emerald-400';
       case 'order': return 'text-rose-400';
-      case 'refund': return 'text-violet-300';
-      default: return 'text-slate-200';
+      case 'refund': return 'text-sky-300';
+      default: return 'text-white/80';
     }
   };
   const fmtDate = (d: string) =>
@@ -213,28 +213,28 @@ export default function Wallet() {
                 {displayTransactions.map((tx) => (
                   <div
                     key={tx.id}
-                    className="flex items-center justify-between p-3.5 rounded-2xl bg-[#07040f] border border-white/5 hover:border-violet-500/30 transition-colors"
+                    className="flex items-center justify-between p-3.5 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] hover:border-white/10 transition-colors"
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       <div className={'w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center ' + getIconBg(tx.type)}>
                         {getIcon(tx.type)}
                       </div>
                       <div className="min-w-0">
-                        <p className="font-medium text-[13px] leading-tight truncate max-w-[240px] text-slate-100">
+                        <p className="font-medium text-[13px] leading-tight truncate max-w-[240px] text-white/90">
                           {tx.displayDescription}
                         </p>
                         <div className="flex items-center flex-wrap gap-x-2 gap-y-0.5 mt-1">
                           {tx.payment_method && (
-                            <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-white/5 text-violet-300/70">
+                            <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-white/[0.05] border border-white/10 text-white/60">
                               {tx.payment_method.replace(/_/g, ' ').toUpperCase()}
                             </span>
                           )}
-                          <span className={'text-[9px] font-semibold px-1.5 py-0.5 rounded ' + (tx.status === 'pending' ? 'bg-amber-500/15 text-amber-300' : tx.status === 'completed' ? 'bg-emerald-500/15 text-emerald-300' : 'bg-rose-500/15 text-rose-300')}>
+                          <span className={'text-[9px] font-semibold px-1.5 py-0.5 rounded ' + (tx.status === 'pending' ? 'bg-amber-500/10 text-amber-300 border border-amber-500/20' : tx.status === 'completed' ? 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-300 border border-rose-500/20')}>
                             {tx.status}
                           </span>
-                          <span className="text-[11px] text-slate-500">{fmtDate(tx.created_at!)}</span>
+                          <span className="text-[11px] text-white/40">{fmtDate(tx.created_at!)}</span>
                           {tx.payment_reference && tx.payment_method === 'usdt_bep20' && (
-                            <a href={`https://bscscan.com/tx/${tx.payment_reference}`} target="_blank" rel="noopener noreferrer" className="text-[11px] flex items-center gap-0.5 hover:underline text-violet-300">
+                            <a href={`https://bscscan.com/tx/${tx.payment_reference}`} target="_blank" rel="noopener noreferrer" className="text-[11px] flex items-center gap-0.5 hover:underline text-white/70 hover:text-white">
                               BSCScan <ExternalLink className="h-3 w-3" />
                             </a>
                           )}
@@ -246,7 +246,7 @@ export default function Wallet() {
                         {tx.type === 'order' ? '−' : '+'}{formatPrice(Math.abs(Number(tx.displayAmount)))}
                       </p>
                       {tx.displayBalanceAfter != null && (
-                        <p className="text-[11px] mt-0.5 text-slate-500">Bal: {formatPrice(Number(tx.displayBalanceAfter))}</p>
+                        <p className="text-[11px] mt-0.5 text-white/40">Bal: {formatPrice(Number(tx.displayBalanceAfter))}</p>
                       )}
                     </div>
                   </div>
@@ -254,12 +254,11 @@ export default function Wallet() {
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center py-14 text-center">
-                <div className="relative w-16 h-16 rounded-2xl bg-violet-500/10 flex items-center justify-center mb-4 border border-violet-500/20">
-                  <WalletIcon className="w-7 h-7 text-violet-400/60" />
-                  <div className="absolute inset-0 rounded-2xl bg-violet-500/20 blur-xl -z-10" />
+                <div className="relative w-14 h-14 rounded-2xl bg-white/[0.04] flex items-center justify-center mb-4 border border-white/10">
+                  <WalletIcon className="w-6 h-6 text-white/40" />
                 </div>
-                <p className="text-slate-300 text-sm font-medium">No transactions yet</p>
-                <p className="text-slate-500 text-xs mt-1">Your deposits and spending will appear here</p>
+                <p className="text-white/80 text-sm font-medium">No transactions yet</p>
+                <p className="text-white/40 text-xs mt-1">Your deposits and spending will appear here</p>
               </div>
             )}
           </div>
