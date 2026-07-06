@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { registerWebhookEvent, finalizeWebhookEvent } from "../_shared/webhook-idempotency.ts";
+import { recordSecurityEvent } from "../_shared/security-audit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
