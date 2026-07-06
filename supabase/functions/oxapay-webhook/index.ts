@@ -29,6 +29,8 @@ Deno.serve(async (req) => {
       inner?.track_id || inner?.trackId || payload?.track_id;
     const status = String(inner?.status || payload?.status || "").toLowerCase();
     const paidAmount = Number(inner?.paid_amount ?? inner?.paidAmount ?? inner?.amount ?? 0);
+    const payerEmail: string | undefined =
+      inner?.email || inner?.payer_email || payload?.email || inner?.buyer_email;
 
     if (!orderId) {
       console.error("no order_id in webhook");
@@ -36,11 +38,71 @@ Deno.serve(async (req) => {
     }
 
     // Find deposit
-    const { data: dep, error: fetchErr } = await supabase
+    let { data: dep, error: fetchErr } = await supabase
       .from("oxapay_deposits")
       .select("*")
       .eq("order_id", orderId)
       .maybeSingle();
+
+    // Fallback: static payment link (no deposit row). Auto-create using email → user match.
+    if ((!dep || !dep.user_id) && (status === "paid" || status === "confirmed") && payerEmail) {
+      const amt = paidAmount || 0;
+      // Match amount → plan (small tolerance)
+      const plans: Array<{ plan: string; usd: number }> = [
+        { plan: "monthly", usd: 15 },
+        { plan: "yearly", usd: 99 },
+        { plan: "lifetime", usd: 250 },
+      ];
+      const matched = plans.find((p) => Math.abs(amt - p.usd) <= Math.max(1, p.usd * 0.05));
+      if (!matched) {
+        console.error("static-link: no plan matches amount", amt);
+        return json({ ok: false, error: "amount does not match any plan" }, 400);
+      }
+
+      // Find user by email
+      const { data: prof } = await supabase
+        .from("profiles")
+        .select("user_id, email")
+        .ilike("email", payerEmail.trim())
+        .maybeSingle();
+
+      if (!prof?.user_id) {
+        console.error("static-link: user not found for email", payerEmail);
+        // Still store an unlinked deposit for admin visibility
+        await supabase.from("oxapay_deposits").upsert({
+          order_id: orderId,
+          purpose: "subscription",
+          plan_type: matched.plan,
+          amount_usd: matched.usd,
+          email: payerEmail,
+          track_id: trackId ? String(trackId) : null,
+          webhook_payload: payload,
+          status: "unmatched_email",
+          credited: false,
+        }, { onConflict: "order_id" });
+        return json({ ok: false, error: "user email not found" }, 404);
+      }
+
+      // Upsert a deposit row so activate RPC works
+      const { data: upserted, error: upErr } = await supabase.from("oxapay_deposits").upsert({
+        order_id: orderId,
+        user_id: prof.user_id,
+        purpose: "subscription",
+        plan_type: matched.plan,
+        amount_usd: matched.usd,
+        email: payerEmail,
+        track_id: trackId ? String(trackId) : null,
+        webhook_payload: payload,
+        status: "paid",
+        credited: false,
+      }, { onConflict: "order_id" }).select("*").maybeSingle();
+
+      if (upErr || !upserted) {
+        console.error("static-link: upsert failed", upErr);
+        return json({ ok: false, error: upErr?.message || "upsert failed" }, 500);
+      }
+      dep = upserted;
+    }
 
     if (fetchErr || !dep) {
       console.error("deposit not found", orderId, fetchErr);
