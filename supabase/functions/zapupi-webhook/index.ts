@@ -59,10 +59,56 @@ Deno.serve(async (req) => {
       .eq("order_id", orderId)
       .maybeSingle();
 
+    // === Subscription flow (static pay link, no deposit row) ===
+    // Frontend appends ?udf1=<user_id>&udf2=monthly_subscription to the pay link.
+    const udf1 = payload.udf1 || payload.data?.udf1;
+    const udf2 = String(payload.udf2 || payload.data?.udf2 || "").toLowerCase();
+    const isSubscriptionPayload = !deposit && udf2 === "monthly_subscription" && udf1;
+
+    if (isSubscriptionPayload) {
+      const verifiedSub = await verifyOrder(ZAP_KEY, orderId, payload);
+      if (!verifiedSub.success) {
+        return ok({ received: true, subscription: false, verified: false });
+      }
+      const paidInr = Number(verifiedSub.amount || 0);
+      if (paidInr < 1000) {
+        console.warn("[zapupi-webhook] subscription amount too low", paidInr);
+        return ok({ received: true, subscription: false, reason: "amount_low" });
+      }
+
+      const now = new Date();
+      const expires = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+
+      // Deactivate any prior active subs then insert a fresh monthly one
+      await supabase
+        .from("subscriptions")
+        .update({ status: "expired" })
+        .eq("user_id", udf1)
+        .eq("status", "active");
+
+      const { error: subErr } = await supabase.from("subscriptions").insert({
+        user_id: udf1,
+        plan_type: "monthly",
+        status: "active",
+        activated_at: now.toISOString(),
+        expires_at: expires.toISOString(),
+        activated_by: udf1,
+      });
+
+      if (subErr) {
+        console.error("[zapupi-webhook] subscription insert error", subErr);
+        return ok({ received: true, subscription: false, error: subErr.message });
+      }
+
+      console.log("[zapupi-webhook] subscription activated for", udf1);
+      return ok({ received: true, subscription: true, expires_at: expires.toISOString() });
+    }
+
     if (!deposit) {
       console.warn("[zapupi-webhook] deposit not found for", orderId);
       return ok({ received: true });
     }
+
 
     if (deposit.credited) {
       return ok({ received: true, already_credited: true });
