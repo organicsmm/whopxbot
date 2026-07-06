@@ -26,7 +26,7 @@ interface SubscriptionGuardProps {
 export function SubscriptionGuard({ children }: SubscriptionGuardProps) {
   const { hasActiveSubscription, hasPendingRequest, isLoading } = useSubscription();
   const [showDialog, setShowDialog] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'lifetime'>('monthly');
+  const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly' | 'lifetime'>('yearly');
   const [cryptoLoading, setCryptoLoading] = useState(false);
 
   async function payWithCrypto() {
@@ -88,77 +88,68 @@ export function SubscriptionGuard({ children }: SubscriptionGuardProps) {
 
           {/* Pricing Cards */}
           {!hasPendingRequest && (
-            <div className="grid sm:grid-cols-2 gap-4 mb-6">
-              {/* Monthly Plan */}
-              <div 
-                className={`p-5 rounded-xl border-2 cursor-pointer transition-all ${
-                  selectedPlan === 'monthly' 
-                    ? 'border-primary bg-primary/5' 
-                    : 'border-border hover:border-primary/50'
-                }`}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+              {/* Monthly */}
+              <div
+                className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${selectedPlan === 'monthly' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'}`}
                 onClick={() => setSelectedPlan('monthly')}
               >
-                <div className="flex items-center justify-between mb-3">
-                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Zap className="h-5 w-5 text-primary" />
+                <div className="flex items-center justify-between mb-2">
+                  <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Zap className="h-4 w-4 text-primary" />
                   </div>
-                  {selectedPlan === 'monthly' && (
-                    <CheckCircle2 className="h-5 w-5 text-primary" />
-                  )}
+                  {selectedPlan === 'monthly' && <CheckCircle2 className="h-4 w-4 text-primary" />}
                 </div>
-                <h3 className="font-semibold mb-1">Monthly Plan</h3>
-                <div className="flex items-baseline gap-1 mb-3">
-                  <span className="text-3xl font-bold">₹999</span>
-                  <span className="text-muted-foreground">/month</span>
+                <h3 className="font-semibold mb-1">Monthly</h3>
+                <div className="flex items-baseline gap-1 mb-1">
+                  <span className="text-2xl font-bold">$18</span>
+                  <span className="text-xs text-muted-foreground">/mo</span>
                 </div>
-                <ul className="space-y-1.5 text-sm text-muted-foreground">
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="h-3 w-3 text-success" />
-                    Full platform access
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="h-3 w-3 text-success" />
-                    Cancel anytime
-                  </li>
-                </ul>
+                <p className="text-xs text-muted-foreground">30 days access</p>
               </div>
 
-              {/* Lifetime Plan */}
-              <div 
-                className={`p-5 rounded-xl border-2 cursor-pointer transition-all relative overflow-hidden ${
-                  selectedPlan === 'lifetime' 
-                    ? 'border-primary bg-primary/5' 
-                    : 'border-border hover:border-primary/50'
-                }`}
+              {/* Yearly - Popular */}
+              <div
+                className={`p-4 rounded-xl border-2 cursor-pointer transition-all relative overflow-hidden ${selectedPlan === 'yearly' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'}`}
+                onClick={() => setSelectedPlan('yearly')}
+              >
+                <Badge className="absolute top-1.5 right-1.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white border-0 text-[10px]">
+                  Popular
+                </Badge>
+                <div className="flex items-center justify-between mb-2">
+                  <div className="w-9 h-9 rounded-full bg-emerald-500/10 flex items-center justify-center">
+                    <Sparkles className="h-4 w-4 text-emerald-500" />
+                  </div>
+                  {selectedPlan === 'yearly' && <CheckCircle2 className="h-4 w-4 text-primary" />}
+                </div>
+                <h3 className="font-semibold mb-1">Yearly</h3>
+                <div className="flex items-baseline gap-1 mb-1">
+                  <span className="text-2xl font-bold">$99</span>
+                  <span className="text-xs text-muted-foreground">/yr</span>
+                </div>
+                <p className="text-xs text-emerald-600 font-semibold">Save 54%</p>
+              </div>
+
+              {/* Lifetime */}
+              <div
+                className={`p-4 rounded-xl border-2 cursor-pointer transition-all relative overflow-hidden ${selectedPlan === 'lifetime' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'}`}
                 onClick={() => setSelectedPlan('lifetime')}
               >
-                <Badge className="absolute top-2 right-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0">
-                  <Sparkles className="h-3 w-3 mr-1" />
-                  Best Value
+                <Badge className="absolute top-1.5 right-1.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 text-[10px]">
+                  Best
                 </Badge>
-                <div className="flex items-center justify-between mb-3">
-                  <div className="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center">
-                    <Crown className="h-5 w-5 text-amber-500" />
+                <div className="flex items-center justify-between mb-2">
+                  <div className="w-9 h-9 rounded-full bg-amber-500/10 flex items-center justify-center">
+                    <Crown className="h-4 w-4 text-amber-500" />
                   </div>
-                  {selectedPlan === 'lifetime' && (
-                    <CheckCircle2 className="h-5 w-5 text-primary" />
-                  )}
+                  {selectedPlan === 'lifetime' && <CheckCircle2 className="h-4 w-4 text-primary" />}
                 </div>
-                <h3 className="font-semibold mb-1">Lifetime Plan</h3>
-                <div className="flex items-baseline gap-1 mb-3">
-                  <span className="text-3xl font-bold">₹8,250</span>
-                  <span className="text-muted-foreground">one-time</span>
+                <h3 className="font-semibold mb-1">Lifetime</h3>
+                <div className="flex items-baseline gap-1 mb-1">
+                  <span className="text-2xl font-bold">$179</span>
+                  <span className="text-xs text-muted-foreground">1x</span>
                 </div>
-                <ul className="space-y-1.5 text-sm text-muted-foreground">
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="h-3 w-3 text-success" />
-                    Forever access
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="h-3 w-3 text-success" />
-                    All future updates
-                  </li>
-                </ul>
+                <p className="text-xs text-amber-600 font-semibold">Forever</p>
               </div>
             </div>
           )}
@@ -167,23 +158,28 @@ export function SubscriptionGuard({ children }: SubscriptionGuardProps) {
           {!hasPendingRequest && (
             <div className="space-y-3">
               <Button
-                className="w-full btn-gradient rounded-full py-6 text-lg"
-                onClick={() => setShowDialog(true)}
-              >
-                Get {selectedPlan === 'monthly' ? 'Monthly' : 'Lifetime'} Plan
-                <ArrowRight className="h-5 w-5 ml-2" />
-              </Button>
-              <Button
-                variant="outline"
                 disabled={cryptoLoading}
                 onClick={payWithCrypto}
-                className="w-full rounded-full py-6 text-base border-orange-500/40 hover:bg-orange-500/10"
+                className="w-full btn-gradient rounded-full py-6 text-lg"
               >
                 {cryptoLoading ? (
                   <><Loader2 className="h-5 w-5 mr-2 animate-spin" /> Opening OxaPay…</>
                 ) : (
-                  <><Bitcoin className="h-5 w-5 mr-2 text-orange-500" /> Pay with Crypto (Instant)</>
+                  <><Bitcoin className="h-5 w-5 mr-2" /> Pay with Crypto — {selectedPlan === 'monthly' ? '$18' : selectedPlan === 'yearly' ? '$99' : '$179'}</>
                 )}
+              </Button>
+              {selectedPlan !== 'yearly' && (
+                <Button
+                  variant="outline"
+                  className="w-full rounded-full py-5 text-sm"
+                  onClick={() => setShowDialog(true)}
+                >
+                  Request via WhatsApp / UPI
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </Button>
+              )}
+            </div>
+          )}
               </Button>
             </div>
           )}
