@@ -244,8 +244,21 @@ Deno.serve(async (req) => {
           .update({ status: "failed", raw_response: verified.raw })
           .eq("order_id", orderId);
       }
+      await recordSecurityEvent(supabase, {
+        category: "webhook_forgery",
+        source: "zapupi-webhook",
+        reason: "wallet-credit webhook could not be verified with provider",
+        provider: "zapupi",
+        order_id: String(orderId),
+        user_id: deposit.user_id,
+        http_status: 200,
+        request: req,
+        payload,
+        metadata: { flow: "wallet", provider_raw: verified.raw, failed: !!verified.failed },
+      });
       return ok({ received: true, verified: false });
     }
+
 
     const inr = Number(verified.amount || deposit.amount_inr) || Number(deposit.amount_inr);
     const usd = Number((inr / USD_RATE).toFixed(4));
