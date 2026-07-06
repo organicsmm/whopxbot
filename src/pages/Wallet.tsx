@@ -142,40 +142,38 @@ export default function Wallet() {
           <div className="relative">
             <div className="flex items-end justify-between mb-3 px-1">
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-violet-300/70">Add Funds</p>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/50">Add Funds</p>
                 <h3 className="text-lg font-bold text-white mt-0.5">Choose payment method</h3>
               </div>
             </div>
 
-            {/* Method switcher */}
-            <div className="grid grid-cols-2 gap-2 p-1.5 rounded-2xl bg-[#0f0824] border border-violet-500/10 mb-4">
+            {/* Method switcher — minimal landing style */}
+            <div className="grid grid-cols-2 gap-1 p-1 rounded-xl bg-white/[0.03] border border-white/10 mb-4 backdrop-blur-sm">
               <button
                 onClick={() => setMethod('upi')}
                 className={
-                  'relative flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm transition-all ' +
+                  'relative flex items-center justify-center gap-2 py-2.5 rounded-lg font-medium text-sm transition-all ' +
                   (method === 'upi'
-                    ? 'bg-gradient-to-br from-violet-600 to-violet-700 text-white shadow-lg shadow-violet-900/50'
-                    : 'text-violet-300/60 hover:text-violet-200 hover:bg-white/5')
+                    ? 'bg-white/[0.08] text-white border border-white/10 shadow-sm'
+                    : 'text-white/50 hover:text-white/80')
                 }
               >
-                <Zap className={'w-4 h-4 ' + (method === 'upi' ? 'fill-white' : '')} />
+                <Zap className="w-3.5 h-3.5" />
                 UPI · INR
                 {method === 'upi' && (
-                  <span className="absolute -top-1 -right-1 px-1.5 py-0.5 rounded-full bg-emerald-500 text-[8px] font-bold text-white leading-none tracking-wide">
-                    INSTANT
-                  </span>
+                  <span className="ml-1 h-1.5 w-1.5 rounded-full bg-emerald-400" style={{ animation: 'vault-pulse 1.8s ease-in-out infinite' }} />
                 )}
               </button>
               <button
                 onClick={() => setMethod('crypto')}
                 className={
-                  'flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm transition-all ' +
+                  'flex items-center justify-center gap-2 py-2.5 rounded-lg font-medium text-sm transition-all ' +
                   (method === 'crypto'
-                    ? 'bg-gradient-to-br from-indigo-600 to-indigo-700 text-white shadow-lg shadow-indigo-900/50'
-                    : 'text-indigo-300/60 hover:text-indigo-200 hover:bg-white/5')
+                    ? 'bg-white/[0.08] text-white border border-white/10 shadow-sm'
+                    : 'text-white/50 hover:text-white/80')
                 }
               >
-                <Bitcoin className="w-4 h-4" />
+                <Bitcoin className="w-3.5 h-3.5" />
                 Crypto · USD
               </button>
             </div>
