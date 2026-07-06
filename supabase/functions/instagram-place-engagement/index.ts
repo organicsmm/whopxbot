@@ -4,6 +4,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { notifyUserTelegram } from "../_shared/notify.ts";
+import { assertPaymentEligible } from "../_shared/payment-eligibility.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -16,16 +17,8 @@ function extractShortcode(link: string): string | null {
   return m ? m[1] : null;
 }
 
-async function isAdmin(userId: string): Promise<boolean> {
-  const { data } = await admin.from("user_roles").select("role").eq("user_id", userId).eq("role", "admin").maybeSingle();
-  return !!data;
-}
 
-async function hasActiveSubscription(userId: string): Promise<boolean> {
-  const { data } = await admin.from("subscriptions").select("plan_type,status").eq("user_id", userId).maybeSingle();
-  if (!data) return false;
-  return data.status === "active" && ["monthly", "lifetime"].includes(String(data.plan_type ?? ""));
-}
+
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
@@ -81,12 +74,16 @@ Deno.serve(async (req) => {
       }
     }
 
-    const admin_bypass = await isAdmin(userId);
-    if (!admin_bypass && !(await hasActiveSubscription(userId))) {
-      return new Response(JSON.stringify({ error: "Active subscription required" }), {
-        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    // Payment-eligibility gate: admin OR active verified subscription OR
+    // at least one completed deposit from a real gateway.
+    const eligibility = await assertPaymentEligible(admin, userId);
+    if (!eligibility.ok) {
+      return new Response(JSON.stringify({ error: eligibility.error }), {
+        status: eligibility.status,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
 
     // Load active IG bundle + items
     const { data: bundle } = await admin
