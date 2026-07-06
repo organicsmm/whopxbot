@@ -4,7 +4,7 @@ import path from "path";
 
 
 // https://vitejs.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
@@ -18,13 +18,27 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  esbuild: {
+    // Strip console.* and debugger in production builds to shrink bundle
+    // and skip runtime work on every page load.
+    drop: mode === "production" ? ["console", "debugger"] : [],
+    legalComments: "none",
+  },
   build: {
+    // Modern browsers only → smaller, faster JS.
+    target: "es2020",
     // Increase limit to suppress warnings for intentionally large chunks
     chunkSizeWarningLimit: 1000,
+    cssCodeSplit: true,
+    sourcemap: false,
+    reportCompressedSize: false,
+    minify: "esbuild",
     rollupOptions: {
       output: {
         // Manual chunk splitting for better caching
         manualChunks: {
+          // React runtime — very stable, cache-friendly
+          "react-vendor": ["react", "react-dom"],
           // UI library core
           "ui-core": [
             "@radix-ui/react-dialog",
@@ -44,8 +58,11 @@ export default defineConfig({
           "charts": ["recharts"],
           // Date utilities
           "date-fns": ["date-fns"],
+          // Form/validation stack
+          "forms": ["react-hook-form", "zod", "@hookform/resolvers"],
         },
       },
     },
   },
-});
+}));
+
