@@ -81,90 +81,62 @@ export default function Wallet() {
   return (
     <DashboardLayout>
       <style>{`
-        @keyframes vault-aurora { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(15px,-10px) scale(1.08)} }
-        @keyframes vault-shine { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
         @keyframes vault-pulse { 0%,100%{opacity:.6} 50%{opacity:1} }
       `}</style>
-      <div className="min-h-full bg-[#07040f] -mx-4 -my-6 md:-mx-6 md:-my-8 px-4 py-6 md:px-8 md:py-10 relative overflow-hidden">
-        {/* Ambient page glow */}
-        <div aria-hidden className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[600px] bg-violet-700/10 blur-[140px] rounded-full" />
-        <div aria-hidden className="pointer-events-none absolute -top-40 -right-40 w-[500px] h-[500px] bg-fuchsia-600/10 blur-[130px] rounded-full" />
+      <div className="min-h-full bg-[#030303] -mx-4 -my-6 md:-mx-6 md:-my-8 px-4 py-6 md:px-8 md:py-10 relative overflow-hidden">
+        {/* Subtle ambient glow */}
+        <div aria-hidden className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-purple-700/5 blur-[120px] rounded-full" />
 
         <div className="max-w-2xl mx-auto space-y-6 relative">
           {/* Page header */}
           <div className="flex items-center justify-between">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <div className="h-1.5 w-1.5 rounded-full bg-violet-400 shadow-[0_0_8px_rgba(167,139,250,0.9)]" style={{ animation: 'vault-pulse 2s ease-in-out infinite' }} />
-                <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-violet-300/70">Vault</p>
+                <div className="h-1.5 w-1.5 rounded-full bg-purple-400" style={{ animation: 'vault-pulse 2s ease-in-out infinite' }} />
+                <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-white/50">Vault</p>
               </div>
               <h1 className="text-3xl font-bold text-white tracking-tight">Wallet</h1>
             </div>
-            <div className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+            <div className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.04] border border-white/10">
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-              <span className="text-[11px] font-semibold text-emerald-300">Secure</span>
+              <span className="text-[11px] font-semibold text-white/70">Secure</span>
             </div>
           </div>
 
-          {/* Compact Vault Balance Strip */}
-          <div className="relative group">
-            {/* Outer glow */}
-            <div aria-hidden className="absolute -inset-px rounded-2xl opacity-70 blur-md transition-opacity group-hover:opacity-100"
-              style={{ background: 'linear-gradient(120deg, rgba(139,92,246,.45), rgba(217,70,239,.35), rgba(99,102,241,.4))' }} />
-
-            <div className="relative flex items-stretch rounded-2xl overflow-hidden bg-gradient-to-br from-[#150829] via-[#0f0620] to-[#0a0416] border border-violet-400/15 shadow-xl shadow-violet-950/40">
-              {/* Left vertical accent rail */}
-              <div className="relative w-1.5 shrink-0 overflow-hidden">
-                <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, #a78bfa, #d946ef 55%, #6366f1)' }} />
-                <div className="absolute inset-0 opacity-60" style={{ background: 'linear-gradient(180deg, transparent, rgba(255,255,255,.5), transparent)', backgroundSize: '100% 200%', animation: 'vault-shine 3s linear infinite' }} />
+          {/* Compact Balance Card — landing page style */}
+          <div className="relative rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.06] to-white/[0.02] backdrop-blur-md p-5 shadow-[0_20px_60px_-20px_rgba(124,58,237,0.25)]">
+            <div className="flex items-center justify-between gap-4 flex-wrap">
+              {/* Left: balance */}
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5 mb-1.5">
+                  <span className="h-1 w-1 rounded-full bg-emerald-400" style={{ animation: 'vault-pulse 1.8s ease-in-out infinite' }} />
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/50">Balance</p>
+                </div>
+                <div className="flex items-baseline gap-2">
+                  <h2 className="text-[28px] leading-none font-bold tracking-tight text-white">{formatPrice(wallet?.balance || 0)}</h2>
+                  <span className="text-[10px] font-medium text-white/40 uppercase tracking-widest">USD</span>
+                </div>
               </div>
 
-              {/* Ambient blob */}
-              <div aria-hidden className="pointer-events-none absolute -top-16 right-10 w-56 h-56 bg-violet-500/25 blur-[90px] rounded-full" style={{ animation: 'vault-aurora 9s ease-in-out infinite' }} />
-              <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.05]"
-                style={{ backgroundImage: 'radial-gradient(rgba(255,255,255,.7) 1px, transparent 1px)', backgroundSize: '14px 14px' }} />
-
-              <div className="relative flex-1 flex items-center justify-between gap-4 px-5 py-4">
-                {/* Left: balance */}
-                <div className="min-w-0">
-                  <div className="flex items-center gap-1.5 mb-1">
-                    <span className="h-1 w-1 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,.9)]" style={{ animation: 'vault-pulse 1.8s ease-in-out infinite' }} />
-                    <p className="text-[9px] font-bold uppercase tracking-[0.28em] text-violet-200/70">Balance · Live</p>
-                  </div>
-                  <div className="flex items-baseline gap-2">
-                    <h2 className="text-[30px] leading-none font-extrabold tracking-tight" style={{
-                      background: 'linear-gradient(180deg, #ffffff 0%, #e9d5ff 100%)',
-                      WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-                    }}>{formatPrice(wallet?.balance || 0)}</h2>
-                    <span className="text-[10px] font-semibold text-violet-300/60 uppercase tracking-widest">USD</span>
+              {/* Right: mini stats */}
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/5">
+                  <ArrowDownLeft className="w-3.5 h-3.5 text-emerald-400" />
+                  <div className="leading-tight">
+                    <p className="text-[8px] font-semibold uppercase tracking-wider text-white/40">In</p>
+                    <p className="text-[11px] font-semibold text-white">{formatPrice(wallet?.total_deposited || 0)}</p>
                   </div>
                 </div>
-
-                {/* Divider */}
-                <div aria-hidden className="hidden sm:block h-10 w-px bg-gradient-to-b from-transparent via-violet-400/30 to-transparent" />
-
-                {/* Right: mini stats stacked */}
-                <div className="flex items-center gap-3 shrink-0">
-                  <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-lg bg-emerald-500/15 border border-emerald-400/20 flex items-center justify-center">
-                      <ArrowDownLeft className="w-3.5 h-3.5 text-emerald-400" />
-                    </div>
-                    <div className="leading-tight">
-                      <p className="text-[8px] font-bold uppercase tracking-[0.18em] text-emerald-300/70">In</p>
-                      <p className="text-[11px] font-bold text-white">{formatPrice(wallet?.total_deposited || 0)}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-lg bg-rose-500/15 border border-rose-400/20 flex items-center justify-center">
-                      <ArrowUpRight className="w-3.5 h-3.5 text-rose-400" />
-                    </div>
-                    <div className="leading-tight">
-                      <p className="text-[8px] font-bold uppercase tracking-[0.18em] text-rose-300/70">Out</p>
-                      <p className="text-[11px] font-bold text-white">{formatPrice(wallet?.total_spent || 0)}</p>
-                    </div>
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/5">
+                  <ArrowUpRight className="w-3.5 h-3.5 text-rose-400" />
+                  <div className="leading-tight">
+                    <p className="text-[8px] font-semibold uppercase tracking-wider text-white/40">Out</p>
+                    <p className="text-[11px] font-semibold text-white">{formatPrice(wallet?.total_spent || 0)}</p>
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
 
               {/* Right notch — ticket style */}
               <div aria-hidden className="hidden md:flex flex-col items-center justify-center px-3 border-l border-dashed border-violet-300/15 bg-white/[0.02]">
