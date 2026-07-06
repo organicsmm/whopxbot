@@ -85,15 +85,15 @@ export default function Wallet() {
       `}</style>
       <div className="min-h-full bg-[#030303] -mx-4 -my-6 md:-mx-6 md:-my-8 px-4 py-6 md:px-8 md:py-10 relative overflow-hidden">
         {/* Subtle ambient glow */}
-        <div aria-hidden className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-purple-700/5 blur-[120px] rounded-full" />
+        <div aria-hidden className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-purple-500/10 blur-[120px] rounded-full" />
 
         <div className="max-w-2xl mx-auto space-y-6 relative">
           {/* Page header */}
           <div className="flex items-center justify-between">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <div className="h-1.5 w-1.5 rounded-full bg-purple-400" style={{ animation: 'vault-pulse 2s ease-in-out infinite' }} />
-                <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-white/50">Vault</p>
+                <div className="h-1.5 w-1.5 rounded-full bg-purple-300 shadow-[0_0_10px_rgba(216,180,254,0.7)]" style={{ animation: 'vault-pulse 2s ease-in-out infinite' }} />
+                <p className="text-[11px] font-medium tracking-[0.18em] uppercase text-purple-200/70">Vault</p>
               </div>
               <h1 className="text-3xl font-bold text-white tracking-tight">Wallet</h1>
             </div>
@@ -104,13 +104,13 @@ export default function Wallet() {
           </div>
 
           {/* Compact Balance Card — landing page style */}
-          <div className="relative rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.06] to-white/[0.02] backdrop-blur-md p-5 shadow-[0_20px_60px_-20px_rgba(124,58,237,0.25)]">
+          <div className="relative rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.06] to-white/[0.02] backdrop-blur-md p-5 shadow-[0_0_40px_rgba(168,85,247,0.08)]">
             <div className="flex items-center justify-between gap-4 flex-wrap">
               {/* Left: balance */}
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5 mb-1.5">
                   <span className="h-1 w-1 rounded-full bg-emerald-400" style={{ animation: 'vault-pulse 1.8s ease-in-out infinite' }} />
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/50">Balance</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/50">Balance</p>
                 </div>
                 <div className="flex items-baseline gap-2">
                   <h2 className="text-[28px] leading-none font-bold tracking-tight text-white">{formatPrice(wallet?.balance || 0)}</h2>
@@ -142,7 +142,7 @@ export default function Wallet() {
           <div className="relative">
             <div className="flex items-end justify-between mb-3 px-1">
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/50">Add Funds</p>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/50">Add Funds</p>
                 <h3 className="text-lg font-bold text-white mt-0.5">Choose payment method</h3>
               </div>
             </div>
@@ -185,7 +185,7 @@ export default function Wallet() {
           <div className="relative rounded-2xl bg-gradient-to-br from-white/[0.06] to-white/[0.02] border border-white/10 p-6 backdrop-blur-md">
             <div className="flex items-center justify-between mb-5">
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/50">Activity</p>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/50">Activity</p>
                 <h3 className="text-lg font-bold text-white mt-0.5">Transaction History</h3>
               </div>
               <span className="text-[11px] text-white/40">{displayTransactions.length} total</span>
