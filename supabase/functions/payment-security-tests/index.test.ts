@@ -492,7 +492,128 @@ Deno.test("E4 — ZapUPI subscription replay: activation happens at most once", 
   assert(txCount <= 1, `expected ≤ 1 transaction, got ${txCount}`);
 });
 
-// ─── F. End-state audit ────────────────────────────────────────────────────
+// ─── E-cross. Cross-provider replay isolation ──────────────────────────────
+// A track_id or order_id observed on one provider must never be honored by
+// the other provider's webhook. Each webhook must look the id up in its own
+// dedicated deposits table (oxapay_deposits vs zapupi_deposits) and reject
+// when the id doesn't exist there — even if the "other" provider has an
+// identically-named row.
+
+Deno.test("E5 — OxaPay order_id replayed at ZapUPI webhook does NOT credit/activate", async () => {
+  // Same id, delivered first to OxaPay, then replayed as a ZapUPI callback.
+  const sharedOrderId = `xprov-${crypto.randomUUID()}`;
+  const sharedTrackId = `xprov-track-${crypto.randomUUID()}`;
+
+  // 1) Send to OxaPay first (forged — no real deposit row exists).
+  const oxa = await postWebhook("oxapay-webhook", {
+    order_id: sharedOrderId,
+    track_id: sharedTrackId,
+    status: "paid",
+    paid_amount: 299,
+    email: "xprov@example.com",
+  });
+  const oxaActivated =
+    oxa.json?.result &&
+    (oxa.json.result.activated === true || oxa.json.result.credited === true);
+  assert(!oxaActivated, `oxapay leg activated: ${JSON.stringify(oxa.json)}`);
+
+  // 2) Replay the SAME order_id at ZapUPI (wallet-credit shape).
+  const zapWallet = await postWebhook(
+    "zapupi-webhook",
+    new URLSearchParams({
+      order_id: sharedOrderId,
+      status: "success",
+      amount: "100",
+      txn_id: sharedTrackId, // reuse the oxapay track id
+    }).toString(),
+    "application/x-www-form-urlencoded",
+  );
+  assert(
+    zapWallet.json?.credited !== true,
+    `zapupi wallet credited via oxapay id: ${JSON.stringify(zapWallet.json)}`,
+  );
+
+  // 3) Replay the SAME order_id at ZapUPI (subscription shape).
+  const zapSub = await postWebhook(
+    "zapupi-webhook",
+    new URLSearchParams({
+      order_id: sharedOrderId,
+      status: "success",
+      amount: "1499",
+      udf1: FAKE_USER,
+      udf2: "monthly_subscription",
+      txn_id: sharedTrackId,
+    }).toString(),
+    "application/x-www-form-urlencoded",
+  );
+  const subActivated =
+    zapSub.json?.subscription === true && zapSub.json?.duplicate !== true;
+  assert(!subActivated, `zapupi sub activated via oxapay id: ${JSON.stringify(zapSub.json)}`);
+
+  // End-state: no transaction and no active subscription tied to this id.
+  const txCount = await countRows(
+    "transactions",
+    `payment_reference=eq.${sharedOrderId}&select=id`,
+  );
+  assertEquals(txCount, 0, `cross-provider replay produced ${txCount} transactions`);
+
+  const sub = await selectRow(
+    "subscriptions",
+    `user_id=eq.${FAKE_USER}&status=eq.active&select=id`,
+  );
+  if (sub.status === 200) {
+    assertEquals(sub.body.trim(), "[]", `fake user gained sub via x-replay: ${sub.body}`);
+  }
+});
+
+Deno.test("E6 — ZapUPI order_id/txn_id replayed at OxaPay webhook does NOT credit/activate", async () => {
+  const sharedOrderId = `xprov2-${crypto.randomUUID()}`;
+  const sharedTxnId = `xprov2-txn-${crypto.randomUUID()}`;
+
+  // 1) Send to ZapUPI first.
+  const zap = await postWebhook(
+    "zapupi-webhook",
+    new URLSearchParams({
+      order_id: sharedOrderId,
+      status: "success",
+      amount: "100",
+      txn_id: sharedTxnId,
+    }).toString(),
+    "application/x-www-form-urlencoded",
+  );
+  assert(
+    zap.json?.credited !== true,
+    `zapupi leg credited: ${JSON.stringify(zap.json)}`,
+  );
+
+  // 2) Replay the SAME order_id/track_id at OxaPay.
+  const oxa = await postWebhook("oxapay-webhook", {
+    order_id: sharedOrderId,
+    track_id: sharedTxnId, // reuse zapupi txn_id as oxapay track_id
+    status: "paid",
+    paid_amount: 299,
+    email: "xprov2@example.com",
+  });
+  const oxaActivated =
+    oxa.json?.result &&
+    (oxa.json.result.activated === true || oxa.json.result.credited === true);
+  assert(!oxaActivated, `oxapay activated via zapupi id: ${JSON.stringify(oxa.json)}`);
+
+  // End-state: no transactions on either id.
+  const txByOrder = await countRows(
+    "transactions",
+    `payment_reference=eq.${sharedOrderId}&select=id`,
+  );
+  assertEquals(txByOrder, 0, `cross-provider replay produced ${txByOrder} txns (order)`);
+
+  const txByTxn = await countRows(
+    "transactions",
+    `payment_reference=eq.${sharedTxnId}&select=id`,
+  );
+  assertEquals(txByTxn, 0, `cross-provider replay produced ${txByTxn} txns (txn)`);
+});
+
+
 
 Deno.test("F1 — no active subscription exists for fake user after all attacks", async () => {
   const { status, body } = await selectRow(
