@@ -13,13 +13,12 @@ import { useAuth } from '@/hooks/useAuth';
  * Dark canvas, fine grid, violet aurora glows, display headline with serif italic accent.
  */
 
-const ZAPUPI_MONTHLY_LINK = 'https://pay.zapupi.com/instent-pay-WkFQVVBJNDFGQkZBRjE5QTgzOTkzNA';
-
 const Index = () => {
   const { user } = useAuth();
-  const monthlyPayHref = user
-    ? `${ZAPUPI_MONTHLY_LINK}?udf1=${encodeURIComponent(user.id)}&udf2=monthly_subscription`
-    : '/auth?next=subscribe';
+  const monthlyPayHref = user ? '/wallet?subscribe=monthly' : '/auth?next=subscribe';
+  const yearlyPayHref = user ? '/wallet?subscribe=yearly' : '/auth?next=subscribe';
+  const lifetimePayHref = user ? '/wallet?subscribe=lifetime' : '/auth?next=subscribe';
+
 
   return (
     <div className="min-h-screen w-full bg-[#030303] text-white overflow-x-hidden selection:bg-purple-500/30 antialiased">
