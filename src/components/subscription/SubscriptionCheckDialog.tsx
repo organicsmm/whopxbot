@@ -33,7 +33,7 @@ interface SubscriptionCheckDialogProps {
 export function SubscriptionCheckDialog({ open, onOpenChange }: SubscriptionCheckDialogProps) {
   const { hasPendingRequest } = useSubscription();
   const [showRequestDialog, setShowRequestDialog] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'lifetime'>('monthly');
+  const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly' | 'lifetime'>('yearly');
   const [cryptoLoading, setCryptoLoading] = useState(false);
 
   async function payWithCrypto() {
@@ -93,79 +93,83 @@ export function SubscriptionCheckDialog({ open, onOpenChange }: SubscriptionChec
 
             {/* Pricing Cards */}
             {!hasPendingRequest && (
-              <div className="grid grid-cols-2 gap-3 mb-4">
+              <div className="grid grid-cols-3 gap-2 mb-4">
                 {/* Monthly Plan */}
                 <div
-                  className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${selectedPlan === 'monthly'
+                  className={`p-3 rounded-xl border-2 cursor-pointer transition-all ${selectedPlan === 'monthly'
                     ? 'border-primary bg-primary/5'
                     : 'border-border hover:border-primary/50'
                     }`}
                   onClick={() => setSelectedPlan('monthly')}
                 >
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                      <Zap className="h-4 w-4 text-primary" />
+                  <div className="flex items-center justify-between mb-1.5">
+                    <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Zap className="h-3.5 w-3.5 text-primary" />
                     </div>
                     {selectedPlan === 'monthly' && (
-                      <CheckCircle2 className="h-4 w-4 text-primary" />
+                      <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
                     )}
                   </div>
-                  <h3 className="font-semibold text-sm mb-1 text-foreground">Monthly Plan</h3>
-                  <div className="flex items-baseline gap-1 mb-2">
-                    <span className="text-2xl font-[1000] text-foreground">₹999</span>
-                    <span className="text-xs font-bold text-muted-foreground">/month</span>
+                  <h3 className="font-semibold text-xs mb-0.5 text-foreground">Monthly</h3>
+                  <div className="flex items-baseline gap-1 mb-1.5">
+                    <span className="text-lg font-[1000] text-foreground">$18</span>
+                    <span className="text-[10px] font-bold text-muted-foreground">/mo</span>
                   </div>
-                  <ul className="space-y-1 text-[11px] font-bold text-muted-foreground/80">
-                    <li className="flex items-center gap-1.5 transition-all hover:translate-x-1">
-                      <CheckCircle2 className="h-3 w-3 text-emerald-500" />
-                      Global Markup Control
-                    </li>
-                    <li className="flex items-center gap-1.5">
-                      <CheckCircle2 className="h-3 w-3 text-emerald-500" />
-                      Full Platform Access
-                    </li>
-                    <li className="flex items-center gap-1.5">
-                      <CheckCircle2 className="h-3 w-3 text-emerald-500" />
-                      Cancel Anytime
-                    </li>
-                  </ul>
+                  <p className="text-[10px] text-muted-foreground/80">30 days access</p>
+                </div>
+
+                {/* Yearly Plan - Popular */}
+                <div
+                  className={`p-3 rounded-xl border-2 cursor-pointer transition-all relative overflow-hidden ${selectedPlan === 'yearly'
+                    ? 'border-primary bg-primary/5'
+                    : 'border-border hover:border-primary/50'
+                    }`}
+                  onClick={() => setSelectedPlan('yearly')}
+                >
+                  <Badge className="absolute top-1 right-1 bg-gradient-to-r from-emerald-500 to-teal-500 text-white border-0 text-[9px] px-1.5 py-0">
+                    Popular
+                  </Badge>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <div className="w-7 h-7 rounded-full bg-emerald-500/10 flex items-center justify-center">
+                      <Sparkles className="h-3.5 w-3.5 text-emerald-500" />
+                    </div>
+                    {selectedPlan === 'yearly' && (
+                      <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
+                    )}
+                  </div>
+                  <h3 className="font-semibold text-xs mb-0.5 text-foreground">Yearly</h3>
+                  <div className="flex items-baseline gap-1 mb-1.5">
+                    <span className="text-lg font-[1000] text-foreground">$99</span>
+                    <span className="text-[10px] font-bold text-muted-foreground">/yr</span>
+                  </div>
+                  <p className="text-[10px] text-emerald-600 font-semibold">Save 54%</p>
                 </div>
 
                 {/* Lifetime Plan */}
                 <div
-                  className={`p-4 rounded-xl border-2 cursor-pointer transition-all relative overflow-hidden ${selectedPlan === 'lifetime'
+                  className={`p-3 rounded-xl border-2 cursor-pointer transition-all relative overflow-hidden ${selectedPlan === 'lifetime'
                     ? 'border-primary bg-primary/5'
                     : 'border-border hover:border-primary/50'
                     }`}
                   onClick={() => setSelectedPlan('lifetime')}
                 >
-                  <Badge className="absolute top-1.5 right-1.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 text-[10px] px-1.5 py-0.5">
-                    <Sparkles className="h-2.5 w-2.5 mr-0.5" />
+                  <Badge className="absolute top-1 right-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 text-[9px] px-1.5 py-0">
                     Best
                   </Badge>
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="w-8 h-8 rounded-full bg-amber-500/10 flex items-center justify-center">
-                      <Crown className="h-4 w-4 text-amber-500" />
+                  <div className="flex items-center justify-between mb-1.5">
+                    <div className="w-7 h-7 rounded-full bg-amber-500/10 flex items-center justify-center">
+                      <Crown className="h-3.5 w-3.5 text-amber-500" />
                     </div>
                     {selectedPlan === 'lifetime' && (
-                      <CheckCircle2 className="h-4 w-4 text-primary" />
+                      <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
                     )}
                   </div>
-                  <h3 className="font-semibold text-sm mb-1 text-foreground">Lifetime Plan</h3>
-                  <div className="flex items-baseline gap-1 mb-2">
-                    <span className="text-2xl font-[1000] text-foreground">₹8,250</span>
-                    <span className="text-xs font-bold text-muted-foreground">one-time</span>
+                  <h3 className="font-semibold text-xs mb-0.5 text-foreground">Lifetime</h3>
+                  <div className="flex items-baseline gap-1 mb-1.5">
+                    <span className="text-lg font-[1000] text-foreground">$179</span>
+                    <span className="text-[10px] font-bold text-muted-foreground">1x</span>
                   </div>
-                  <ul className="space-y-1 text-[11px] font-bold text-muted-foreground/80">
-                    <li className="flex items-center gap-1.5 transition-all hover:translate-x-1">
-                      <CheckCircle2 className="h-3 w-3 text-amber-500" />
-                      Lifetime Console Access
-                    </li>
-                    <li className="flex items-center gap-1.5">
-                      <CheckCircle2 className="h-3 w-3 text-amber-500" />
-                      All Future Updates
-                    </li>
-                  </ul>
+                  <p className="text-[10px] text-amber-600 font-semibold">Forever</p>
                 </div>
               </div>
             )}
