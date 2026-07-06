@@ -64,17 +64,40 @@ Deno.serve(async (req) => {
       const { data: existing } = await adminAuth
         .from('instagram_accounts').select('id').eq('user_id', userId).eq('username', usernameLower).maybeSingle();
       if (!existing) {
-        const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-        const { count: monthCount } = await adminAuth
+        const windowMs = 30 * 24 * 60 * 60 * 1000;
+        const sinceDate = new Date(Date.now() - windowMs);
+        const { data: recent } = await adminAuth
           .from('instagram_accounts')
-          .select('id', { count: 'exact', head: true })
+          .select('username, created_at')
           .eq('user_id', userId)
-          .gte('created_at', since);
-        if ((monthCount ?? 0) >= 5) {
+          .gte('created_at', sinceDate.toISOString())
+          .order('created_at', { ascending: true });
+        const used = recent?.length ?? 0;
+        const LIMIT = 5;
+        if (used >= LIMIT) {
+          const oldest = recent![0];
+          const resetAt = new Date(new Date(oldest.created_at).getTime() + windowMs);
+          const secsUntilReset = Math.max(1, Math.ceil((resetAt.getTime() - Date.now()) / 1000));
+          const resetHuman = resetAt.toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true });
           return new Response(JSON.stringify({
-            error: 'Monthly limit reached: you can link up to 5 Instagram accounts per 30 days. Please try again later or remove an existing account.',
+            error: `Monthly limit reached: you can link ${LIMIT} Instagram accounts per 30 days. You have used ${used}/${LIMIT}. Next slot frees on ${resetHuman} (when @${oldest.username} rolls out of the window). Remove an existing account to free a slot immediately.`,
+            code: 'monthly_link_limit_reached',
+            limit: LIMIT,
+            used,
+            remaining: 0,
+            window_days: 30,
+            reset_at: resetAt.toISOString(),
+            reset_at_human: resetHuman,
+            retry_after_seconds: secsUntilReset,
+            oldest_linked_username: oldest.username,
+            oldest_linked_at: oldest.created_at,
           }), {
-            status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 429,
+            headers: {
+              ...corsHeaders,
+              'Content-Type': 'application/json',
+              'Retry-After': String(secsUntilReset),
+            },
           });
         }
       }
