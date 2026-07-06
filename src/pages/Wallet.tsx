@@ -138,14 +138,6 @@ export default function Wallet() {
             </div>
           </div>
 
-              {/* Right notch — ticket style */}
-              <div aria-hidden className="hidden md:flex flex-col items-center justify-center px-3 border-l border-dashed border-violet-300/15 bg-white/[0.02]">
-                <Sparkles className="w-3.5 h-3.5 text-violet-300/70 mb-1" />
-                <p className="text-[8px] font-bold uppercase tracking-[0.22em] text-violet-300/60 writing-mode-vertical" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>Vault · Secure</p>
-              </div>
-            </div>
-          </div>
-
           {/* Deposit section — tabbed */}
           <div className="relative">
             <div className="flex items-end justify-between mb-3 px-1">
