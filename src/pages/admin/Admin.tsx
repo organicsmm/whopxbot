@@ -30,6 +30,7 @@ import {
   Save,
   Loader2,
   TrendingDown,
+  ShieldAlert,
 } from 'lucide-react';
 import { Link, Navigate } from 'react-router-dom';
 import { toast } from 'sonner';
