@@ -1505,6 +1505,60 @@ export type Database = {
         }
         Relationships: []
       }
+      security_audit_log: {
+        Row: {
+          category: string
+          created_at: string
+          http_status: number | null
+          id: string
+          ip: string | null
+          metadata: Json | null
+          order_id: string | null
+          payload: Json | null
+          provider: string | null
+          reason: string
+          request_path: string | null
+          source: string
+          track_id: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          http_status?: number | null
+          id?: string
+          ip?: string | null
+          metadata?: Json | null
+          order_id?: string | null
+          payload?: Json | null
+          provider?: string | null
+          reason: string
+          request_path?: string | null
+          source: string
+          track_id?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          http_status?: number | null
+          id?: string
+          ip?: string | null
+          metadata?: Json | null
+          order_id?: string | null
+          payload?: Json | null
+          provider?: string | null
+          reason?: string
+          request_path?: string | null
+          source?: string
+          track_id?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       service_provider_mapping: {
         Row: {
           backup_provider_account_id: string | null
