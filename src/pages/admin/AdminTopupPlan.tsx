@@ -177,6 +177,13 @@ export default function AdminTopupPlan() {
           }
         }
       )
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "provider_balance_history" },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ["topup-balance-history"] });
+        }
+      )
       .subscribe((status) => {
         setLiveConnected(status === "SUBSCRIBED");
       });
