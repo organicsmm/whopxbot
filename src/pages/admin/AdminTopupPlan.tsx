@@ -259,16 +259,42 @@ export default function AdminTopupPlan() {
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Badge variant="secondary" className="text-xs">Updates every 60s</Badge>
+            <div className="flex items-center gap-2 flex-wrap">
+              <Badge
+                variant="outline"
+                className={cn(
+                  "text-xs gap-1.5 border-transparent",
+                  liveConnected
+                    ? "bg-success/10 text-success"
+                    : "bg-muted text-muted-foreground"
+                )}
+              >
+                <span className="relative flex h-2 w-2">
+                  {liveConnected && (
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-75" />
+                  )}
+                  <span
+                    className={cn(
+                      "relative inline-flex h-2 w-2 rounded-full",
+                      liveConnected ? "bg-success" : "bg-muted-foreground/50"
+                    )}
+                  />
+                </span>
+                {liveConnected ? "LIVE" : "Connecting…"}
+              </Badge>
               <span className="text-xs text-muted-foreground hidden sm:inline">
-                Refreshed {formatDistanceToNow(lastRefresh, { addSuffix: true })}
+                Updated {formatDistanceToNow(lastRefresh, { addSuffix: true })}
               </span>
               <Button size="sm" variant="outline" onClick={refreshAll} disabled={loading}>
                 <RefreshCw className={cn("h-4 w-4 mr-1", loading && "animate-spin")} />
                 Refresh
               </Button>
+              <Button size="sm" onClick={checkAll} disabled={checkingAll} className="gap-1">
+                <Zap className={cn("h-4 w-4", checkingAll && "animate-pulse")} />
+                {checkingAll ? "Checking…" : "Check All Balances Now"}
+              </Button>
             </div>
+
           </div>
 
           {/* Quick stats */}
