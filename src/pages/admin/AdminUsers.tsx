@@ -88,6 +88,8 @@ export default function AdminUsers() {
   const [balanceAction, setBalanceAction] = useState<'add' | 'subtract'>('add');
   const [removeSubUser, setRemoveSubUser] = useState<UserProfile | null>(null);
   const [pauseUser, setPauseUser] = useState<UserProfile | null>(null);
+  const [selfTestRunning, setSelfTestRunning] = useState(false);
+  const [selfTestSteps, setSelfTestSteps] = useState<Array<{ label: string; ok: boolean | null; detail?: string }>>([]);
   const [cancelUser, setCancelUser] = useState<UserProfile | null>(null);
   const [refundOnCancel, setRefundOnCancel] = useState(false);
 
