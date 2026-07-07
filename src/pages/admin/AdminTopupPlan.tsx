@@ -350,36 +350,70 @@ export default function AdminTopupPlan() {
                   const delta = (a.balance ?? 0) - cost;
                   const stale = !a.balance_checked_at || (Date.now() - new Date(a.balance_checked_at).getTime() > 5 * 60_000);
                   const healthy = !a.last_balance_error && !stale;
+                  const isChecking = !!checkingIds[a.id];
+                  const isPulsing = !!pulseIds[a.id];
                   return (
-                    <Card key={a.id} className="glass-card">
+                    <Card
+                      key={a.id}
+                      className={cn(
+                        "glass-card relative overflow-hidden transition-all duration-500",
+                        isPulsing && "ring-2 ring-primary/70 shadow-lg shadow-primary/20"
+                      )}
+                    >
+                      {isPulsing && (
+                        <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent animate-pulse" />
+                      )}
                       <CardHeader className="pb-2">
                         <div className="flex items-center justify-between gap-2">
-                          <CardTitle className="text-base truncate">{a.name}</CardTitle>
-                          <span
-                            className={cn(
-                              "h-2.5 w-2.5 rounded-full",
-                              healthy ? "bg-success" : "bg-destructive"
+                          <CardTitle className="text-base truncate flex items-center gap-2">
+                            {a.name}
+                            {isPulsing && (
+                              <Badge variant="outline" className="text-[10px] py-0 px-1.5 border-primary/40 text-primary bg-primary/10">
+                                updated
+                              </Badge>
                             )}
-                            title={healthy ? "Fresh" : "Stale / error"}
-                          />
+                          </CardTitle>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span
+                                className={cn(
+                                  "h-2.5 w-2.5 rounded-full shrink-0",
+                                  healthy ? "bg-success" : "bg-destructive"
+                                )}
+                              />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              {healthy ? "Fresh — balance is up to date" : "Stale or errored — press Check Now"}
+                            </TooltipContent>
+                          </Tooltip>
                         </div>
                         <div className="text-xs text-muted-foreground">{a.provider_id}</div>
                       </CardHeader>
-                      <CardContent className="space-y-2">
+                      <CardContent className="space-y-3">
                         <div>
-                          <div className="text-xs text-muted-foreground">Balance</div>
-                          <div className="text-2xl font-bold">
+                          <div className="text-xs text-muted-foreground">Live Balance</div>
+                          <div
+                            className={cn(
+                              "text-3xl font-bold tabular-nums transition-colors duration-500",
+                              isPulsing && "text-primary"
+                            )}
+                          >
                             {a.balance != null ? inrFromAny(a.balance, a.balance_currency) : "—"}
                           </div>
+                          {a.balance_currency && a.balance != null && (
+                            <div className="text-[11px] text-muted-foreground">
+                              Exact at provider: {Number(a.balance).toLocaleString(undefined, { maximumFractionDigits: 4 })} {String(a.balance_currency).toUpperCase()}
+                            </div>
+                          )}
                         </div>
                         <div className="grid grid-cols-2 gap-2 text-sm">
                           <div>
                             <div className="text-xs text-muted-foreground">Pending cost</div>
-                            <div className="font-semibold">{inr(cost)}</div>
+                            <div className="font-semibold tabular-nums">{inr(cost)}</div>
                           </div>
                           <div>
                             <div className="text-xs text-muted-foreground">Delta</div>
-                            <div className={cn("font-semibold", delta >= 0 ? "text-success" : "text-destructive")}>
+                            <div className={cn("font-semibold tabular-nums", delta >= 0 ? "text-success" : "text-destructive")}>
                               {delta >= 0 ? inr(delta) : `-${inr(Math.abs(delta))}`}
                             </div>
                           </div>
@@ -389,12 +423,22 @@ export default function AdminTopupPlan() {
                             TOP UP {inr(Math.abs(delta))} needed
                           </div>
                         )}
-                        <div className="text-[11px] text-muted-foreground flex items-center justify-between">
-                          <span>
+                        <div className="flex items-center justify-between gap-2 pt-1 border-t border-border/50">
+                          <span className="text-[11px] text-muted-foreground">
                             {a.balance_checked_at
                               ? `Checked ${formatDistanceToNow(new Date(a.balance_checked_at), { addSuffix: true })}`
                               : "Never checked"}
                           </span>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-7 px-2 gap-1 text-xs"
+                            onClick={() => checkOne(a.id, a.name)}
+                            disabled={isChecking}
+                          >
+                            <Radio className={cn("h-3.5 w-3.5", isChecking && "animate-pulse text-primary")} />
+                            {isChecking ? "Checking…" : "Check Now"}
+                          </Button>
                         </div>
                         {a.last_balance_error && (
                           <div className="text-xs text-destructive flex items-start gap-1">
@@ -403,6 +447,7 @@ export default function AdminTopupPlan() {
                           </div>
                         )}
                       </CardContent>
+
                     </Card>
                   );
                 })}
