@@ -119,10 +119,10 @@ export default function AdminTopupPlan() {
     if (plan.dataUpdatedAt) setLastRefresh(new Date(plan.dataUpdatedAt));
   }, [plan.dataUpdatedAt]);
 
-  // Realtime: any change to organic_run_schedule invalidates the planner
+  // Realtime: instant updates for schedule + provider balances
   useEffect(() => {
     const channel = supabase
-      .channel("topup-live")
+      .channel("admin-topup-live")
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "organic_run_schedule" },
@@ -131,11 +131,67 @@ export default function AdminTopupPlan() {
           queryClient.invalidateQueries({ queryKey: ["topup-breakdown"] });
         }
       )
-      .subscribe();
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "provider_accounts" },
+        (payload) => {
+          const id = (payload.new as { id?: string })?.id;
+          queryClient.invalidateQueries({ queryKey: ["topup-provider-accounts"] });
+          if (id) {
+            setPulseIds((s) => ({ ...s, [id]: Date.now() }));
+            setTimeout(() => {
+              setPulseIds((s) => {
+                const copy = { ...s };
+                delete copy[id];
+                return copy;
+              });
+            }, 1600);
+          }
+        }
+      )
+      .subscribe((status) => {
+        setLiveConnected(status === "SUBSCRIBED");
+      });
     return () => {
       supabase.removeChannel(channel);
     };
   }, [queryClient]);
+
+  const checkOne = async (accountId: string, name: string) => {
+    setCheckingIds((s) => ({ ...s, [accountId]: true }));
+    try {
+      const { error } = await supabase.functions.invoke("check-provider-balance", {
+        body: { account_id: accountId },
+      });
+      if (error) throw error;
+      toast.success(`Balance refreshed — ${name}`);
+    } catch (e) {
+      toast.error(`Failed to fetch ${name} balance`, {
+        description: (e as Error).message,
+      });
+    } finally {
+      setCheckingIds((s) => {
+        const copy = { ...s };
+        delete copy[accountId];
+        return copy;
+      });
+    }
+  };
+
+  const checkAll = async () => {
+    setCheckingAll(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("check-provider-balance", { body: {} });
+      if (error) throw error;
+      const n = (data as { checked?: number })?.checked ?? 0;
+      toast.success(`Checked ${n} provider${n === 1 ? "" : "s"} live`);
+    } catch (e) {
+      toast.error("Live balance check failed", { description: (e as Error).message });
+    } finally {
+      setCheckingAll(false);
+    }
+  };
+
 
   const planByAccount = useMemo(() => {
     const m = new Map<string, PlanRow>();
