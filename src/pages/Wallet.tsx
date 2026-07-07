@@ -284,6 +284,7 @@ export default function Wallet() {
           </div>
         </div>
       </div>
+      <SubscriptionCheckDialog open={subDialogOpen} onOpenChange={setSubDialogOpen} />
     </DashboardLayout>
   );
 }
