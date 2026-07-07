@@ -115,6 +115,21 @@ export default function AdminTopupPlan() {
     refetchInterval: 60_000,
   });
 
+  const history = useQuery({
+    queryKey: ["topup-balance-history"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("provider_balance_history")
+        .select("id,provider_account_id,balance,balance_currency,previous_balance,delta,status,error_message,source,checked_at")
+        .order("checked_at", { ascending: false })
+        .limit(50);
+      if (error) throw error;
+      return (data || []) as HistoryRow[];
+    },
+    refetchInterval: 60_000,
+  });
+
+
   useEffect(() => {
     if (plan.dataUpdatedAt) setLastRefresh(new Date(plan.dataUpdatedAt));
   }, [plan.dataUpdatedAt]);
