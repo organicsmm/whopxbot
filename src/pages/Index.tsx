@@ -15,9 +15,9 @@ import { useAuth } from '@/hooks/useAuth';
 
 const Index = () => {
   const { user } = useAuth();
-  const monthlyPayHref = user ? '/wallet?subscribe=monthly' : '/auth?next=subscribe';
-  const yearlyPayHref = user ? '/wallet?subscribe=yearly' : '/auth?next=subscribe';
-  const lifetimePayHref = user ? '/wallet?subscribe=lifetime' : '/auth?next=subscribe';
+  const monthlyPayHref = user ? '/wallet?subscribe=monthly' : `/auth?next=${encodeURIComponent('/wallet?subscribe=monthly')}`;
+  const yearlyPayHref = user ? '/wallet?subscribe=yearly' : `/auth?next=${encodeURIComponent('/wallet?subscribe=yearly')}`;
+  const lifetimePayHref = user ? '/wallet?subscribe=lifetime' : `/auth?next=${encodeURIComponent('/wallet?subscribe=lifetime')}`;
 
 
   return (

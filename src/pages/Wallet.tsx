@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { useWallet } from '@/hooks/useWallet';
 import { useTransactions, type TransactionFilter } from '@/hooks/useTransactions';
@@ -6,6 +7,7 @@ import { useCurrency } from '@/hooks/useCurrency';
 
 import OxapayDepositCard from '@/components/wallet/OxapayDepositCard';
 import ZapUpiDepositCard from '@/components/wallet/ZapUpiDepositCard';
+import { SubscriptionCheckDialog } from '@/components/subscription/SubscriptionCheckDialog';
 import {
   Wallet as WalletIcon,
   ArrowUpRight,
@@ -22,8 +24,26 @@ export default function Wallet() {
   const { wallet } = useWallet();
   const { formatPrice, rates } = useCurrency();
   const [filter, setFilter] = useState<TransactionFilter>('all');
-  const [method, setMethod] = useState<'upi' | 'crypto'>('upi');
+  const [searchParams, setSearchParams] = useSearchParams();
+  // Default to crypto tab when returning from OxaPay so the deposit card
+  // mounts and its poll-until-credited effect fires.
+  const initialMethod: 'upi' | 'crypto' =
+    (searchParams.get('order_id') || '').startsWith('oxw_') ? 'crypto' : 'upi';
+  const [method, setMethod] = useState<'upi' | 'crypto'>(initialMethod);
+  const [subDialogOpen, setSubDialogOpen] = useState(false);
   const { data: transactions } = useTransactions(filter);
+
+  // Consume ?subscribe=<plan> from landing-page pricing buttons.
+  useEffect(() => {
+    const plan = searchParams.get('subscribe');
+    if (plan === 'monthly' || plan === 'yearly' || plan === 'lifetime') {
+      setSubDialogOpen(true);
+      const next = new URLSearchParams(searchParams);
+      next.delete('subscribe');
+      setSearchParams(next, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const getIcon = (type: string) => {
     switch (type) {
