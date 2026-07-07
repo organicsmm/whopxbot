@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, RefreshCw, Wallet, TrendingUp, ChevronDown, ChevronRight, AlertTriangle } from "lucide-react";
+import { ArrowLeft, RefreshCw, Wallet, TrendingUp, ChevronDown, ChevronRight, AlertTriangle, Zap, Radio } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -11,7 +11,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+
 
 const INR_RATE = 83.5;
 
@@ -73,6 +75,11 @@ export default function AdminTopupPlan() {
   const queryClient = useQueryClient();
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
+  const [checkingIds, setCheckingIds] = useState<Record<string, boolean>>({});
+  const [checkingAll, setCheckingAll] = useState(false);
+  const [liveConnected, setLiveConnected] = useState(false);
+  const [pulseIds, setPulseIds] = useState<Record<string, number>>({});
+
 
   const plan = useQuery({
     queryKey: ["topup-plan"],
@@ -112,10 +119,10 @@ export default function AdminTopupPlan() {
     if (plan.dataUpdatedAt) setLastRefresh(new Date(plan.dataUpdatedAt));
   }, [plan.dataUpdatedAt]);
 
-  // Realtime: any change to organic_run_schedule invalidates the planner
+  // Realtime: instant updates for schedule + provider balances
   useEffect(() => {
     const channel = supabase
-      .channel("topup-live")
+      .channel("admin-topup-live")
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "organic_run_schedule" },
@@ -124,11 +131,67 @@ export default function AdminTopupPlan() {
           queryClient.invalidateQueries({ queryKey: ["topup-breakdown"] });
         }
       )
-      .subscribe();
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "provider_accounts" },
+        (payload) => {
+          const id = (payload.new as { id?: string })?.id;
+          queryClient.invalidateQueries({ queryKey: ["topup-provider-accounts"] });
+          if (id) {
+            setPulseIds((s) => ({ ...s, [id]: Date.now() }));
+            setTimeout(() => {
+              setPulseIds((s) => {
+                const copy = { ...s };
+                delete copy[id];
+                return copy;
+              });
+            }, 1600);
+          }
+        }
+      )
+      .subscribe((status) => {
+        setLiveConnected(status === "SUBSCRIBED");
+      });
     return () => {
       supabase.removeChannel(channel);
     };
   }, [queryClient]);
+
+  const checkOne = async (accountId: string, name: string) => {
+    setCheckingIds((s) => ({ ...s, [accountId]: true }));
+    try {
+      const { error } = await supabase.functions.invoke("check-provider-balance", {
+        body: { account_id: accountId },
+      });
+      if (error) throw error;
+      toast.success(`Balance refreshed — ${name}`);
+    } catch (e) {
+      toast.error(`Failed to fetch ${name} balance`, {
+        description: (e as Error).message,
+      });
+    } finally {
+      setCheckingIds((s) => {
+        const copy = { ...s };
+        delete copy[accountId];
+        return copy;
+      });
+    }
+  };
+
+  const checkAll = async () => {
+    setCheckingAll(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("check-provider-balance", { body: {} });
+      if (error) throw error;
+      const n = (data as { checked?: number })?.checked ?? 0;
+      toast.success(`Checked ${n} provider${n === 1 ? "" : "s"} live`);
+    } catch (e) {
+      toast.error("Live balance check failed", { description: (e as Error).message });
+    } finally {
+      setCheckingAll(false);
+    }
+  };
+
 
   const planByAccount = useMemo(() => {
     const m = new Map<string, PlanRow>();
@@ -196,16 +259,42 @@ export default function AdminTopupPlan() {
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Badge variant="secondary" className="text-xs">Updates every 60s</Badge>
+            <div className="flex items-center gap-2 flex-wrap">
+              <Badge
+                variant="outline"
+                className={cn(
+                  "text-xs gap-1.5 border-transparent",
+                  liveConnected
+                    ? "bg-success/10 text-success"
+                    : "bg-muted text-muted-foreground"
+                )}
+              >
+                <span className="relative flex h-2 w-2">
+                  {liveConnected && (
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-75" />
+                  )}
+                  <span
+                    className={cn(
+                      "relative inline-flex h-2 w-2 rounded-full",
+                      liveConnected ? "bg-success" : "bg-muted-foreground/50"
+                    )}
+                  />
+                </span>
+                {liveConnected ? "LIVE" : "Connecting…"}
+              </Badge>
               <span className="text-xs text-muted-foreground hidden sm:inline">
-                Refreshed {formatDistanceToNow(lastRefresh, { addSuffix: true })}
+                Updated {formatDistanceToNow(lastRefresh, { addSuffix: true })}
               </span>
               <Button size="sm" variant="outline" onClick={refreshAll} disabled={loading}>
                 <RefreshCw className={cn("h-4 w-4 mr-1", loading && "animate-spin")} />
                 Refresh
               </Button>
+              <Button size="sm" onClick={checkAll} disabled={checkingAll} className="gap-1">
+                <Zap className={cn("h-4 w-4", checkingAll && "animate-pulse")} />
+                {checkingAll ? "Checking…" : "Check All Balances Now"}
+              </Button>
             </div>
+
           </div>
 
           {/* Quick stats */}
@@ -261,36 +350,70 @@ export default function AdminTopupPlan() {
                   const delta = (a.balance ?? 0) - cost;
                   const stale = !a.balance_checked_at || (Date.now() - new Date(a.balance_checked_at).getTime() > 5 * 60_000);
                   const healthy = !a.last_balance_error && !stale;
+                  const isChecking = !!checkingIds[a.id];
+                  const isPulsing = !!pulseIds[a.id];
                   return (
-                    <Card key={a.id} className="glass-card">
+                    <Card
+                      key={a.id}
+                      className={cn(
+                        "glass-card relative overflow-hidden transition-all duration-500",
+                        isPulsing && "ring-2 ring-primary/70 shadow-lg shadow-primary/20"
+                      )}
+                    >
+                      {isPulsing && (
+                        <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent animate-pulse" />
+                      )}
                       <CardHeader className="pb-2">
                         <div className="flex items-center justify-between gap-2">
-                          <CardTitle className="text-base truncate">{a.name}</CardTitle>
-                          <span
-                            className={cn(
-                              "h-2.5 w-2.5 rounded-full",
-                              healthy ? "bg-success" : "bg-destructive"
+                          <CardTitle className="text-base truncate flex items-center gap-2">
+                            {a.name}
+                            {isPulsing && (
+                              <Badge variant="outline" className="text-[10px] py-0 px-1.5 border-primary/40 text-primary bg-primary/10">
+                                updated
+                              </Badge>
                             )}
-                            title={healthy ? "Fresh" : "Stale / error"}
-                          />
+                          </CardTitle>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span
+                                className={cn(
+                                  "h-2.5 w-2.5 rounded-full shrink-0",
+                                  healthy ? "bg-success" : "bg-destructive"
+                                )}
+                              />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              {healthy ? "Fresh — balance is up to date" : "Stale or errored — press Check Now"}
+                            </TooltipContent>
+                          </Tooltip>
                         </div>
                         <div className="text-xs text-muted-foreground">{a.provider_id}</div>
                       </CardHeader>
-                      <CardContent className="space-y-2">
+                      <CardContent className="space-y-3">
                         <div>
-                          <div className="text-xs text-muted-foreground">Balance</div>
-                          <div className="text-2xl font-bold">
+                          <div className="text-xs text-muted-foreground">Live Balance</div>
+                          <div
+                            className={cn(
+                              "text-3xl font-bold tabular-nums transition-colors duration-500",
+                              isPulsing && "text-primary"
+                            )}
+                          >
                             {a.balance != null ? inrFromAny(a.balance, a.balance_currency) : "—"}
                           </div>
+                          {a.balance_currency && a.balance != null && (
+                            <div className="text-[11px] text-muted-foreground">
+                              Exact at provider: {Number(a.balance).toLocaleString(undefined, { maximumFractionDigits: 4 })} {String(a.balance_currency).toUpperCase()}
+                            </div>
+                          )}
                         </div>
                         <div className="grid grid-cols-2 gap-2 text-sm">
                           <div>
                             <div className="text-xs text-muted-foreground">Pending cost</div>
-                            <div className="font-semibold">{inr(cost)}</div>
+                            <div className="font-semibold tabular-nums">{inr(cost)}</div>
                           </div>
                           <div>
                             <div className="text-xs text-muted-foreground">Delta</div>
-                            <div className={cn("font-semibold", delta >= 0 ? "text-success" : "text-destructive")}>
+                            <div className={cn("font-semibold tabular-nums", delta >= 0 ? "text-success" : "text-destructive")}>
                               {delta >= 0 ? inr(delta) : `-${inr(Math.abs(delta))}`}
                             </div>
                           </div>
@@ -300,12 +423,22 @@ export default function AdminTopupPlan() {
                             TOP UP {inr(Math.abs(delta))} needed
                           </div>
                         )}
-                        <div className="text-[11px] text-muted-foreground flex items-center justify-between">
-                          <span>
+                        <div className="flex items-center justify-between gap-2 pt-1 border-t border-border/50">
+                          <span className="text-[11px] text-muted-foreground">
                             {a.balance_checked_at
                               ? `Checked ${formatDistanceToNow(new Date(a.balance_checked_at), { addSuffix: true })}`
                               : "Never checked"}
                           </span>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-7 px-2 gap-1 text-xs"
+                            onClick={() => checkOne(a.id, a.name)}
+                            disabled={isChecking}
+                          >
+                            <Radio className={cn("h-3.5 w-3.5", isChecking && "animate-pulse text-primary")} />
+                            {isChecking ? "Checking…" : "Check Now"}
+                          </Button>
                         </div>
                         {a.last_balance_error && (
                           <div className="text-xs text-destructive flex items-start gap-1">
@@ -314,6 +447,7 @@ export default function AdminTopupPlan() {
                           </div>
                         )}
                       </CardContent>
+
                     </Card>
                   );
                 })}

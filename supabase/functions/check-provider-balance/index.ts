@@ -49,12 +49,23 @@ serve(async (req) => {
     const usdToInr = await getUsdToInrRate()
     console.log(`USD->INR rate: ${usdToInr}`)
 
-    const { data: accounts, error } = await supabase
-      .from('provider_accounts')
-      .select('*')
-      .eq('is_active', true)
+    // Optional: check a single account only (much faster for "Check Now" per card)
+    let accountId: string | null = null
+    if (req.method === 'POST') {
+      try {
+        const body = await req.json()
+        if (body?.account_id && typeof body.account_id === 'string') {
+          accountId = body.account_id
+        }
+      } catch {}
+    }
 
+    let query = supabase.from('provider_accounts').select('*').eq('is_active', true)
+    if (accountId) query = supabase.from('provider_accounts').select('*').eq('id', accountId)
+
+    const { data: accounts, error } = await query
     if (error) throw error
+
 
     const results: any[] = []
 
