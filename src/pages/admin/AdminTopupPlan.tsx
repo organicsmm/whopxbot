@@ -75,6 +75,11 @@ export default function AdminTopupPlan() {
   const queryClient = useQueryClient();
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
+  const [checkingIds, setCheckingIds] = useState<Record<string, boolean>>({});
+  const [checkingAll, setCheckingAll] = useState(false);
+  const [liveConnected, setLiveConnected] = useState(false);
+  const [pulseIds, setPulseIds] = useState<Record<string, number>>({});
+
 
   const plan = useQuery({
     queryKey: ["topup-plan"],
