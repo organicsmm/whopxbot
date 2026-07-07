@@ -51,11 +51,15 @@ serve(async (req) => {
 
     // Optional: check a single account only (much faster for "Check Now" per card)
     let accountId: string | null = null
+    let source: 'auto' | 'manual' = 'auto'
     if (req.method === 'POST') {
       try {
         const body = await req.json()
         if (body?.account_id && typeof body.account_id === 'string') {
           accountId = body.account_id
+        }
+        if (body?.source === 'manual' || body?.account_id) {
+          source = 'manual'
         }
       } catch {}
     }
@@ -70,6 +74,7 @@ serve(async (req) => {
     const results: any[] = []
 
     for (const acc of accounts || []) {
+      const previousBalance: number | null = acc.balance != null ? Number(acc.balance) : null
       try {
         const formData = new URLSearchParams()
         formData.append('key', acc.api_key)
@@ -91,16 +96,28 @@ serve(async (req) => {
         try { data = JSON.parse(text) } catch { data = { error: text } }
 
         if (data.error) {
+          const errMsg = typeof data.error === 'string' ? data.error : JSON.stringify(data.error)
           await supabase.from('provider_accounts').update({
             balance_checked_at: new Date().toISOString(),
-            last_balance_error: typeof data.error === 'string' ? data.error : JSON.stringify(data.error),
+            last_balance_error: errMsg,
           }).eq('id', acc.id)
+          await supabase.from('provider_balance_history').insert({
+            provider_account_id: acc.id,
+            balance: previousBalance,
+            balance_currency: acc.balance_currency,
+            previous_balance: previousBalance,
+            delta: 0,
+            status: 'error',
+            error_message: errMsg,
+            source,
+          })
           results.push({ name: acc.name, error: data.error })
           continue
         }
 
         const balance = parseFloat(data.balance ?? '0')
         const currency = data.currency ?? acc.balance_currency ?? 'USD'
+        const delta = previousBalance != null ? balance - previousBalance : 0
 
         await supabase.from('provider_accounts').update({
           balance,
@@ -108,6 +125,21 @@ serve(async (req) => {
           balance_checked_at: new Date().toISOString(),
           last_balance_error: null,
         }).eq('id', acc.id)
+
+        // Only log meaningful entries: first-ever check, manual check, or actual change.
+        const isChange = previousBalance == null || Math.abs(delta) > 0.00005
+        if (source === 'manual' || isChange) {
+          await supabase.from('provider_balance_history').insert({
+            provider_account_id: acc.id,
+            balance,
+            balance_currency: currency,
+            previous_balance: previousBalance,
+            delta,
+            status: 'ok',
+            error_message: null,
+            source,
+          })
+        }
 
         // Convert to INR for unified threshold comparison
         const isUSD = String(currency).toUpperCase() === 'USD'
@@ -136,13 +168,25 @@ serve(async (req) => {
         results.push({ name: acc.name, balance, currency, balance_inr: balanceInr.toFixed(2), alerted: isLow && canAlert })
       } catch (e: any) {
         console.error(`Balance check failed for ${acc.name}:`, e.message)
+        const errMsg = e.message || 'Network error'
         await supabase.from('provider_accounts').update({
           balance_checked_at: new Date().toISOString(),
-          last_balance_error: e.message || 'Network error',
+          last_balance_error: errMsg,
         }).eq('id', acc.id)
-        results.push({ name: acc.name, error: e.message })
+        await supabase.from('provider_balance_history').insert({
+          provider_account_id: acc.id,
+          balance: previousBalance,
+          balance_currency: acc.balance_currency,
+          previous_balance: previousBalance,
+          delta: 0,
+          status: 'error',
+          error_message: errMsg,
+          source,
+        })
+        results.push({ name: acc.name, error: errMsg })
       }
     }
+
 
     return new Response(JSON.stringify({ success: true, checked: results.length, results }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
