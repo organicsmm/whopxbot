@@ -876,10 +876,107 @@ export default function AdminUsers() {
                   />
                   <p className="text-[10px] text-muted-foreground">Wallet credit converted at ₹83.5 / $1</p>
                 </div>
+
+                {/* Self-Test Panel */}
+                <div className="rounded-xl border border-dashed p-3 space-y-2 bg-muted/30">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="text-xs font-semibold">Admin Fund Self-Test</p>
+                      <p className="text-[10px] text-muted-foreground">+₹1 then -₹1, verifies wallet & transactions</p>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      disabled={selfTestRunning}
+                      onClick={async () => {
+                        if (!selectedUser) return;
+                        setSelfTestRunning(true);
+                        setSelfTestSteps([]);
+                        const push = (s: { label: string; ok: boolean | null; detail?: string }) =>
+                          setSelfTestSteps((prev) => [...prev, s]);
+                        const RATE = 83.5;
+                        const delta = Math.trunc((1 / RATE) * 10000) / 10000;
+                        try {
+                          const { data: w0, error: e0 } = await supabase.from('wallets')
+                            .select('balance').eq('user_id', selectedUser.user_id).single();
+                          if (e0) throw new Error('read: ' + e0.message);
+                          const b0 = Number(w0?.balance || 0);
+                          push({ label: `1. Initial balance = $${b0.toFixed(4)}`, ok: true });
+
+                          const b1 = Math.trunc((b0 + delta) * 10000) / 10000;
+                          const { error: eu1 } = await supabase.from('wallets')
+                            .update({ balance: b1 }).eq('user_id', selectedUser.user_id);
+                          push({ label: '2. Update wallet (+₹1)', ok: !eu1, detail: eu1?.message });
+                          if (eu1) throw eu1;
+
+                          const { error: et1 } = await supabase.from('transactions').insert({
+                            user_id: selectedUser.user_id, type: 'deposit', amount: delta,
+                            balance_after: b1, status: 'completed',
+                            description: 'SELF-TEST: admin +₹1',
+                          });
+                          push({ label: '3. Insert deposit transaction', ok: !et1, detail: et1?.message });
+                          if (et1) throw et1;
+
+                          const { data: w1 } = await supabase.from('wallets').select('balance')
+                            .eq('user_id', selectedUser.user_id).single();
+                          const okAdd = Math.abs(Number(w1?.balance || 0) - b1) < 0.0001;
+                          push({ label: `4. Verify balance = $${b1.toFixed(4)}`, ok: okAdd, detail: `got $${Number(w1?.balance).toFixed(4)}` });
+
+                          const b2 = Math.trunc((b1 - delta) * 10000) / 10000;
+                          const { error: eu2 } = await supabase.from('wallets')
+                            .update({ balance: b2 }).eq('user_id', selectedUser.user_id);
+                          push({ label: '5. Update wallet (-₹1)', ok: !eu2, detail: eu2?.message });
+                          if (eu2) throw eu2;
+
+                          const { error: et2 } = await supabase.from('transactions').insert({
+                            user_id: selectedUser.user_id, type: 'withdrawal', amount: -delta,
+                            balance_after: b2, status: 'completed',
+                            description: 'SELF-TEST: admin -₹1',
+                          });
+                          push({ label: '6. Insert withdrawal transaction', ok: !et2, detail: et2?.message });
+                          if (et2) throw et2;
+
+                          const { data: w2 } = await supabase.from('wallets').select('balance')
+                            .eq('user_id', selectedUser.user_id).single();
+                          const okSub = Math.abs(Number(w2?.balance || 0) - b0) < 0.0001;
+                          push({ label: `7. Verify balance restored = $${b0.toFixed(4)}`, ok: okSub, detail: `got $${Number(w2?.balance).toFixed(4)}` });
+
+                          const { data: txs } = await supabase.from('transactions')
+                            .select('description').eq('user_id', selectedUser.user_id)
+                            .like('description', 'SELF-TEST:%')
+                            .order('created_at', { ascending: false }).limit(2);
+                          push({ label: '8. SELF-TEST transactions recorded', ok: (txs?.length || 0) >= 2, detail: `${txs?.length || 0} rows` });
+
+                          toast.success('Self-test finished ✔');
+                          queryClient.invalidateQueries({ queryKey: ['admin-all-users-with-subs'] });
+                        } catch (err) {
+                          const msg = err instanceof Error ? err.message : String(err);
+                          push({ label: 'ABORTED', ok: false, detail: msg });
+                          toast.error('Self-test failed: ' + msg);
+                        } finally {
+                          setSelfTestRunning(false);
+                        }
+                      }}
+                    >
+                      {selfTestRunning && <Loader2 className="h-3 w-3 animate-spin mr-1" />}
+                      Run Self-Test
+                    </Button>
+                  </div>
+                  {selfTestSteps.length > 0 && (
+                    <ul className="space-y-1 text-[11px] max-h-48 overflow-auto pt-1">
+                      {selfTestSteps.map((s, i) => (
+                        <li key={i} className={s.ok === false ? 'text-red-500' : s.ok ? 'text-green-600' : 'text-muted-foreground'}>
+                          {s.ok === true ? '✅' : s.ok === false ? '❌' : '•'} {s.label}
+                          {s.detail && <span className="text-muted-foreground"> — {s.detail}</span>}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
               </div>
             )}
             <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-4">
-              <Button variant="outline" onClick={() => setSelectedUser(null)}>
+              <Button variant="outline" onClick={() => { setSelectedUser(null); setSelfTestSteps([]); }}>
                 Cancel
               </Button>
               <Button
