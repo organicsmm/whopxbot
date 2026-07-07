@@ -1448,6 +1448,53 @@ export type Database = {
         }
         Relationships: []
       }
+      provider_balance_history: {
+        Row: {
+          balance: number | null
+          balance_currency: string | null
+          checked_at: string
+          delta: number | null
+          error_message: string | null
+          id: string
+          previous_balance: number | null
+          provider_account_id: string
+          source: string
+          status: string
+        }
+        Insert: {
+          balance?: number | null
+          balance_currency?: string | null
+          checked_at?: string
+          delta?: number | null
+          error_message?: string | null
+          id?: string
+          previous_balance?: number | null
+          provider_account_id: string
+          source?: string
+          status?: string
+        }
+        Update: {
+          balance?: number | null
+          balance_currency?: string | null
+          checked_at?: string
+          delta?: number | null
+          error_message?: string | null
+          id?: string
+          previous_balance?: number | null
+          provider_account_id?: string
+          source?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_balance_history_provider_account_id_fkey"
+            columns: ["provider_account_id"]
+            isOneToOne: false
+            referencedRelation: "provider_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       providers: {
         Row: {
           api_key: string
