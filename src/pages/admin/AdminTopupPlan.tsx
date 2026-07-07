@@ -59,6 +59,19 @@ type ProviderAccount = {
   balance_checked_at: string | null;
   last_balance_error: string | null;
 };
+type HistoryRow = {
+  id: string;
+  provider_account_id: string;
+  balance: number | null;
+  balance_currency: string | null;
+  previous_balance: number | null;
+  delta: number | null;
+  status: string;
+  error_message: string | null;
+  source: string;
+  checked_at: string;
+};
+
 
 function categoryColor(cat: string | null): string {
   const k = (cat || "").toLowerCase();
