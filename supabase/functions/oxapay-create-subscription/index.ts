@@ -40,7 +40,9 @@ Deno.serve(async (req) => {
     if (!PLANS[plan]) return json({ error: "Invalid plan" }, 400);
 
     const usd = PLANS[plan].usd;
-    const inr = Math.round(usd * USD_INR);
+    // TEMP TEST OVERRIDE: charge $1 for monthly plan while testing OxaPay flow.
+    const chargeUsd = plan === "monthly" ? 1 : usd;
+    const inr = Math.round(chargeUsd * USD_INR);
 
     const orderId = `oxs_${plan}_${user.id.slice(0, 8)}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 
@@ -49,7 +51,7 @@ Deno.serve(async (req) => {
       purpose: "subscription",
       plan_type: plan,
       order_id: orderId,
-      amount_usd: usd,
+      amount_usd: chargeUsd,
       amount_inr: inr,
       status: "pending",
     });
@@ -66,8 +68,13 @@ Deno.serve(async (req) => {
     const projectRef = Deno.env.get("SUPABASE_URL")!.replace("https://", "").split(".")[0];
     const callbackUrl = `https://${projectRef}.supabase.co/functions/v1/oxapay-webhook`;
 
+    // TEMP TEST OVERRIDE: charge $1 for monthly plan while testing OxaPay flow.
+    // UI/DB still record $15; only the amount sent to OxaPay is reduced.
+    // Remove this block to restore full pricing.
+    const chargeUsd = plan === "monthly" ? 1 : usd;
+
     const payload = {
-      amount: usd,
+      amount: chargeUsd,
       currency: "USD",
       lifetime: 60,
       fee_paid_by_payer: 1,
