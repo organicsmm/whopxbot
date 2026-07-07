@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, RefreshCw, Wallet, TrendingUp, ChevronDown, ChevronRight, AlertTriangle, Zap, Radio } from "lucide-react";
@@ -146,6 +146,26 @@ export default function AdminTopupPlan() {
   useEffect(() => {
     if (plan.dataUpdatedAt) setLastRefresh(new Date(plan.dataUpdatedAt));
   }, [plan.dataUpdatedAt]);
+
+  // Auto-fetch balances on first load if any account has never been checked
+  const autoCheckedRef = useRef(false);
+  useEffect(() => {
+    if (autoCheckedRef.current) return;
+    const list = accounts.data;
+    if (!list || list.length === 0) return;
+    const needsCheck = list.some((a) => !a.balance_checked_at);
+    if (!needsCheck) return;
+    autoCheckedRef.current = true;
+    (async () => {
+      try {
+        await supabase.functions.invoke("check-provider-balance", { body: { source: "manual" } });
+        queryClient.invalidateQueries({ queryKey: ["topup-provider-accounts"] });
+        queryClient.invalidateQueries({ queryKey: ["topup-balance-history"] });
+      } catch (e) {
+        console.error("auto balance check failed", e);
+      }
+    })();
+  }, [accounts.data, queryClient]);
 
   // Realtime: instant updates for schedule + provider balances
   useEffect(() => {
