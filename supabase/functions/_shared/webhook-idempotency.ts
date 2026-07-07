@@ -58,13 +58,17 @@ export async function registerWebhookEvent(
     return { duplicate: true, reason: "payload_replay", existing: sameHash };
   }
 
-  // Fast path: track_id already recorded for this provider.
+  // Fast path: track_id already recorded for this provider — but only treat as
+  // a replay when the event_status matches. Providers like OxaPay send multiple
+  // legitimate webhook deliveries for the same track_id as the payment
+  // progresses (e.g. "Paying" → "Paid"); those must NOT be blocked.
   if (args.trackId) {
     const { data: sameTrack } = await supabase
       .from("webhook_events")
-      .select("id, order_id, outcome, first_seen_at")
+      .select("id, order_id, outcome, first_seen_at, event_status")
       .eq("provider", args.provider)
       .eq("track_id", args.trackId)
+      .eq("event_status", args.eventStatus || "")
       .maybeSingle();
     if (sameTrack) {
       return { duplicate: true, reason: "track_replay", existing: sameTrack };
