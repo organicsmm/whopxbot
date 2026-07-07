@@ -608,7 +608,106 @@ export default function AdminTopupPlan() {
               )}
             </CardContent>
           </Card>
+
+          {/* Section C: Balance change history */}
+          <Card className="glass-card">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <div>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Radio className="h-4 w-4 text-primary" />
+                  Balance Change History
+                </CardTitle>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Every time a balance changes or a check runs — live feed of last 50 events.
+                </p>
+              </div>
+              <Badge variant="outline" className="text-[10px]">
+                {(history.data || []).length} events
+              </Badge>
+            </CardHeader>
+            <CardContent className="p-0">
+              {history.isLoading ? (
+                <div className="p-4 space-y-2">
+                  {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-8" />)}
+                </div>
+              ) : (history.data || []).length === 0 ? (
+                <div className="p-8 text-center text-sm text-muted-foreground">
+                  No balance changes recorded yet. Press <span className="font-semibold">Check All Balances Now</span> to start.
+                </div>
+              ) : (
+                <div className="max-h-[420px] overflow-y-auto">
+                  <table className="w-full text-sm">
+                    <thead className="bg-muted/40 text-xs uppercase text-muted-foreground sticky top-0 backdrop-blur">
+                      <tr>
+                        <th className="text-left px-4 py-2">Time</th>
+                        <th className="text-left px-4 py-2">Provider</th>
+                        <th className="text-right px-4 py-2">Balance</th>
+                        <th className="text-right px-4 py-2">Change</th>
+                        <th className="text-left px-4 py-2">Status</th>
+                        <th className="text-left px-4 py-2">Source</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(history.data || []).map((h) => {
+                        const acc = (accounts.data || []).find((a) => a.id === h.provider_account_id);
+                        const name = acc?.name || h.provider_account_id.slice(0, 8);
+                        const d = Number(h.delta ?? 0);
+                        const isErr = h.status !== "ok";
+                        return (
+                          <tr key={h.id} className="border-t border-border hover:bg-muted/20">
+                            <td className="px-4 py-2 text-xs text-muted-foreground whitespace-nowrap">
+                              {formatDistanceToNow(new Date(h.checked_at), { addSuffix: true })}
+                            </td>
+                            <td className="px-4 py-2 font-medium">{name}</td>
+                            <td className="px-4 py-2 text-right tabular-nums">
+                              {h.balance != null
+                                ? `${Number(h.balance).toLocaleString(undefined, { maximumFractionDigits: 4 })} ${String(h.balance_currency || "").toUpperCase()}`
+                                : "—"}
+                            </td>
+                            <td className="px-4 py-2 text-right tabular-nums">
+                              {isErr || d === 0 ? (
+                                <span className="text-muted-foreground">—</span>
+                              ) : (
+                                <span className={cn("font-semibold", d > 0 ? "text-success" : "text-destructive")}>
+                                  {d > 0 ? "+" : ""}
+                                  {d.toLocaleString(undefined, { maximumFractionDigits: 4 })}
+                                </span>
+                              )}
+                            </td>
+                            <td className="px-4 py-2">
+                              {isErr ? (
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Badge variant="destructive" className="text-[10px] gap-1">
+                                      <AlertTriangle className="h-3 w-3" /> error
+                                    </Badge>
+                                  </TooltipTrigger>
+                                  <TooltipContent className="max-w-xs">
+                                    {h.error_message || "Unknown error"}
+                                  </TooltipContent>
+                                </Tooltip>
+                              ) : (
+                                <Badge variant="outline" className="text-[10px] bg-success/10 text-success border-success/30">
+                                  ok
+                                </Badge>
+                              )}
+                            </td>
+                            <td className="px-4 py-2">
+                              <Badge variant="outline" className="text-[10px] capitalize">
+                                {h.source}
+                              </Badge>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
+
       </TooltipProvider>
     </DashboardLayout>
   );
