@@ -216,7 +216,7 @@ export default function AdminTopupPlan() {
   const checkAll = async () => {
     setCheckingAll(true);
     try {
-      const { data, error } = await supabase.functions.invoke("check-provider-balance", { body: {} });
+      const { data, error } = await supabase.functions.invoke("check-provider-balance", { body: { source: "manual" } });
       if (error) throw error;
       const n = (data as { checked?: number })?.checked ?? 0;
       toast.success(`Checked ${n} provider${n === 1 ? "" : "s"} live`);
