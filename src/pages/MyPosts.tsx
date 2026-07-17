@@ -40,6 +40,7 @@ export default function MyPosts() {
   const navigate = useNavigate();
   const selectedAccountId = searchParams.get('account');
   const [manualLink, setManualLink] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
 
   const goBoost = (url: string) => navigate(`/engagement-order?link=${encodeURIComponent(url)}`);
 
