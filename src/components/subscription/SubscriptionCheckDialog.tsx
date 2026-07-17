@@ -28,12 +28,17 @@ import {
 interface SubscriptionCheckDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  initialPlan?: 'monthly' | 'yearly' | 'lifetime';
 }
 
-export function SubscriptionCheckDialog({ open, onOpenChange }: SubscriptionCheckDialogProps) {
+export function SubscriptionCheckDialog({ open, onOpenChange, initialPlan = 'yearly' }: SubscriptionCheckDialogProps) {
   const { hasPendingRequest } = useSubscription();
   const [showRequestDialog, setShowRequestDialog] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly' | 'lifetime'>('yearly');
+  const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly' | 'lifetime'>(initialPlan);
+  // Sync when parent opens dialog with a different plan choice.
+  useEffect(() => {
+    if (open) setSelectedPlan(initialPlan);
+  }, [open, initialPlan]);
   const [cryptoLoading, setCryptoLoading] = useState(false);
 
   async function payWithCrypto() {
