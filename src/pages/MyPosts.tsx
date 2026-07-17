@@ -110,11 +110,13 @@ export default function MyPosts() {
   // Auto-refresh selected account's media on mount so posts land quickly
   useEffect(() => {
     if (!selectedAccountId) return;
+    setRefreshing(true);
     (async () => {
       try {
         await supabase.functions.invoke('instagram-refresh-media', { body: { account_id: selectedAccountId } });
         qc.invalidateQueries({ queryKey: igQueryKeys.postsSummary() });
       } catch { /* silent */ }
+      finally { setRefreshing(false); }
     })();
   }, [selectedAccountId, qc]);
 
