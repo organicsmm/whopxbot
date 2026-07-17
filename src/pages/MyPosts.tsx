@@ -198,15 +198,20 @@ export default function MyPosts() {
 
 
 
-        {isLoading && (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="aspect-square rounded-2xl bg-white/5 animate-pulse" />
-            ))}
+        {(isLoading || (refreshing && rows.length === 0)) && (
+          <div className="space-y-3">
+            {refreshing && rows.length === 0 && (
+              <p className="text-center text-[12px] text-white/60">Fetching latest posts from Instagram…</p>
+            )}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className="aspect-square rounded-2xl bg-white/5 animate-pulse" />
+              ))}
+            </div>
           </div>
         )}
 
-        {!isLoading && rows.length === 0 && (
+        {!isLoading && !refreshing && rows.length === 0 && (
           <div className="text-center py-14 rounded-2xl border border-dashed border-white/10 space-y-3">
             <Instagram className="w-10 h-10 text-white/65 mx-auto" />
             <p className="text-white/80 text-sm">No posts found for this account yet.</p>
