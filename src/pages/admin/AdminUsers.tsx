@@ -896,11 +896,31 @@ export default function AdminUsers() {
                           setSelfTestSteps((prev) => [...prev, s]);
                         const RATE = 83.5;
                         const delta = Math.trunc((1 / RATE) * 10000) / 10000;
+                        const insertedTxIds: string[] = [];
+                        let b0: number | null = null;
+                        let walletMutated = false;
+
+                        const cleanup = async (reason: string) => {
+                          try {
+                            if (walletMutated && b0 !== null) {
+                              await supabase.from('wallets')
+                                .update({ balance: b0 }).eq('user_id', selectedUser.user_id);
+                            }
+                            if (insertedTxIds.length) {
+                              await supabase.from('transactions').delete().in('id', insertedTxIds);
+                            }
+                            push({ label: `Rollback (${reason}) — balance restored & self-test rows removed`, ok: true });
+                          } catch (ce) {
+                            const cm = ce instanceof Error ? ce.message : String(ce);
+                            push({ label: `Rollback FAILED — manual review needed`, ok: false, detail: cm });
+                          }
+                        };
+
                         try {
                           const { data: w0, error: e0 } = await supabase.from('wallets')
                             .select('balance').eq('user_id', selectedUser.user_id).single();
                           if (e0) throw new Error('read: ' + e0.message);
-                          const b0 = Number(w0?.balance || 0);
+                          b0 = Number(w0?.balance || 0);
                           push({ label: `1. Initial balance = $${b0.toFixed(4)}`, ok: true });
 
                           const b1 = Math.trunc((b0 + delta) * 10000) / 10000;
@@ -908,14 +928,16 @@ export default function AdminUsers() {
                             .update({ balance: b1 }).eq('user_id', selectedUser.user_id);
                           push({ label: '2. Update wallet (+₹1)', ok: !eu1, detail: eu1?.message });
                           if (eu1) throw eu1;
+                          walletMutated = true;
 
-                          const { error: et1 } = await supabase.from('transactions').insert({
+                          const { data: ti1, error: et1 } = await supabase.from('transactions').insert({
                             user_id: selectedUser.user_id, type: 'deposit', amount: delta,
                             balance_after: b1, status: 'completed',
-                            description: 'SELF-TEST: admin +₹1',
-                          });
+                            description: '[ADMIN SELF-TEST] +₹1 (auto-reverted)',
+                          }).select('id').single();
                           push({ label: '3. Insert deposit transaction', ok: !et1, detail: et1?.message });
                           if (et1) throw et1;
+                          if (ti1?.id) insertedTxIds.push(ti1.id);
 
                           const { data: w1 } = await supabase.from('wallets').select('balance')
                             .eq('user_id', selectedUser.user_id).single();
@@ -928,30 +950,31 @@ export default function AdminUsers() {
                           push({ label: '5. Update wallet (-₹1)', ok: !eu2, detail: eu2?.message });
                           if (eu2) throw eu2;
 
-                          const { error: et2 } = await supabase.from('transactions').insert({
+                          const { data: ti2, error: et2 } = await supabase.from('transactions').insert({
                             user_id: selectedUser.user_id, type: 'withdrawal', amount: -delta,
                             balance_after: b2, status: 'completed',
-                            description: 'SELF-TEST: admin -₹1',
-                          });
+                            description: '[ADMIN SELF-TEST] -₹1 (auto-reverted)',
+                          }).select('id').single();
                           push({ label: '6. Insert withdrawal transaction', ok: !et2, detail: et2?.message });
                           if (et2) throw et2;
+                          if (ti2?.id) insertedTxIds.push(ti2.id);
 
                           const { data: w2 } = await supabase.from('wallets').select('balance')
                             .eq('user_id', selectedUser.user_id).single();
                           const okSub = Math.abs(Number(w2?.balance || 0) - b0) < 0.0001;
                           push({ label: `7. Verify balance restored = $${b0.toFixed(4)}`, ok: okSub, detail: `got $${Number(w2?.balance).toFixed(4)}` });
 
-                          const { data: txs } = await supabase.from('transactions')
-                            .select('description').eq('user_id', selectedUser.user_id)
-                            .like('description', 'SELF-TEST:%')
-                            .order('created_at', { ascending: false }).limit(2);
-                          push({ label: '8. SELF-TEST transactions recorded', ok: (txs?.length || 0) >= 2, detail: `${txs?.length || 0} rows` });
+                          push({ label: `8. Recorded ${insertedTxIds.length} self-test transaction(s) — cleaning up`, ok: true });
 
-                          toast.success('Self-test finished ✔');
+                          // Always remove the self-test transaction rows so the user never sees them.
+                          await cleanup('test complete');
+
+                          toast.success('Self-test finished ✔ (no permanent changes)');
                           queryClient.invalidateQueries({ queryKey: ['admin-all-users-with-subs'] });
                         } catch (err) {
                           const msg = err instanceof Error ? err.message : String(err);
                           push({ label: 'ABORTED', ok: false, detail: msg });
+                          await cleanup('error');
                           toast.error('Self-test failed: ' + msg);
                         } finally {
                           setSelfTestRunning(false);
