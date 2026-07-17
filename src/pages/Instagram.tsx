@@ -232,13 +232,22 @@ export default function InstagramPage() {
           )}
           {accounts.map((a: any) => (
             <div key={a.id} className="rounded-2xl p-4 bg-[#0a0a14]/80 border border-white/10 flex items-center gap-4">
-              {a.avatar_url ? (
-                <img src={`https://lvrbhgulxqdsamhdjzkw.supabase.co/functions/v1/ig-image-proxy?url=${encodeURIComponent(a.avatar_url)}`} alt={a.username} referrerPolicy="no-referrer" className="w-14 h-14 rounded-full object-cover ring-2 ring-purple-400/30" />
-              ) : (
-                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-fuchsia-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg">
+              <div className="relative w-14 h-14 shrink-0">
+                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-fuchsia-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg ring-2 ring-purple-400/30">
                   {a.username[0]?.toUpperCase()}
                 </div>
-              )}
+                {a.avatar_url && (
+                  <img
+                    src={`https://lvrbhgulxqdsamhdjzkw.supabase.co/functions/v1/ig-image-proxy?url=${encodeURIComponent(a.avatar_url)}`}
+                    alt={a.username}
+                    referrerPolicy="no-referrer"
+                    loading="lazy"
+                    className="absolute inset-0 w-14 h-14 rounded-full object-cover ring-2 ring-purple-400/30 transition-opacity duration-300 opacity-0"
+                    onLoad={(e) => { (e.target as HTMLImageElement).style.opacity = '1'; }}
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                  />
+                )}
+              </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5">
                   <span className="font-semibold !text-white truncate">@{a.username}</span>
