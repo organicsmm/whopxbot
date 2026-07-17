@@ -8,6 +8,7 @@ import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Instagram, Loader2, Plus, Trash2, CheckCircle2, ShieldAlert, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
+import { igQueryKeys } from '@/lib/instagramCache';
 
 export default function InstagramPage() {
   const { user } = useAuth();
@@ -17,7 +18,7 @@ export default function InstagramPage() {
   const [username, setUsername] = useState('');
 
   const { data: accounts = [], isLoading } = useQuery({
-    queryKey: ['ig-accounts', user?.id],
+    queryKey: igQueryKeys.accounts(user?.id),
     queryFn: async () => {
       const { data, error } = await supabase
         .from('instagram_accounts').select('*')
@@ -30,7 +31,7 @@ export default function InstagramPage() {
 
   // Persistent 30-day link usage from audit log (survives account deletion).
   const { data: linkEvents = [] } = useQuery({
-    queryKey: ['ig-link-events', user?.id],
+    queryKey: igQueryKeys.linkEvents(user?.id),
     queryFn: async () => {
       const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
       const { data, error } = await supabase
@@ -65,9 +66,9 @@ export default function InstagramPage() {
     onSuccess: (d) => {
       toast.success(`Linked @${d.account.username} · ${d.imported} posts imported`);
       setUsername('');
-     qc.invalidateQueries({ queryKey: ['ig-accounts'] });
-     qc.invalidateQueries({ queryKey: ['ig-link-events'] });
-     qc.invalidateQueries({ queryKey: ['ig-posts-summary'] });
+      qc.invalidateQueries({ queryKey: igQueryKeys.accounts() });
+      qc.invalidateQueries({ queryKey: igQueryKeys.linkEvents() });
+      qc.invalidateQueries({ queryKey: igQueryKeys.postsSummary() });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -79,8 +80,8 @@ export default function InstagramPage() {
     },
     onSuccess: () => {
       toast.success('Account removed');
-      qc.invalidateQueries({ queryKey: ['ig-accounts'] });
-      qc.invalidateQueries({ queryKey: ['ig-posts-summary'] });
+      qc.invalidateQueries({ queryKey: igQueryKeys.accounts() });
+      qc.invalidateQueries({ queryKey: igQueryKeys.postsSummary() });
     },
   });
 

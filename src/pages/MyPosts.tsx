@@ -8,6 +8,7 @@ import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { useCurrency } from '@/hooks/useCurrency';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { igQueryKeys } from '@/lib/instagramCache';
 
 type Row = {
   media_id: string;
@@ -43,7 +44,7 @@ export default function MyPosts() {
   const goBoost = (url: string) => navigate(`/engagement-order?link=${encodeURIComponent(url)}`);
 
   const { data: rows = [], isLoading } = useQuery({
-    queryKey: ['ig-posts-summary', user?.id, selectedAccountId],
+    queryKey: igQueryKeys.postsSummary(user?.id, selectedAccountId),
     queryFn: async () => {
       let mediaQuery = supabase
         .from('instagram_media')
@@ -96,7 +97,7 @@ export default function MyPosts() {
 
 
   const { data: accounts = [] } = useQuery({
-    queryKey: ['ig-accounts', user?.id],
+    queryKey: igQueryKeys.accounts(user?.id),
     queryFn: async () => {
       const { data, error } = await supabase.from('instagram_accounts').select('id,username').eq('user_id', user!.id).order('created_at', { ascending: false });
       if (error) throw error;
@@ -111,7 +112,7 @@ export default function MyPosts() {
     (async () => {
       try {
         await supabase.functions.invoke('instagram-refresh-media', { body: { account_id: selectedAccountId } });
-        qc.invalidateQueries({ queryKey: ['ig-posts-summary'] });
+        qc.invalidateQueries({ queryKey: igQueryKeys.postsSummary() });
       } catch { /* silent */ }
     })();
   }, [selectedAccountId, qc]);
@@ -122,9 +123,9 @@ export default function MyPosts() {
     const ch = supabase
       .channel(`eo-mypost-${user.id}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'engagement_orders', filter: `user_id=eq.${user.id}` },
-        () => qc.invalidateQueries({ queryKey: ['ig-posts-summary'] }))
+        () => qc.invalidateQueries({ queryKey: igQueryKeys.postsSummary() }))
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'instagram_media', filter: `user_id=eq.${user.id}` },
-        () => qc.invalidateQueries({ queryKey: ['ig-posts-summary'] }))
+        () => qc.invalidateQueries({ queryKey: igQueryKeys.postsSummary() }))
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, [user?.id, qc]);
