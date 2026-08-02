@@ -137,8 +137,24 @@ fi
 
 # ---------------------------------------------------------------------------
 log "4/8 Starting Supabase stack"
+
+# Host Postgres (installed by hostinger-setup.sh) squats on 5432 and blocks the
+# supabase-pooler container from binding it. Free the port before starting.
+if ss -ltnp 2>/dev/null | grep -q ':5432 '; then
+  warn "Port 5432 is in use — stopping host postgresql service"
+  systemctl stop postgresql 2>/dev/null || true
+  systemctl disable postgresql 2>/dev/null || true
+  sleep 2
+fi
+if ss -ltnp 2>/dev/null | grep -q ':5432 '; then
+  ss -ltnp | grep ':5432 ' || true
+  die "Port 5432 is still occupied. Stop that process, then re-run this script."
+fi
+
+
 docker compose pull
 docker compose up -d
+
 
 log "Waiting for Postgres to accept connections"
 for i in $(seq 1 60); do
