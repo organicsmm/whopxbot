@@ -138,13 +138,25 @@ fi
 # ---------------------------------------------------------------------------
 log "4/8 Starting Supabase stack"
 
+# The connection pooler service is named "pooler" in some Supabase releases and
+# "supavisor" in others; detect whichever exists (may be neither).
+POOLER_SVC=""
+for cand in pooler supavisor; do
+  if docker compose config --services 2>/dev/null | grep -qx "$cand"; then
+    POOLER_SVC="$cand"
+    break
+  fi
+done
+
 # Host Postgres (installed by hostinger-setup.sh) squats on 5432 and blocks the
 # supabase-pooler container from binding it. On reruns, however, 5432 may
 # already belong to our own healthy pooler and must not be treated as a clash.
-EXISTING_POOLER_ID="$(docker compose ps -q pooler 2>/dev/null || true)"
 EXISTING_POOLER_RUNNING="false"
-if [ -n "$EXISTING_POOLER_ID" ]; then
-  EXISTING_POOLER_RUNNING="$(docker inspect -f '{{.State.Running}}' "$EXISTING_POOLER_ID" 2>/dev/null || true)"
+if [ -n "$POOLER_SVC" ]; then
+  EXISTING_POOLER_ID="$(docker compose ps -q "$POOLER_SVC" 2>/dev/null || true)"
+  if [ -n "$EXISTING_POOLER_ID" ]; then
+    EXISTING_POOLER_RUNNING="$(docker inspect -f '{{.State.Running}}' "$EXISTING_POOLER_ID" 2>/dev/null || true)"
+  fi
 fi
 
 if [ "$EXISTING_POOLER_RUNNING" != "true" ] && ss -ltnp 2>/dev/null | grep -q ':5432 '; then
@@ -173,29 +185,33 @@ docker compose exec -T db pg_isready -U postgres >/dev/null 2>&1 \
 
 # Pooler can start before Postgres is ready and enter a restart loop. Restart it
 # only after pg_isready succeeds, then verify it remains up before migrations.
-log "Waiting for database pooler"
-docker compose restart pooler >/dev/null
-POOLER_READY=false
-for i in $(seq 1 30); do
-  POOLER_ID="$(docker compose ps -q pooler 2>/dev/null || true)"
-  if [ -n "$POOLER_ID" ]; then
-    POOLER_RUNNING="$(docker inspect -f '{{.State.Running}}' "$POOLER_ID" 2>/dev/null || true)"
-    POOLER_RESTARTING="$(docker inspect -f '{{.State.Restarting}}' "$POOLER_ID" 2>/dev/null || true)"
-    if [ "$POOLER_RUNNING" = "true" ] && [ "$POOLER_RESTARTING" = "false" ]; then
-      sleep 3
+if [ -z "$POOLER_SVC" ]; then
+  warn "No connection pooler service in this Supabase release — skipping pooler check"
+else
+  log "Waiting for database pooler ($POOLER_SVC)"
+  docker compose restart "$POOLER_SVC" >/dev/null 2>&1 || true
+  POOLER_READY=false
+  for i in $(seq 1 30); do
+    POOLER_ID="$(docker compose ps -q "$POOLER_SVC" 2>/dev/null || true)"
+    if [ -n "$POOLER_ID" ]; then
       POOLER_RUNNING="$(docker inspect -f '{{.State.Running}}' "$POOLER_ID" 2>/dev/null || true)"
       POOLER_RESTARTING="$(docker inspect -f '{{.State.Restarting}}' "$POOLER_ID" 2>/dev/null || true)"
       if [ "$POOLER_RUNNING" = "true" ] && [ "$POOLER_RESTARTING" = "false" ]; then
-        POOLER_READY=true
-        break
+        sleep 3
+        POOLER_RUNNING="$(docker inspect -f '{{.State.Running}}' "$POOLER_ID" 2>/dev/null || true)"
+        POOLER_RESTARTING="$(docker inspect -f '{{.State.Restarting}}' "$POOLER_ID" 2>/dev/null || true)"
+        if [ "$POOLER_RUNNING" = "true" ] && [ "$POOLER_RESTARTING" = "false" ]; then
+          POOLER_READY=true
+          break
+        fi
       fi
     fi
+    sleep 2
+  done
+  if [ "$POOLER_READY" != "true" ]; then
+    docker compose logs --tail=80 "$POOLER_SVC" || true
+    warn "Pooler is not stable — continuing anyway (migrations use the db container directly)"
   fi
-  sleep 2
-done
-if [ "$POOLER_READY" != "true" ]; then
-  docker compose logs --tail=80 pooler || true
-  die "Database pooler is still restarting. The logs above show the exact cause."
 fi
 
 # ---------------------------------------------------------------------------
