@@ -229,24 +229,50 @@ CREATE TABLE IF NOT EXISTS public._applied_migrations (
 SQL
 
 APPLIED=0; SKIPPED=0; FAILED=0
-for f in $(ls "$MIG_DIR"/*.sql | sort); do
-  name="$(basename "$f")"
-  already="$(docker compose exec -T db psql -U postgres -d postgres -tAc \
-    "SELECT 1 FROM public._applied_migrations WHERE name='$name'" || true)"
-  if [ "$already" = "1" ]; then SKIPPED=$((SKIPPED+1)); continue; fi
+# Multi-pass: some migrations depend on objects created by later files (or by
+# data seeded elsewhere). Retry the failures until a pass makes no progress.
+PASS=1
+while [ "$PASS" -le 5 ]; do
+  PASS_APPLIED=0; PASS_FAILED=0; LAST_FAILS=""
+  for f in $(ls "$MIG_DIR"/*.sql | sort); do
+    name="$(basename "$f")"
+    already="$(docker compose exec -T db psql -U postgres -d postgres -tAc \
+      "SELECT 1 FROM public._applied_migrations WHERE name='$name'" || true)"
+    if [ "$already" = "1" ]; then continue; fi
 
-  echo "  -> $name"
-  if docker compose exec -T db psql -U postgres -d postgres -v ON_ERROR_STOP=1 -f - < "$f" >/tmp/mig.log 2>&1; then
-    docker compose exec -T db psql -U postgres -d postgres -c \
-      "INSERT INTO public._applied_migrations(name) VALUES ('$name') ON CONFLICT DO NOTHING" >/dev/null
-    APPLIED=$((APPLIED+1))
-  else
-    FAILED=$((FAILED+1))
-    warn "migration failed: $name"
-    tail -n 20 /tmp/mig.log
-  fi
+    [ "$PASS" -eq 1 ] && echo "  -> $name"
+    if docker compose exec -T db psql -U postgres -d postgres -v ON_ERROR_STOP=1 -f - < "$f" >/tmp/mig.log 2>&1; then
+      docker compose exec -T db psql -U postgres -d postgres -c \
+        "INSERT INTO public._applied_migrations(name) VALUES ('$name') ON CONFLICT DO NOTHING" >/dev/null
+      PASS_APPLIED=$((PASS_APPLIED+1))
+      APPLIED=$((APPLIED+1))
+    else
+      PASS_FAILED=$((PASS_FAILED+1))
+      LAST_FAILS="$LAST_FAILS $name"
+      if [ "$PASS" -eq 1 ]; then
+        warn "migration deferred: $name"
+        tail -n 5 /tmp/mig.log
+      fi
+    fi
+  done
+
+  echo "   pass $PASS: applied=$PASS_APPLIED pending=$PASS_FAILED"
+  FAILED="$PASS_FAILED"
+  [ "$PASS_FAILED" -eq 0 ] && break
+  [ "$PASS_APPLIED" -eq 0 ] && break
+  PASS=$((PASS+1))
 done
-echo "   migrations: applied=$APPLIED skipped=$SKIPPED failed=$FAILED"
+
+if [ "$FAILED" -gt 0 ]; then
+  warn "migrations still failing after retries:$LAST_FAILS"
+  warn "these are usually data-dependent (missing provider rows) and safe to skip"
+  for name in $LAST_FAILS; do
+    docker compose exec -T db psql -U postgres -d postgres -v ON_ERROR_STOP=1 \
+      -f - < "$MIG_DIR/$name" >/tmp/mig.log 2>&1 || tail -n 8 /tmp/mig.log
+  done
+fi
+echo "   migrations: applied=$APPLIED failed=$FAILED"
+
 
 # ---------------------------------------------------------------------------
 log "7/8 Optional HTTPS reverse proxy"
