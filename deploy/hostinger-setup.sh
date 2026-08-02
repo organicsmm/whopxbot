@@ -2,7 +2,7 @@
 # =============================================================================
 # OrganicSMM Pro — one-shot VPS installer (Ubuntu 22.04 / 24.04, Hostinger VPS)
 #
-#   curl -fsSL https://raw.githubusercontent.com/USERNAME/REPO/main/deploy/hostinger-setup.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/xbhisofy/whopxbot/main/deploy/hostinger-setup.sh | bash
 #
 # Installs: Node.js 20, pnpm, PostgreSQL, Caddy
 # Creates:  /opt/smmpanel (repo), /etc/smmpanel.env (secrets), systemd unit `smmpanel`
@@ -11,7 +11,7 @@
 set -euo pipefail
 
 # ---- configurable via env ---------------------------------------------------
-REPO_URL="${REPO_URL:-https://github.com/USERNAME/REPO.git}"
+REPO_URL="${REPO_URL:-https://github.com/xbhisofy/whopxbot.git}"
 REPO_BRANCH="${REPO_BRANCH:-main}"
 APP_DIR="${APP_DIR:-/opt/smmpanel}"
 ENV_FILE="${ENV_FILE:-/etc/smmpanel.env}"
@@ -33,11 +33,11 @@ die()  { printf '\033[1;31mxx %s\033[0m\n' "$*" >&2; exit 1; }
 if [ -z "$DOMAIN" ] && [ -t 0 ]; then
   read -rp "Domain (e.g. panel.example.com, blank = IP only, no HTTPS): " DOMAIN
 fi
-if [ "$REPO_URL" = "https://github.com/USERNAME/REPO.git" ] && [ -t 0 ]; then
+if [ "$REPO_URL" = "https://github.com/xbhisofy/whopxbot.git" ] && [ -t 0 ]; then
   read -rp "GitHub repo URL: " input_repo
   [ -n "$input_repo" ] && REPO_URL="$input_repo"
 fi
-[ "$REPO_URL" = "https://github.com/USERNAME/REPO.git" ] && \
+[ "$REPO_URL" = "https://github.com/xbhisofy/whopxbot.git" ] && \
   die "Set REPO_URL, e.g. REPO_URL=https://github.com/me/panel.git bash hostinger-setup.sh"
 
 # -----------------------------------------------------------------------------
