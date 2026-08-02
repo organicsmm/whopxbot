@@ -148,26 +148,35 @@ for cand in pooler supavisor; do
   fi
 done
 
-# Host Postgres (installed by hostinger-setup.sh) squats on 5432 and blocks the
-# supabase-pooler container from binding it. On reruns, however, 5432 may
-# already belong to our own healthy pooler and must not be treated as a clash.
-EXISTING_POOLER_RUNNING="false"
-if [ -n "$POOLER_SVC" ]; then
-  EXISTING_POOLER_ID="$(docker compose ps -q "$POOLER_SVC" 2>/dev/null || true)"
-  if [ -n "$EXISTING_POOLER_ID" ]; then
-    EXISTING_POOLER_RUNNING="$(docker inspect -f '{{.State.Running}}' "$EXISTING_POOLER_ID" 2>/dev/null || true)"
+# A failed/old run can leave a Supabase container behind whose docker-proxy
+# still owns 5432 even though `docker compose ps` no longer recognises it.
+# Remove only Supabase-owned blockers; never kill an unrelated Docker database.
+mapfile -t PORT_5432_CONTAINERS < <(docker ps --filter publish=5432 --format '{{.ID}}' 2>/dev/null || true)
+for blocker_id in "${PORT_5432_CONTAINERS[@]}"; do
+  [ -n "$blocker_id" ] || continue
+  blocker_name="$(docker inspect -f '{{.Name}}' "$blocker_id" 2>/dev/null | sed 's|^/||')"
+  blocker_project="$(docker inspect -f '{{index .Config.Labels "com.docker.compose.project"}}' "$blocker_id" 2>/dev/null || true)"
+  if [[ "$blocker_name" == supabase-* || "$blocker_name" == *-supabase-* || "$blocker_project" == "supabase" ]]; then
+    warn "Removing stale Supabase port blocker: $blocker_name"
+    docker rm -f "$blocker_id" >/dev/null 2>&1 || true
   fi
-fi
+done
 
-if [ "$EXISTING_POOLER_RUNNING" != "true" ] && ss -ltnp 2>/dev/null | grep -q ':5432 '; then
+# The original panel installer uses the host PostgreSQL service on 5432.
+if ss -ltnp 2>/dev/null | grep -q ':5432 '; then
   warn "Port 5432 is in use — stopping host postgresql service"
   systemctl stop postgresql 2>/dev/null || true
   systemctl disable postgresql 2>/dev/null || true
   sleep 2
 fi
-if [ "$EXISTING_POOLER_RUNNING" != "true" ] && ss -ltnp 2>/dev/null | grep -q ':5432 '; then
+
+if ss -ltnp 2>/dev/null | grep -q ':5432 '; then
+  blocker="$(docker ps --filter publish=5432 --format '{{.Names}}' 2>/dev/null | head -n1)"
   ss -ltnp | grep ':5432 ' || true
-  die "Port 5432 is still occupied. Stop that process, then re-run this script."
+  if [ -n "$blocker" ]; then
+    die "Port 5432 is held by unrelated Docker container '$blocker'. Stop it with: docker stop $blocker"
+  fi
+  die "Port 5432 is still occupied. Check it with: ss -ltnp | grep :5432"
 fi
 
 
