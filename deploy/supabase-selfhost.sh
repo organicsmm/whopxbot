@@ -69,18 +69,22 @@ if [ ! -f "$ENV_FILE.generated" ]; then
   VAULT_ENC_KEY="$(openssl rand -hex 16)"
 
   # Mint anon + service_role JWTs signed with JWT_SECRET (10 year expiry)
+  # Pure openssl/base64 implementation - no docker/node dependency
+  b64url() { openssl base64 -A | tr '+/' '-_' | tr -d '='; }
   mint_jwt() {
     local role="$1"
-    docker run --rm -e JWT_SECRET="$JWT_SECRET" -e ROLE="$role" node:20-alpine sh -c '
-      npm i -s jsonwebtoken@9 >/dev/null 2>&1
-      node -e "
-        const jwt=require(\"jsonwebtoken\");
-        const iat=Math.floor(Date.now()/1000);
-        console.log(jwt.sign({role:process.env.ROLE,iss:\"supabase\",iat,exp:iat+60*60*24*3650},process.env.JWT_SECRET));
-      "'
+    local iat exp header payload signing_input sig
+    iat="$(date +%s)"
+    exp="$((iat + 60*60*24*3650))"
+    header="$(printf '%s' '{"alg":"HS256","typ":"JWT"}' | b64url)"
+    payload="$(printf '{"role":"%s","iss":"supabase","iat":%s,"exp":%s}' "$role" "$iat" "$exp" | b64url)"
+    signing_input="$header.$payload"
+    sig="$(printf '%s' "$signing_input" | openssl dgst -sha256 -hmac "$JWT_SECRET" -binary | b64url)"
+    printf '%s.%s\n' "$signing_input" "$sig"
   }
   ANON_KEY="$(mint_jwt anon)"
   SERVICE_ROLE_KEY="$(mint_jwt service_role)"
+
 
   set_env() { # key value
     if grep -q "^$1=" "$ENV_FILE"; then
