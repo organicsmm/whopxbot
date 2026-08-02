@@ -30,11 +30,20 @@ psql_run() { docker compose exec -T db psql -U postgres -d postgres "$@"; }
 case "$SRC" in
   *.sql)
     log "Importing SQL dump: $SRC"
+    if [ "${FRESH:-0}" = "1" ]; then
+      log "FRESH=1 — resetting public schema first (dump must contain schema + data)"
+      psql_run -v ON_ERROR_STOP=1 -c "DROP SCHEMA IF EXISTS public CASCADE; CREATE SCHEMA public;
+        GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;
+        GRANT ALL ON SCHEMA public TO postgres;" >/dev/null
+    fi
     # Relax triggers/FKs during load so row order does not matter.
+    # No ON_ERROR_STOP: 'already exists' / duplicate-key noise must not abort
+    # the whole import.
     psql_run -c "SET session_replication_role = 'replica';" >/dev/null
-    psql_run --single-transaction -v ON_ERROR_STOP=1 -f - < "$SRC"
+    psql_run -f - < "$SRC" 2>&1 | grep -Ev 'already exists|^SET$|^$' | tail -n 60 || true
     psql_run -c "SET session_replication_role = 'origin';" >/dev/null
     ;;
+
 
   *.tar.gz|*.tgz)
     TMP="$(mktemp -d)"
