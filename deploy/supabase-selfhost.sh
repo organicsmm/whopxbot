@@ -47,14 +47,30 @@ systemctl enable --now docker
 
 # ---------------------------------------------------------------------------
 log "2/8 Fetching Supabase docker stack"
-if [ ! -d "$INSTALL_DIR/.git" ]; then
-  rm -rf "$INSTALL_DIR"
-  git clone --depth 1 https://github.com/supabase/supabase "$INSTALL_DIR-src"
-  mkdir -p "$INSTALL_DIR"
-  cp -r "$INSTALL_DIR-src/docker/." "$INSTALL_DIR/"
+if [ ! -f "$INSTALL_DIR/.stack_ready" ]; then
+  # Stop anything holding files/mounts in the target dir, then wipe it clean.
+  if [ -f "$INSTALL_DIR/docker-compose.yml" ]; then
+    (cd "$INSTALL_DIR" && docker compose down -v --remove-orphans >/dev/null 2>&1) || true
+  fi
   rm -rf "$INSTALL_DIR-src"
+  git clone --depth 1 https://github.com/supabase/supabase "$INSTALL_DIR-src"
+
+  # Remove stale empty dirs that docker auto-created where files must live
+  # (e.g. volumes/db/*.sql), otherwise cp fails with "cannot overwrite directory".
+  find "$INSTALL_DIR" -depth -type d -name '*.sql' -exec rm -rf {} + 2>/dev/null || true
+  find "$INSTALL_DIR" -depth -type d -name '*.yml' -exec rm -rf {} + 2>/dev/null || true
+  find "$INSTALL_DIR" -depth -type d -name '*.toml' -exec rm -rf {} + 2>/dev/null || true
+  find "$INSTALL_DIR" -depth -type d -name '*.conf' -exec rm -rf {} + 2>/dev/null || true
+
+  mkdir -p "$INSTALL_DIR"
+  cp -rT "$INSTALL_DIR-src/docker" "$INSTALL_DIR"
+  rm -rf "$INSTALL_DIR-src"
+  touch "$INSTALL_DIR/.stack_ready"
 fi
 cd "$INSTALL_DIR"
+[ -f docker-compose.yml ] || die "Supabase compose files missing in $INSTALL_DIR"
+
+
 
 # ---------------------------------------------------------------------------
 log "3/8 Generating secrets"
