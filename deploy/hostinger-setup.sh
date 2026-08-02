@@ -33,12 +33,12 @@ die()  { printf '\033[1;31mxx %s\033[0m\n' "$*" >&2; exit 1; }
 if [ -z "$DOMAIN" ] && [ -t 0 ]; then
   read -rp "Domain (e.g. panel.example.com, blank = IP only, no HTTPS): " DOMAIN
 fi
+# Allow overriding the repo URL interactively or via REPO_URL env var.
 if [ "$REPO_URL" = "https://github.com/xbhisofy/whopxbot.git" ] && [ -t 0 ]; then
-  read -rp "GitHub repo URL: " input_repo
+  read -rp "GitHub repo URL [https://github.com/xbhisofy/whopxbot.git]: " input_repo
   [ -n "$input_repo" ] && REPO_URL="$input_repo"
 fi
-[ "$REPO_URL" = "https://github.com/xbhisofy/whopxbot.git" ] && \
-  die "Set REPO_URL, e.g. REPO_URL=https://github.com/me/panel.git bash hostinger-setup.sh"
+
 
 # -----------------------------------------------------------------------------
 log "Installing base packages"
@@ -197,7 +197,17 @@ caddy validate --config /etc/caddy/Caddyfile
 systemctl enable caddy
 systemctl reload caddy || systemctl restart caddy
 
+# Update PUBLIC_APP_URL when a domain is supplied later.
+if [ -n "$DOMAIN" ] && [ -f "$ENV_FILE" ]; then
+  if grep -q '^PUBLIC_APP_URL=' "$ENV_FILE"; then
+    sed -i "s|^PUBLIC_APP_URL=.*|PUBLIC_APP_URL=https://$DOMAIN|" "$ENV_FILE"
+  else
+    echo "PUBLIC_APP_URL=https://$DOMAIN" >> "$ENV_FILE"
+  fi
+fi
+
 # ---- firewall ---------------------------------------------------------------
+
 log "Configuring firewall"
 ufw allow OpenSSH >/dev/null 2>&1 || true
 ufw allow 80/tcp  >/dev/null 2>&1 || true
