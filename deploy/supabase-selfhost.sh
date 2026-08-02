@@ -138,13 +138,25 @@ fi
 # ---------------------------------------------------------------------------
 log "4/8 Starting Supabase stack"
 
+# The connection pooler service is named "pooler" in some Supabase releases and
+# "supavisor" in others; detect whichever exists (may be neither).
+POOLER_SVC=""
+for cand in pooler supavisor; do
+  if docker compose config --services 2>/dev/null | grep -qx "$cand"; then
+    POOLER_SVC="$cand"
+    break
+  fi
+done
+
 # Host Postgres (installed by hostinger-setup.sh) squats on 5432 and blocks the
 # supabase-pooler container from binding it. On reruns, however, 5432 may
 # already belong to our own healthy pooler and must not be treated as a clash.
-EXISTING_POOLER_ID="$(docker compose ps -q pooler 2>/dev/null || true)"
 EXISTING_POOLER_RUNNING="false"
-if [ -n "$EXISTING_POOLER_ID" ]; then
-  EXISTING_POOLER_RUNNING="$(docker inspect -f '{{.State.Running}}' "$EXISTING_POOLER_ID" 2>/dev/null || true)"
+if [ -n "$POOLER_SVC" ]; then
+  EXISTING_POOLER_ID="$(docker compose ps -q "$POOLER_SVC" 2>/dev/null || true)"
+  if [ -n "$EXISTING_POOLER_ID" ]; then
+    EXISTING_POOLER_RUNNING="$(docker inspect -f '{{.State.Running}}' "$EXISTING_POOLER_ID" 2>/dev/null || true)"
+  fi
 fi
 
 if [ "$EXISTING_POOLER_RUNNING" != "true" ] && ss -ltnp 2>/dev/null | grep -q ':5432 '; then
