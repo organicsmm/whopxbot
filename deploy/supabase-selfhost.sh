@@ -139,14 +139,21 @@ fi
 log "4/8 Starting Supabase stack"
 
 # Host Postgres (installed by hostinger-setup.sh) squats on 5432 and blocks the
-# supabase-pooler container from binding it. Free the port before starting.
-if ss -ltnp 2>/dev/null | grep -q ':5432 '; then
+# supabase-pooler container from binding it. On reruns, however, 5432 may
+# already belong to our own healthy pooler and must not be treated as a clash.
+EXISTING_POOLER_ID="$(docker compose ps -q pooler 2>/dev/null || true)"
+EXISTING_POOLER_RUNNING="false"
+if [ -n "$EXISTING_POOLER_ID" ]; then
+  EXISTING_POOLER_RUNNING="$(docker inspect -f '{{.State.Running}}' "$EXISTING_POOLER_ID" 2>/dev/null || true)"
+fi
+
+if [ "$EXISTING_POOLER_RUNNING" != "true" ] && ss -ltnp 2>/dev/null | grep -q ':5432 '; then
   warn "Port 5432 is in use — stopping host postgresql service"
   systemctl stop postgresql 2>/dev/null || true
   systemctl disable postgresql 2>/dev/null || true
   sleep 2
 fi
-if ss -ltnp 2>/dev/null | grep -q ':5432 '; then
+if [ "$EXISTING_POOLER_RUNNING" != "true" ] && ss -ltnp 2>/dev/null | grep -q ':5432 '; then
   ss -ltnp | grep ':5432 ' || true
   die "Port 5432 is still occupied. Stop that process, then re-run this script."
 fi
@@ -163,6 +170,33 @@ for i in $(seq 1 60); do
 done
 docker compose exec -T db pg_isready -U postgres >/dev/null 2>&1 \
   || die "Postgres did not come up. Check: docker compose logs db"
+
+# Pooler can start before Postgres is ready and enter a restart loop. Restart it
+# only after pg_isready succeeds, then verify it remains up before migrations.
+log "Waiting for database pooler"
+docker compose restart pooler >/dev/null
+POOLER_READY=false
+for i in $(seq 1 30); do
+  POOLER_ID="$(docker compose ps -q pooler 2>/dev/null || true)"
+  if [ -n "$POOLER_ID" ]; then
+    POOLER_RUNNING="$(docker inspect -f '{{.State.Running}}' "$POOLER_ID" 2>/dev/null || true)"
+    POOLER_RESTARTING="$(docker inspect -f '{{.State.Restarting}}' "$POOLER_ID" 2>/dev/null || true)"
+    if [ "$POOLER_RUNNING" = "true" ] && [ "$POOLER_RESTARTING" = "false" ]; then
+      sleep 3
+      POOLER_RUNNING="$(docker inspect -f '{{.State.Running}}' "$POOLER_ID" 2>/dev/null || true)"
+      POOLER_RESTARTING="$(docker inspect -f '{{.State.Restarting}}' "$POOLER_ID" 2>/dev/null || true)"
+      if [ "$POOLER_RUNNING" = "true" ] && [ "$POOLER_RESTARTING" = "false" ]; then
+        POOLER_READY=true
+        break
+      fi
+    fi
+  fi
+  sleep 2
+done
+if [ "$POOLER_READY" != "true" ]; then
+  docker compose logs --tail=80 pooler || true
+  die "Database pooler is still restarting. The logs above show the exact cause."
+fi
 
 # ---------------------------------------------------------------------------
 log "5/8 Cloning project repo (for migrations + edge functions)"
