@@ -197,7 +197,17 @@ caddy validate --config /etc/caddy/Caddyfile
 systemctl enable caddy
 systemctl reload caddy || systemctl restart caddy
 
+# Update PUBLIC_APP_URL when a domain is supplied later.
+if [ -n "$DOMAIN" ] && [ -f "$ENV_FILE" ]; then
+  if grep -q '^PUBLIC_APP_URL=' "$ENV_FILE"; then
+    sed -i "s|^PUBLIC_APP_URL=.*|PUBLIC_APP_URL=https://$DOMAIN|" "$ENV_FILE"
+  else
+    echo "PUBLIC_APP_URL=https://$DOMAIN" >> "$ENV_FILE"
+  fi
+fi
+
 # ---- firewall ---------------------------------------------------------------
+
 log "Configuring firewall"
 ufw allow OpenSSH >/dev/null 2>&1 || true
 ufw allow 80/tcp  >/dev/null 2>&1 || true
