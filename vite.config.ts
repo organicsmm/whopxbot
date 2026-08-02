@@ -33,36 +33,9 @@ export default defineConfig(({ mode }) => ({
     sourcemap: false,
     reportCompressedSize: false,
     minify: "esbuild",
-    rollupOptions: {
-      output: {
-        // Manual chunk splitting for better caching
-        manualChunks: {
-          // React runtime — very stable, cache-friendly
-          "react-vendor": ["react", "react-dom"],
-          // UI library core
-          "ui-core": [
-            "@radix-ui/react-dialog",
-            "@radix-ui/react-dropdown-menu",
-            "@radix-ui/react-tabs",
-            "@radix-ui/react-toast",
-            "@radix-ui/react-tooltip",
-          ],
-          // Data fetching layer
-          "data-layer": [
-            "@tanstack/react-query",
-            "@supabase/supabase-js",
-          ],
-          // Router
-          "router": ["react-router-dom"],
-          // Charts and heavy UI
-          "charts": ["recharts"],
-          // Date utilities
-          "date-fns": ["date-fns"],
-          // Form/validation stack
-          "forms": ["react-hook-form", "zod", "@hookform/resolvers"],
-        },
-      },
-    },
+    // Let Rollup derive the dependency graph. Manually separating React from
+    // libraries that call createContext during module initialization can form
+    // a production-only circular chunk and leave the React import undefined.
   },
 }));
 
