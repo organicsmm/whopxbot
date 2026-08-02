@@ -147,13 +147,10 @@ if ss -ltnp 2>/dev/null | grep -q ':5432 '; then
   sleep 2
 fi
 if ss -ltnp 2>/dev/null | grep -q ':5432 '; then
-  warn "5432 still busy — moving pooler to 5433"
-  if grep -q '^POSTGRES_PORT=' "$ENV_FILE"; then
-    sed -i 's|^POSTGRES_PORT=.*|POSTGRES_PORT=5433|' "$ENV_FILE"
-  else
-    echo "POSTGRES_PORT=5433" >> "$ENV_FILE"
-  fi
+  ss -ltnp | grep ':5432 ' || true
+  die "Port 5432 is still occupied. Stop that process, then re-run this script."
 fi
+
 
 docker compose pull
 docker compose up -d
