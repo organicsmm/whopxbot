@@ -11,12 +11,17 @@ Deno.serve(async (req) => {
 
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
   const provided = req.headers.get('x-export-key') ?? '';
-  if (!serviceKey || provided !== serviceKey) {
+  const bearer = (req.headers.get('authorization') ?? '').replace(/^Bearer\s+/i, '');
+  const apikey = req.headers.get('apikey') ?? '';
+  const authorized = !!serviceKey &&
+    (provided === serviceKey || bearer === serviceKey || apikey === serviceKey);
+  if (!authorized) {
     return new Response(JSON.stringify({ error: 'unauthorized' }), {
       status: 401,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
+
 
   const dbUrl = Deno.env.get('SUPABASE_DB_URL');
   if (!dbUrl) {
