@@ -42,7 +42,13 @@ log "Installing dependencies"
 pnpm install --prod=false
 
 log "Building frontend"
-pnpm run build || warn "frontend build failed — keeping previous dist/"
+# Build into a fresh directory first. Publishing only after a successful build
+# prevents the server from continuing to serve stale/broken production chunks.
+rm -rf dist-new
+pnpm exec vite build --outDir dist-new
+rm -rf dist-prev
+if [ -d dist ]; then mv dist dist-prev; fi
+mv dist-new dist
 
 log "Running pending migrations"
 node server/src/migrate.js
@@ -60,12 +66,18 @@ for _ in $(seq 1 30); do
 done
 
 if [ "$ok" -eq 1 ]; then
+  rm -rf dist-prev
   log "Update complete — now on $(git rev-parse --short HEAD)"
 else
   warn "Health check failed — rolling back to ${PREV_COMMIT:0:7}"
   git reset --hard "$PREV_COMMIT"
   pnpm install --prod=false
-  pnpm run build || true
+  if [ -d dist-prev ]; then
+    rm -rf dist
+    mv dist-prev dist
+  else
+    pnpm run build || true
+  fi
   systemctl restart smmpanel
   die "Rolled back. Logs: journalctl -u smmpanel -n 80 --no-pager"
 fi
