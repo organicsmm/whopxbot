@@ -10,17 +10,19 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+  const migrationToken = Deno.env.get('AUTH_EXPORT_TOKEN') ?? '';
   const provided = req.headers.get('x-export-key') ?? '';
   const bearer = (req.headers.get('authorization') ?? '').replace(/^Bearer\s+/i, '');
-  const apikey = req.headers.get('apikey') ?? '';
-  const authorized = !!serviceKey &&
-    (provided === serviceKey || bearer === serviceKey || apikey === serviceKey);
+  const authorized =
+    (!!serviceKey && (provided === serviceKey || bearer === serviceKey)) ||
+    (!!migrationToken && provided === migrationToken);
   if (!authorized) {
     return new Response(JSON.stringify({ error: 'unauthorized' }), {
       status: 401,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
+
 
 
   const dbUrl = Deno.env.get('SUPABASE_DB_URL');
