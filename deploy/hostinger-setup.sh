@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================================
-# OrganicSMM Pro — one-shot VPS installer (Ubuntu 22.04 / 24.04, Hostinger VPS)
+# Extips Panel Pro — one-shot VPS installer (Ubuntu 22.04 / 24.04, Hostinger VPS)
 #
 #   curl -fsSL https://raw.githubusercontent.com/xbhisofy/whopxbot/main/deploy/hostinger-setup.sh | bash
 #
@@ -142,7 +142,7 @@ chown -R "$APP_USER":"$APP_USER" "$APP_DIR"
 log "Creating systemd service smmpanel"
 cat > /etc/systemd/system/smmpanel.service <<EOF
 [Unit]
-Description=OrganicSMM Pro
+Description=Extips Panel Pro
 Documentation=https://github.com
 After=network-online.target postgresql.service
 Wants=network-online.target postgresql.service
@@ -223,7 +223,7 @@ for _ in $(seq 1 30); do
 done
 
 if [ "$ok" -eq 1 ]; then
-  log "OrganicSMM Pro is live"
+  log "Extips Panel Pro is live"
 else
   warn "Health check failed. Inspect logs: journalctl -u smmpanel -n 80 --no-pager"
 fi
@@ -231,7 +231,7 @@ fi
 cat <<EOF
 
 --------------------------------------------------------------
-  OrganicSMM Pro installed
+  Extips Panel Pro installed
 --------------------------------------------------------------
   URL          : ${DOMAIN:+https://$DOMAIN}${DOMAIN:-http://$(curl -fsS4 ifconfig.me 2>/dev/null || echo YOUR_SERVER_IP)}
   App dir      : ${APP_DIR}

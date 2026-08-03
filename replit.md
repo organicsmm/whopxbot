@@ -1,4 +1,4 @@
-# OrganicSMM Pro
+# Extips Panel Pro
 
 Full SMM panel — React + Vite frontend, Node.js + Express API, PostgreSQL, deployed on a VPS behind Caddy.
 

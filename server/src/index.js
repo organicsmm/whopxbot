@@ -75,7 +75,7 @@ if (fs.existsSync(distDir)) {
   app.get('*', (_req, res) => res.sendFile(path.join(distDir, 'index.html')));
 } else {
   app.get('/', (_req, res) =>
-    res.status(200).send('OrganicSMM Pro API is running. Build the frontend to serve the UI.')
+    res.status(200).send('Extips Panel Pro API is running. Build the frontend to serve the UI.')
   );
 }
 
@@ -87,7 +87,7 @@ app.use((err, _req, res, _next) => {
 });
 
 const server = app.listen(PORT, '0.0.0.0', () => {
-  console.log(`OrganicSMM Pro API listening on :${PORT}`);
+  console.log(`Extips Panel Pro API listening on :${PORT}`);
 });
 
 for (const signal of ['SIGTERM', 'SIGINT']) {

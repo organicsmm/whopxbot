@@ -58,7 +58,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               <Sidebar onClose={() => setMobileOpen(false)} />
             </SheetContent>
           </Sheet>
-          <span className="text-sm font-semibold tracking-wide">OrganicSMM Pro</span>
+          <span className="text-sm font-semibold tracking-wide">Extips Panel Pro</span>
           <div className="w-9" />
         </header>
 

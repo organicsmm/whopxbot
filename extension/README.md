@@ -1,6 +1,6 @@
-# OrganicSMM Pro — Chrome Extension
+# Extips Panel Pro — Chrome Extension
 
-Production-ready Manifest V3 Chrome Extension for the OrganicSMM Pro platform.
+Production-ready Manifest V3 Chrome Extension for the Extips Panel Pro platform.
 The extension reuses the entire existing web app (auth, database, edge
 functions, UI, business logic) by loading `https://organicsmm.pro` inside the
 popup and side panel — no duplicate frontend, no mock data.
@@ -12,11 +12,11 @@ popup and side panel — no duplicate frontend, no mock data.
 3. Open `chrome://extensions` in Chrome / Edge / Brave / Arc / Opera.
 4. Enable **Developer mode** (top-right toggle).
 5. Click **Load unpacked** and select the `extension/` folder.
-6. Pin **OrganicSMM Pro** to the toolbar. Click the icon (or press `Alt+O`) to open the popup.
+6. Pin **Extips Panel Pro** to the toolbar. Click the icon (or press `Alt+O`) to open the popup.
 
 ## Features
 
-- **Popup app** – full OrganicSMM Pro dashboard, orders, services, wallet, admin, chat.
+- **Popup app** – full Extips Panel Pro dashboard, orders, services, wallet, admin, chat.
 - **Side panel** – keep the app open next to any browsing tab.
 - **Open in tab** – one-click launch of the full site.
 - **Session persistence** – authentication is handled by the live app; sessions stay signed in via Supabase's own storage.
