@@ -32,9 +32,9 @@ export function Sidebar({ onClose }: SidebarProps) {
       {/* Logo */}
       <div className="flex items-center justify-between px-5 pt-4 pb-3">
         <Link to="/" className="flex items-center gap-2.5">
-          <img src={logo} alt="OrganicSMM Pro" className="w-9 h-9 rounded-xl object-cover ring-1 ring-white/10" />
+          <img src={logo} alt="Extips Panel Pro" className="w-9 h-9 rounded-xl object-cover ring-1 ring-white/10" />
           <div className="flex flex-col">
-            <span className="text-[15px] font-bold tracking-tight leading-tight !text-white">OrganicSMM Pro</span>
+            <span className="text-[15px] font-bold tracking-tight leading-tight !text-white">Extips Panel Pro</span>
             <span className="text-[9px] font-semibold uppercase tracking-[0.18em] leading-tight text-purple-300/80">✦ v2.0</span>
           </div>
         </Link>

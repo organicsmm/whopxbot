@@ -7,8 +7,8 @@ export default function ContactUs() {
   return (
     <>
       <PageMeta
-        title="Contact Us | OrganicSMM Pro"
-        description="Get in touch with OrganicSMM Pro support team. Email, WhatsApp and business address for customer support."
+        title="Contact Us | Extips Panel Pro"
+        description="Get in touch with Extips Panel Pro support team. Email, WhatsApp and business address for customer support."
         canonicalPath="/contact"
         breadcrumbs={[{ name: "Home", path: "/" }, { name: "Contact Us", path: "/contact" }]}
       />
@@ -86,7 +86,7 @@ export default function ContactUs() {
               <div>
                 <h3 className="font-semibold mb-2">Registered Business Address</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  OrganicSMM Pro LLC<br />
+                  Extips Panel Pro LLC<br />
                   8 The Green, Suite #14490,<br />
                   Dover, DE 19901,<br />
                   United States of America

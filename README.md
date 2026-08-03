@@ -1,6 +1,6 @@
 # NEW PANNEL
 
-Mera GitHub repo connect ho chuka hai. Ye ek full SMM platform hai — "Organic SMM Pro". Isme sab kuch already coded hai. Mujhe bas ensure karna hai ki:
+Mera GitHub repo connect ho chuka hai. Ye ek full SMM platform hai — "Extips Panel Pro". Isme sab kuch already coded hai. Mujhe bas ensure karna hai ki:
 
 Lovable Cloud (Supabase) Setup — Database tables, RLS policies, Edge Functions sab deploy ho jayein exactly jaisa code me hai.
 
@@ -62,7 +62,7 @@ Important Notes:
 
 GitHub repo: https://github.com/xbhishekh/organicsmm
 
-Brand: Organic SMM Pro
+Brand: Extips Panel Pro
 
 Color: Orange + White theme
 

@@ -1,4 +1,4 @@
-// Popup controller for OrganicSMM Pro extension.
+// Popup controller for Extips Panel Pro extension.
 // Loads the live web app inside an iframe and reuses all existing auth,
 // APIs, database, and business logic — no duplicate frontend.
 

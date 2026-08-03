@@ -1,12 +1,12 @@
 {
   "manifest_version": 3,
-  "name": "OrganicSMM Pro",
-  "short_name": "OrganicSMM",
+  "name": "Extips Panel Pro",
+  "short_name": "Extips Panel",
   "version": "1.0.0",
-  "description": "OrganicSMM Pro — organic social media growth platform. Place orders, manage wallet, track engagement and get instant notifications, right from your browser.",
-  "author": "OrganicSMM Pro",
+  "description": "Extips Panel Pro — organic social media growth platform. Place orders, manage wallet, track engagement and get instant notifications, right from your browser.",
+  "author": "Extips Panel Pro",
   "action": {
-    "default_title": "OrganicSMM Pro",
+    "default_title": "Extips Panel Pro",
     "default_popup": "popup.html",
     "default_icon": {
       "16": "icons/icon16.png",
@@ -46,7 +46,7 @@
       "suggested_key": {
         "default": "Alt+O"
       },
-      "description": "Open OrganicSMM Pro popup"
+      "description": "Open Extips Panel Pro popup"
     }
   },
   "minimum_chrome_version": "114"
