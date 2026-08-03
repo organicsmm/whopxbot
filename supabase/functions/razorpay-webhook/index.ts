@@ -194,7 +194,7 @@ Deno.serve(async (req) => {
     const netPaise = Number(payment.amount || 0);
     const grossPaise = netPaise + Number(payment.fee || 0) + Number(payment.tax || 0);
 
-    // Extips Panel Pro should only credit the exact hosted-button amounts.
+    // OrganicSMM Pro should only credit the exact hosted-button amounts.
     // If some other site shares the same Razorpay account/webhook, ignore it here.
     const creditPaise = FIXED_BUTTON_AMOUNTS_PAISE.has(netPaise)
       ? netPaise
@@ -293,7 +293,7 @@ Deno.serve(async (req) => {
         console.log("Ignoring Razorpay payment with no matching app user:", paymentId, checkoutEmail);
         await notifyTelegram(
           supabase,
-          `⚠️ <b>Extips Panel Pro — Razorpay payment, NO user match</b>\n` +
+          `⚠️ <b>OrganicSMM Pro — Razorpay payment, NO user match</b>\n` +
           `Email: <code>${checkoutEmail}</code>\n` +
           `Amount: <b>₹${amountInr}</b>\n` +
           `Payment ID: <code>${paymentId}</code>\n` +
@@ -309,7 +309,7 @@ Deno.serve(async (req) => {
         console.error("Multiple profiles share email, refusing auto-credit:", paymentId, checkoutEmail);
         await notifyTelegram(
           supabase,
-          `🚫 <b>Extips Panel Pro — Razorpay payment, ambiguous email</b>\n` +
+          `🚫 <b>OrganicSMM Pro — Razorpay payment, ambiguous email</b>\n` +
           `Email: <code>${checkoutEmail}</code>\n` +
           `Amount: <b>₹${amountInr}</b>\n` +
           `Payment ID: <code>${paymentId}</code>\n` +
@@ -350,7 +350,7 @@ Deno.serve(async (req) => {
       console.error("Blocked Razorpay payment because noted email does not match profile", paymentId);
       await notifyTelegram(
         supabase,
-        `🚫 <b>Extips Panel Pro — Blocked Razorpay Credit</b>\n` +
+        `🚫 <b>OrganicSMM Pro — Blocked Razorpay Credit</b>\n` +
         `Amount: <b>₹${amountInr}</b>\n` +
         `Payment ID: <code>${paymentId}</code>\n` +
         `Profile email: <code>${profileEmail}</code>\n` +
@@ -401,7 +401,7 @@ Deno.serve(async (req) => {
 
     await notifyTelegram(
       supabase,
-      `✅ <b>Extips Panel Pro — Wallet Credited</b>\n` +
+      `✅ <b>OrganicSMM Pro — Wallet Credited</b>\n` +
       `User: <b>${prof?.full_name || "—"}</b>\n` +
       `Email: <code>${prof?.email || userEmailFromNotes || "—"}</code>\n` +
       `Amount: <b>₹${creditedInr.toFixed(2)}</b>\n` +

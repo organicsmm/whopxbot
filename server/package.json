@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Extips Panel Pro self-hosted Express API (VPS only — not used by the Lovable preview)",
+  "description": "OrganicSMM Pro self-hosted Express API (VPS only — not used by the Lovable preview)",
   "engines": {
     "node": ">=20"
   },

@@ -11,9 +11,9 @@ const USD_INR = 83.5;
 
 // Plan pricing — USD native (OxaPay is USD-based)
 const PLANS: Record<string, { usd: number; label: string }> = {
-  monthly:  { usd: 15,  label: "Extips Panel Pro — Monthly (30 days)" },
-  yearly:   { usd: 99,  label: "Extips Panel Pro — Yearly (365 days)" },
-  lifetime: { usd: 250, label: "Extips Panel Pro — Lifetime Access" },
+  monthly:  { usd: 15,  label: "OrganicSMM Pro — Monthly (30 days)" },
+  yearly:   { usd: 99,  label: "OrganicSMM Pro — Yearly (365 days)" },
+  lifetime: { usd: 250, label: "OrganicSMM Pro — Lifetime Access" },
 };
 
 Deno.serve(async (req) => {

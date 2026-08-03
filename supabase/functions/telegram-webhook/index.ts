@@ -73,7 +73,7 @@ async function handleCommand(chatId: number, username: string | null, text: stri
 
   if (cmd === "/start" || cmd === "/help") {
     return reply(chatId,
-      `<b>Extips Panel Pro Bot</b>\n\n` +
+      `<b>OrganicSMM Pro Bot</b>\n\n` +
       `<b>Account</b>\n` +
       `<code>/link CODE</code> — pair account\n` +
       `<code>/wallet</code> — balance\n` +

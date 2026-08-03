@@ -40,9 +40,9 @@ export function MobileBottomNav() {
       <header className="fixed top-0 left-0 right-0 z-40">
         <div className="flex items-center justify-between h-14 px-3 sm:px-5 bg-[#030303]/85 backdrop-blur-md border-b border-white/5">
           <Link to="/dashboard" className="flex items-center gap-2 min-w-0">
-            <img src={logo} alt="Extips Panel Pro" className="w-8 h-8 rounded-lg object-cover ring-1 ring-white/10 shrink-0" />
+            <img src={logo} alt="OrganicSMM Pro" className="w-8 h-8 rounded-lg object-cover ring-1 ring-white/10 shrink-0" />
             <div className="flex flex-col min-w-0">
-              <span className="text-[14px] font-bold tracking-tight leading-tight !text-white truncate">Extips Panel Pro</span>
+              <span className="text-[14px] font-bold tracking-tight leading-tight !text-white truncate">OrganicSMM Pro</span>
               <span className="text-[8px] font-semibold uppercase tracking-[0.18em] leading-tight text-purple-300/80">✦ v2.0</span>
             </div>
           </Link>

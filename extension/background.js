@@ -1,4 +1,4 @@
-// Extips Panel Pro — background service worker (MV3)
+// OrganicSMM Pro — background service worker (MV3)
 // Handles side panel behavior, badge updates and notifications.
 
 const APP_URL = "https://organicsmm.pro/";
@@ -33,7 +33,7 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
       .create(id, {
         type: "basic",
         iconUrl: chrome.runtime.getURL("icons/icon128.png"),
-        title: String(msg.title || "Extips Panel Pro"),
+        title: String(msg.title || "OrganicSMM Pro"),
         message: String(msg.message || ""),
         priority: 1,
       })

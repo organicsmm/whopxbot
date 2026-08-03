@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================================
-# Extips Panel Pro — one-command updater
+# OrganicSMM Pro — one-command updater
 #
 #   bash /opt/smmpanel/deploy/update.sh
 #

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ============================================================================
-# Extips Panel Pro — Full Supabase Self-Host Installer (Option B)
+# OrganicSMM Pro — Full Supabase Self-Host Installer (Option B)
 #
 # Installs a complete Supabase stack (Postgres + Auth + Data API + Storage +
 # Realtime + Edge Runtime + Studio) on a fresh Ubuntu VPS, then applies all

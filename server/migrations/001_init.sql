@@ -1,4 +1,4 @@
--- Extips Panel Pro — self-hosted schema (PostgreSQL)
+-- OrganicSMM Pro — self-hosted schema (PostgreSQL)
 
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 

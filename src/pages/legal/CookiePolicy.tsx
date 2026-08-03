@@ -6,7 +6,7 @@ import { PageMeta } from "@/components/seo/PageMeta";
 export default function CookiePolicy() {
   return (
     <>
-      <PageMeta title="Cookie Policy | Extips Panel Pro" description="Learn about how Extips Panel Pro uses cookies and similar technologies." canonicalPath="/cookies" breadcrumbs={[{ name: "Home", path: "/" }, { name: "Cookie Policy", path: "/cookies" }]} />
+      <PageMeta title="Cookie Policy | OrganicSMM Pro" description="Learn about how OrganicSMM Pro uses cookies and similar technologies." canonicalPath="/cookies" breadcrumbs={[{ name: "Home", path: "/" }, { name: "Cookie Policy", path: "/cookies" }]} />
       <div className="min-h-screen bg-background text-foreground">
         <div className="max-w-4xl mx-auto px-4 py-12">
           <Link to="/">
@@ -26,7 +26,7 @@ export default function CookiePolicy() {
 
             <section className="space-y-3">
               <h2 className="text-xl font-semibold text-foreground">2. How We Use Cookies</h2>
-              <p>Extips Panel Pro uses cookies and similar technologies for the following purposes:</p>
+              <p>OrganicSMM Pro uses cookies and similar technologies for the following purposes:</p>
               <ul className="list-disc pl-6 space-y-1">
                 <li><strong className="text-foreground">Authentication:</strong> To identify you when you log in and maintain your session securely</li>
                 <li><strong className="text-foreground">Security:</strong> To protect your account from unauthorized access and detect suspicious activity</li>

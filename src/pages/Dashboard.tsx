@@ -68,7 +68,7 @@ export default function Dashboard() {
 
   return (
     <DashboardLayout>
-      <PageMeta title="Dashboard" description="Manage your Extips Panel Pro social media growth orders, track wallet balance, monitor active engagement campaigns and view delivery progress." noIndex />
+      <PageMeta title="Dashboard" description="Manage your OrganicSMM Pro social media growth orders, track wallet balance, monitor active engagement campaigns and view delivery progress." noIndex />
       <OxapaySubscriptionPoller />
       <div className="space-y-6">
         {/* Header */}
