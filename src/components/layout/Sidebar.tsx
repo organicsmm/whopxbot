@@ -24,8 +24,16 @@ const adminNavItems = [{ icon: Shield, label: 'Admin Panel', path: '/admin' }];
 
 export function Sidebar({ onClose }: SidebarProps) {
   const location = useLocation();
-  const { isAdmin, signOut, wallet, profile } = useAuth();
+  const { isAdmin, signOut, wallet, profile, user } = useAuth();
   const { formatPrice } = useCurrency();
+
+  const displayEmail = profile?.email || user?.email || '';
+  const displayName =
+    profile?.full_name ||
+    (user?.user_metadata as { full_name?: string } | undefined)?.full_name ||
+    displayEmail.split('@')[0] ||
+    'User';
+  const showUser = Boolean(profile || user);
 
   return (
     <div className="h-full w-full overflow-hidden flex flex-col bg-[#070710]/95 backdrop-blur-xl border-r border-white/5">
@@ -44,17 +52,18 @@ export function Sidebar({ onClose }: SidebarProps) {
       </div>
 
       {/* User info */}
-      {profile && (
+      {showUser && (
         <div className="mx-4 mb-3 flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-white/[0.04] border border-white/10">
           <div className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold text-white shrink-0 bg-gradient-to-br from-purple-500 to-fuchsia-600">
-            {profile.full_name?.[0]?.toUpperCase() || 'U'}
+            {displayName[0]?.toUpperCase() || 'U'}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-[12px] font-semibold truncate !text-white">{profile.full_name || 'User'}</p>
-            <p className="text-[10px] truncate text-white/70">{profile.email}</p>
+            <p className="text-[12px] font-semibold truncate !text-white">{displayName}</p>
+            <p className="text-[10px] truncate text-white/70">{displayEmail}</p>
           </div>
         </div>
       )}
+
 
       {/* Wallet */}
       <div className="mx-4 mb-4">
