@@ -180,7 +180,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (error || (data && data.error)) {
-        const errorMsg = error?.message || data?.error || 'Signup failed';
+        let functionError = '';
+        if (error && 'context' in error) {
+          const context = (error as { context?: Response }).context;
+          if (context) {
+            try {
+              const payload = await context.clone().json() as { error?: string };
+              functionError = payload.error || '';
+            } catch {
+              // Keep the SDK fallback when the response is not JSON.
+            }
+          }
+        }
+        const errorMsg = data?.error || functionError || error?.message || 'Signup failed';
         console.error('--- useAuth: signUp error ---', errorMsg);
         return { error: new Error(errorMsg) };
       }
