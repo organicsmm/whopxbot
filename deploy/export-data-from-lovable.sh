@@ -128,7 +128,7 @@ fetch_table() {
 }
 
 for t in "${TABLES[@]}"; do
-  fetch_table "$t" || echo "  [warn] $table export failed, continuing..."
+  fetch_table "$t" || echo "  [warn] $t export failed, continuing..."
 done
 
 log "Packing CSVs into $ARCHIVE"
