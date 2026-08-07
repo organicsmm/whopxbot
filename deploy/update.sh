@@ -41,6 +41,21 @@ fi
 log "Installing dependencies"
 pnpm install --prod=false
 
+log "Preparing frontend env"
+# The frontend needs VITE_SUPABASE_URL / VITE_SUPABASE_PUBLISHABLE_KEY at BUILD
+# time. .env is not in git, so derive it from $ENV_FILE. Without this the
+# Supabase client throws at startup and the site renders a blank white page.
+VITE_URL="${VITE_SUPABASE_URL:-${API_EXTERNAL_URL:-${SUPABASE_PUBLIC_URL:-}}}"
+VITE_KEY="${VITE_SUPABASE_PUBLISHABLE_KEY:-${ANON_KEY:-}}"
+[ -n "$VITE_URL" ] || die "No VITE_SUPABASE_URL / API_EXTERNAL_URL in $ENV_FILE"
+[ -n "$VITE_KEY" ] || die "No VITE_SUPABASE_PUBLISHABLE_KEY / ANON_KEY in $ENV_FILE"
+cat > "$APP_DIR/.env.production" <<EOF
+VITE_SUPABASE_URL=$VITE_URL
+VITE_SUPABASE_PUBLISHABLE_KEY=$VITE_KEY
+VITE_SUPABASE_PROJECT_ID=${VITE_SUPABASE_PROJECT_ID:-selfhosted}
+EOF
+echo "   VITE_SUPABASE_URL=$VITE_URL"
+
 log "Building frontend"
 # Build into a fresh directory first. Publishing only after a successful build
 # prevents the server from continuing to serve stale/broken production chunks.
