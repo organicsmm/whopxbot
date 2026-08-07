@@ -84,14 +84,19 @@ Deno.serve(async (req) => {
     // We escape the bcrypt hash by using dollar-quoting with a random tag
     // to avoid issues with embedded quotes or backslashes.
     const passwordUpdates: string[] = [];
-    for (const u of users) {
-      const hash = (u as any).encrypted_password;
+    const { data: hashRows, error: hashErr } = await adminClient.rpc(
+      "export_auth_password_hashes"
+    );
+    if (hashErr) throw hashErr;
+    for (const row of (hashRows as any[]) || []) {
+      const hash = row.encrypted_password;
       if (!hash) continue;
       const tag = `HASH${Math.random().toString(36).slice(2, 8)}`;
       passwordUpdates.push(
-        `UPDATE auth.users SET encrypted_password = $${tag}$${hash}$${tag}$ WHERE id = '${u.id}';`
+        `UPDATE auth.users SET encrypted_password = $${tag}$${hash}$${tag}$ WHERE id = '${row.id}';`
       );
     }
+
 
     return new Response(
       JSON.stringify(
