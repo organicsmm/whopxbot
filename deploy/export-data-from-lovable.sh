@@ -94,10 +94,21 @@ fetch_table() {
     fi
 
     if [ "$page" -eq 1 ]; then
-      jq -r '(.[0] | keys) as $h | $h | @csv' "$resp_file" > "$out"
+      # Freeze the column order from the first row and reuse it for EVERY row,
+      # otherwise rows with different key order shift values into wrong columns.
+      jq -c '.[0] | keys_unsorted' "$resp_file" > "$headers_file"
+      jq -r '(.[0] | keys_unsorted) | @csv' "$resp_file" > "$out"
     fi
 
-    jq -r '.[] | [.[] | tostring] | @csv' "$resp_file" >> "$out"
+    # NULL -> unquoted empty field (Postgres CSV reads that as NULL).
+    # Objects/arrays -> compact JSON. Everything else -> quoted string.
+    jq -r --argjson h "$(cat "$headers_file")" '
+      .[] | [ $h[] as $k | (.[$k]
+              | if . == null then null
+                elif type == "string" then .
+                else tojson end) ]
+          | map(if . == null then "" else "\"" + (gsub("\"";"\"\"")) + "\"" end)
+          | join(",")' "$resp_file" >> "$out"
 
     echo "  page $page: $count rows"
     [ "$count" -lt "$BATCH" ] && break
@@ -106,10 +117,10 @@ fetch_table() {
     sleep 0.2  # be polite to the REST API
   done
 
-  local total
-  total=$(wc -l < "$out" | tr -d ' ')
+  local total=0
+  [ -f "$out" ] && total=$(wc -l < "$out" | tr -d ' ')
   if [ "$total" -le 1 ]; then
-    echo "  [info] $table empty — removing CSV"
+    echo "  [info] $table empty or not readable — removing CSV"
     rm -f "$out"
   else
     echo "  -> $total total rows (including header) written to $out"
@@ -117,7 +128,7 @@ fetch_table() {
 }
 
 for t in "${TABLES[@]}"; do
-  fetch_table "$t" || echo "  [warn] $table export failed, continuing..."
+  fetch_table "$t" || echo "  [warn] $t export failed, continuing..."
 done
 
 log "Packing CSVs into $ARCHIVE"

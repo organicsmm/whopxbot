@@ -66,13 +66,22 @@ case "$SRC" in
       drip_feed_campaigns mass_order_batches mass_order_batch_items
       subscription_requests
     )
-    psql_run -c "SET session_replication_role = 'replica';" >/dev/null
+    # session_replication_role must be set in the SAME session as the COPY,
+    # so stream a prelude + COPY + data into one psql invocation.
+    copy_csv() {
+      local tbl="$1" file="$2"
+      { echo "SET session_replication_role = 'replica';";
+        echo "COPY public.$tbl FROM STDIN WITH (FORMAT csv, HEADER true);";
+        cat "$file";
+        echo "\\.";
+      } | docker compose exec -T db psql -U postgres -d postgres -q
+    }
+
     for t in "${ORDER[@]}"; do
       f="$(find "$TMP" -maxdepth 2 -name "$t.csv" | head -1 || true)"
       [ -n "$f" ] || continue
       echo "  -> $t"
-      docker compose exec -T db psql -U postgres -d postgres \
-        -c "\copy public.$t FROM STDIN WITH (FORMAT csv, HEADER true)" < "$f" \
+      copy_csv "$t" "$f" \
         || echo "     [warn] $t import had errors (likely duplicates) — continuing"
     done
     # Any remaining CSVs not in the ordered list.
@@ -80,11 +89,9 @@ case "$SRC" in
       t="$(basename "$f" .csv)"
       printf '%s\n' "${ORDER[@]}" | grep -qx "$t" && continue
       echo "  -> $t (extra)"
-      docker compose exec -T db psql -U postgres -d postgres \
-        -c "\copy public.$t FROM STDIN WITH (FORMAT csv, HEADER true)" < "$f" \
+      copy_csv "$t" "$f" \
         || echo "     [warn] $t import had errors — continuing"
     done < <(find "$TMP" -maxdepth 2 -name '*.csv')
-    psql_run -c "SET session_replication_role = 'origin';" >/dev/null
     ;;
 
   *)
