@@ -55,6 +55,10 @@ TELEGRAM_CHAT_ID=
 APIFY_API_TOKEN=
 RAZORPAY_WEBHOOK_SECRET=
 LOVABLE_API_KEY=
+# Source Lovable Cloud credentials (used only by export-from-lovable.sh)
+SOURCE_SUPABASE_URL=
+SOURCE_SUPABASE_ANON_KEY=
+MIGRATION_TOKEN=
 EOF
   chmod 600 "$SECRETS_FILE"
   echo "      created template $SECRETS_FILE (fill it and rerun)"
